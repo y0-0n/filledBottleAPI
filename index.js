@@ -5,6 +5,7 @@ var app = express();
 //routes
 const index = require('./src/routes/index');
 const customer = require('./src/routes/customer');
+const product = require('./src/routes/product');
 
 // configuration ===============================================================
 app.set('port', process.env.PORT || 4000);
@@ -15,6 +16,7 @@ app.use(passport.initialize());
 
 app.use(index);
 app.use(customer);
+app.use(product);
 
 //===============================================================
 
