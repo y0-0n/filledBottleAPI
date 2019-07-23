@@ -6,6 +6,7 @@ var app = express();
 const index = require('./src/routes/index');
 const customer = require('./src/routes/customer');
 const product = require('./src/routes/product');
+const plant = require('./src/routes/plant');
 
 // configuration ===============================================================
 app.set('port', process.env.PORT || 4000);
@@ -17,6 +18,7 @@ app.use(passport.initialize());
 app.use(index);
 app.use(customer);
 app.use(product);
+app.use(plant);
 
 //===============================================================
 
