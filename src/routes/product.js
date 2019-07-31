@@ -14,8 +14,20 @@ router.get('/product', function(req, res){
   });
 });
 
+router.get('/product/:id', function(req, res){
+  var id = req.params.id; // 제품 이름
+
+  connection.query('SELECT * from product WHERE id = "'+id+'"', function(err, rows) {
+    if(err) throw err;
+
+    console.log('GET /product/'+id+' : ' + rows);
+    res.header("Access-Control-Allow-Origin", "*");
+    res.send(rows);
+  });
+});
+
 router.post('/product', (req, res) => {
-  connection.query("INSERT INTO `mydb`.`product` (`name`, `image`, `group`, `barcode`, `productcol`, `price_receiving`, `price_shipping`, `category`, `is_set`, `process`) VALUES ('"+req.body.name+"', '2', '3', '4', '5', '6', '7', '8', '9', '10');", function(err, rows) {
+  connection.query("INSERT INTO `product` (`name`, `image`, `group`, `barcode`, `productcol`, `price_receiving`, `price_shipping`, `category`, `is_set`, `process`) VALUES ('"+req.body.name+"', '2', '3', '4', '5', '6', '7', '8', '9', '10');", function(err, rows) {
     if(err) throw err;
 
     console.log('POST /product : ' + rows);
