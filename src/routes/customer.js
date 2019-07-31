@@ -27,7 +27,7 @@ router.get('/customer/:id', function(req, res){
 });
 
 router.post('/customer', (req, res) => {
-  connection.query("INSERT INTO customer (`name`, `delegate`, `telephone`, `cellphone`, `keyword`, `set`, `transfer`, `address`) VALUES ('"+req.body.name+"', '"+req.body.delegate+"', '"+req.body.telephone+"', '"+req.body.cellphone+"', '1', '1', '2', '"+req.body.address+"')", function(err, rows) {
+  connection.query("INSERT INTO customer (`name`, `delegate`, `telephone`, `cellphone`, `keyword`, `set`, `transfer`, `address`, `manager`) VALUES ('"+req.body.name+"', '"+req.body.delegate+"', '"+req.body.telephone+"', '"+req.body.cellphone+"', '1', '1', '2', '"+req.body.address+"', '"+req.body.manager+"')", function(err, rows) {
     if(err) throw err;
 
     console.log('POST /customer : ' + rows);
