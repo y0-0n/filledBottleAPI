@@ -14,8 +14,20 @@ router.get('/plant', function(req, res){
   });
 });
 
+router.get('/plant/:id', function(req, res){
+  var id = req.params.id; // 공장 이름
+
+  connection.query('SELECT * from plant WHERE id = "'+id+'"', function(err, rows) {
+    if(err) throw err;
+
+    console.log('GET /plant/'+id+' : ' + rows);
+    res.header("Access-Control-Allow-Origin", "*");
+    res.send(rows);
+  });
+});
+
 router.post('/plant', (req, res) => {
-  connection.query("INSERT INTO `mydb`.`plant` (`name`, `division`, `additional_company`, `set`) VALUES ('"+req.body.name+"','1','2','3');", function(err, rows) {
+  connection.query("INSERT INTO `plant` (`name`, `division`, `additional_company`, `set`) VALUES ('"+req.body.name+"','1','2','3');", function(err, rows) {
     if(err) throw err;
 
     console.log('POST /plant : ' + rows); 
