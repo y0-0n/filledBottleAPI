@@ -15,14 +15,24 @@ router.get('/order', function(req, res){
 });
 
 router.post('/order', (req, res) => {
-  res.header("Access-Control-Allow-Origin", "*");
-
-  connection.query("INSERT INTO sell (`customer_id`, `employee_id`, `date`, `price`) VALUES ('"+req.body.sCustomer+"', 1, '"+req.body.date+"', '100')", function(err, rows) {
-    if(err) {
-      res.send(err);
-      throw err;
-    }
+  let products = req.body.sProduct;
+  let prices = []; //각 제품들의 가격
+  let price = 0; //총액
+  products.map((e, i) => {
+    price += e.c * e.d; // 수량 * 출고 가격
+    prices.push(e.c * e.d);
+  })
+  connection.query(`INSERT INTO \`order\` (\`customer_id\`, \`employee_id\`, \`date\`, \`price\`) VALUES ('${req.body.sCustomer}', '1', '${req.body.date}', '${price}')`, function(err, rows) {
+    if(err) throw err;
     console.log('POST /order : ' + rows);
+
+    let order_id = rows.insertId;
+    products.map((e, i) => {
+      connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`quantity\`, \`price\`) VALUES ('${order_id}', '${e.a}', '${e.c}', '${prices[i]}')`, function(err_, rows_) {
+        if(err) throw err_;
+        console.log('product '+i+' : '+rows_);
+      })
+    });
     res.header("Access-Control-Allow-Origin", "*");
 
     res.send(rows);
