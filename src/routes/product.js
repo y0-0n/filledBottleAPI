@@ -14,8 +14,18 @@ router.get('/product', function(req, res){
   });
 });
 
+router.get('/product/search/:keyword', function(req, res){
+  let {keyword} = req.params; // 검색어로 검색
+  connection.query(`SELECT * from product WHERE name = "${keyword}"`, function(err, rows) {
+    if(err) throw err;
+    console.log('GET /product/search : ' + rows);
+    res.header("Access-Control-Allow-Origin", "*");
+    res.send(rows);
+  });
+});
+
 router.get('/product/:id', function(req, res){
-  var id = req.params.id; // 제품 이름
+  let id = req.params.id; // id로 검색
 
   connection.query('SELECT * from product WHERE id = "'+id+'"', function(err, rows) {
     if(err) throw err;
