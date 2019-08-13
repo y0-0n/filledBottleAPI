@@ -1,5 +1,6 @@
 var express    = require('express');
 const passport = require('passport');
+var cors = require('cors');
 
 var app = express();
 //routes
@@ -23,6 +24,26 @@ app.use(product);
 app.use(plant);
 app.use(order);
 app.use(stock);
+
+var whitelist = ['ec2-54-180-104-51.ap-northeast-2.compute.amazonaws.com']
+
+var corsOptions = {
+
+  origin: function(origin, callback){
+
+  var isWhitelisted = whitelist.indexOf(origin) !== -1;
+
+  callback(null, isWhitelisted); 
+
+  // callback expects two parameters: error and options 
+
+  },
+
+  credentials:true
+
+}
+
+app.use( cors(corsOptions) );                                                                                                            
 
 //===============================================================
 
