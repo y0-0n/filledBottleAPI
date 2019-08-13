@@ -1,6 +1,6 @@
 module.exports = {
   dev: {
-    host     : 'ec2-54-180-104-51.ap-northeast-2.compute.amazonaws.com',
+    host     : '211.62.225.211',
     user     : 'l5vd5',
     password : 'dbsqud23',
     port     : 3306,
