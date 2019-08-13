@@ -14,6 +14,16 @@ router.get('/order', function(req, res){
   });
 });
 
+router.get('/order_product', function(req, res) {
+  connection.query('SELECT * from order_product', function(err, rows) {
+    if(err) throw err;
+
+    console.log('GET /order_product : ' + rows);
+    res.header("Access-Control-Allow-Origin", "*");
+    res.send(rows);
+  })
+})
+
 router.post('/order', (req, res) => {
   let products = req.body.sProduct;
   let prices = []; //각 제품들의 가격
