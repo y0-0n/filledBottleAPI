@@ -22,7 +22,17 @@ router.get('/order_product', function(req, res) {
     res.header("Access-Control-Allow-Origin", "*");
     res.send(rows);
   })
-})
+});
+
+router.get('/order_summary', function(req, res) {
+  connection.query('SELECT * from `order` as A JOIN `order_product` as B ON A.id = B.order_id', function(err, rows) {
+    if(err) throw err;
+
+    console.log('GET /order_summary : ' + rows);
+    res.header("Access-Control-Allow-Origin", "*");
+    res.send(rows);
+  })
+});
 
 router.post('/order', (req, res) => {
   let products = req.body.sProduct;
