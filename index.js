@@ -8,6 +8,7 @@ const customer = require('./src/routes/customer');
 const product = require('./src/routes/product');
 const plant = require('./src/routes/plant');
 const order = require('./src/routes/order');
+const stock = require('./src/routes/stock');
 
 // configuration ===============================================================
 app.set('port', process.env.PORT || 4000);
@@ -21,6 +22,7 @@ app.use(customer);
 app.use(product);
 app.use(plant);
 app.use(order);
+app.use(stock);
 
 //===============================================================
 
