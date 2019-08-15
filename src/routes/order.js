@@ -5,7 +5,18 @@ const router = express.Router();
 const connection = require('../../config/dbConnection').connection;
 
 router.get('/order', function(req, res){
-  connection.query('SELECT * from order', function(err, rows) {
+  connection.query('SELECT * from `order`', function(err, rows) {
+    if(err) throw err;
+
+    console.log('GET /order : ' + rows);
+    res.header("Access-Control-Allow-Origin", "*");
+    res.send(rows);
+  });
+});
+
+router.get('/order/:state', function(req, res){
+  let {state} = req.params; // 검색어로 검색
+  connection.query(`SELECT * from \`order\` WHERE state = '${state}'`, function(err, rows) {
     if(err) throw err;
 
     console.log('GET /order : ' + rows);
