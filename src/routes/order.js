@@ -89,4 +89,16 @@ router.delete('/customer', function(req, res){
   });
 });
 
+router.get('/orderDetail/:id', function(req, res){
+  let {id} = req.params; // id로 검색
+
+  connection.query(`SELECT * from \`order\` WHERE id=${id}`, function(err, rows) {
+    if(err) throw err;
+
+    console.log('GET /orderDetail' + id + ' : ' + rows);
+    res.header("Access-Control-Allow-Origin", "*");
+    res.send(rows);
+  });
+});
+
 module.exports = router;
