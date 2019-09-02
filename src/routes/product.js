@@ -37,8 +37,8 @@ router.get('/product/:id', function(req, res){
 });
 
 router.post('/product', (req, res) => {
-
-  connection.query("INSERT INTO `product` (`name`, `image`, `group`, `barcode`, `price_receiving`, `price_shipping`, `category`, `is_set`, `process`) VALUES ('"+req.body.name+"', '2', '3', '4', '5', '6', '7', '8', '9');", function(err, rows) {
+  let {name, price} = req.body;
+  connection.query(`INSERT INTO \`product\` (\`name\`, \`image\`, \`group\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`category\`, \`is_set\`, \`process\`) VALUES ('${name}', '2', '3', '4', '5', '${price}', '7', '8', '9');`, function(err, rows) {
     if(err) throw err;
 
     console.log('POST /product : ' + rows);
