@@ -92,13 +92,25 @@ router.delete('/customer', function(req, res){
 router.get('/orderDetail/:id', function(req, res){
   let {id} = req.params; // id로 검색
 
-  connection.query(`SELECT \`customer_id\`, \'state\', \`received\`, c.\`name\` as \`customer_name\`, o.\`price\` as \`sum\`, \`date\`, \`product_id\` from \`order\` as o JOIN \`customer\` as c ON o.customer_id = c.id JOIN \`order_product\` as op ON op.order_id = o.id WHERE o.id=${id}`, function(err, rows) {
+  connection.query(`SELECT * from \`order\` as o JOIN \`customer\` as c ON o.customer_id = c.id WHERE o.id=${id}`, function(err, rows) {
+    if(err) throw err;
+
+    connection.query(`SELECT * from \`order\` as o JOIN \`order_product\` as op ON o.id = op.order_id JOIN product as p ON op.product_id = p.id WHERE o.id=${id}`, function(err, rows2) {
+      if(err) throw err;
+
+      console.log('GET /orderDetail' + id + ' : ' + rows);
+      res.header("Access-Control-Allow-Origin", "*");
+      res.send({orderInfo: rows, productInfo: rows2});
+    });
+  });
+
+  /*connection.query(`SELECT \`customer_id\`, \'state\', \`received\`, c.\`name\` as \`customer_name\`, o.\`price\` as \`sum\`, \`date\`, \`product_id\` from \`order\` as o JOIN \`customer\` as c ON o.customer_id = c.id JOIN \`order_product\` as op ON op.order_id = o.id WHERE o.id=${id}`, function(err, rows) {
     if(err) throw err;
 
     console.log('GET /orderDetail' + id + ' : ' + rows);
     res.header("Access-Control-Allow-Origin", "*");
     res.send(rows);
-  });
+  });*/
 });
 
 module.exports = router;
