@@ -46,19 +46,21 @@ router.get('/order_summary', function(req, res) {
 });
 
 router.post('/order', (req, res) => {
-  let products = req.body.sProduct;
   let prices = []; //각 제품들의 가격
   let price = 0; //총액
-  products.map((e, i) => {
+  let {sCustomer, sProduct, date, cellphone, telephone, address, comment} = req.body;
+
+  sProduct.map((e, i) => {
     price += e.c * e.d; // 수량 * 출고 가격
     prices.push(e.c * e.d);
   })
-  connection.query(`INSERT INTO \`order\` (\`customer_id\`, \`employee_id\`, \`date\`, \`price\`) VALUES ('${req.body.sCustomer}', '1', '${req.body.date}', '${price}')`, function(err, rows) {
+
+  connection.query(`INSERT INTO \`order\` (\`customer_id\`, \`date\`, \`price\`, \`telephone\`, \`cellphone\`, \`address\`, \`comment\`) VALUES ('${sCustomer}', '${date}', '${price}', '${telephone}', '${cellphone}', '${address}', '${comment}')`, function(err, rows) {
     if(err) throw err;
     console.log('POST /order : ' + rows);
 
     let order_id = rows.insertId;
-    products.map((e, i) => {
+    sProduct.map((e, i) => {
       connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`quantity\`, \`price\`) VALUES ('${order_id}', '${e.a}', '${e.c}', '${prices[i]}')`, function(err_, rows_) {
         if(err) throw err_;
         console.log('product '+i+' : '+rows_);
@@ -92,7 +94,7 @@ router.delete('/customer', function(req, res){
 router.get('/orderDetail/:id', function(req, res){
   let {id} = req.params; // id로 검색
 
-  connection.query(`SELECT * from \`order\` as o JOIN \`customer\` as c ON o.customer_id = c.id WHERE o.id=${id}`, function(err, rows) {
+  connection.query(`SELECT date, name, o.address as address, o.telephone as telephone, o.cellphone as cellphone, comment from \`order\` as o JOIN \`customer\` as c ON o.customer_id = c.id WHERE o.id=${id}`, function(err, rows) {
     if(err) throw err;
 
     connection.query(`SELECT * from \`order\` as o JOIN \`order_product\` as op ON o.id = op.order_id JOIN product as p ON op.product_id = p.id WHERE o.id=${id}`, function(err, rows2) {
