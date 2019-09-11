@@ -24,7 +24,7 @@ router.get('/product/search/:keyword', function(req, res){
   });
 });
 
-router.get('/product/:id', function(req, res){
+router.get('/product/:id', function(req, res) {
   let id = req.params.id; // id로 검색
 
   connection.query('SELECT * from product WHERE id = "'+id+'"', function(err, rows) {
@@ -37,34 +37,22 @@ router.get('/product/:id', function(req, res){
 });
 
 router.post('/product', (req, res) => {
-  let {name, price} = req.body;
-  connection.query(`INSERT INTO \`product\` (\`name\`, \`image\`, \`group\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`category\`, \`is_set\`, \`process\`) VALUES ('${name}', '2', '3', '4', '5', '${price}', '7', '8', '9');`, function(err, rows) {
+  let {name, price, grade, weight} = req.body;
+  connection.query(`INSERT INTO \`product\` (\`name\`, \`image\`, \`grade\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`weight\`, \`safety_stock\`) VALUES ('${name}', '2', '${grade}', '4', '5', '${price}', '${weight}', '8');`, function(err, rows) {
     if(err) throw err;
 
     console.log('POST /product : ' + rows);
 
     const product_id = rows.insertId;
     
-    connection.query("SELECT * FROM plant", function(err_, rows_) {
-      let plant_ids = [];
-      if(err) throw err;
-      rows_.map((e, i) => {
-        plant_ids.push(e.id);
-      });
+    connection.query(`INSERT INTO stock (\`product_id\`, \`quantity\`) VALUES ('${product_id}', '${0}')`, function(err_, rows_) {
+      if(err_) throw err_;
+      console.log('stock '+rows_);
 
-      plant_ids.map((e, i) => {
-        connection.query(`INSERT INTO stock (\`product_id\`, \`plant_id\`, \`quantity\`) VALUES ('${product_id}', '${e}', '${0}')`, function(err_, rows_) {
-          if(err_) throw err_;
-          console.log('stock '+rows_)
-        });
-      })
-      
-  
       res.header("Access-Control-Allow-Origin", "*");
-  
-      res.send(rows);  
-    })
-  });
+      res.send(rows);
+    });
+  })
 });
 
 router.options('/product', (req, res, next) => {
