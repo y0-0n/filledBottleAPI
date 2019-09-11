@@ -46,13 +46,11 @@ router.get('/order_summary', function(req, res) {
 });
 
 router.post('/order', (req, res) => {
-  let prices = []; //각 제품들의 가격
   let price = 0; //총액
   let {sCustomer, sProduct, date, cellphone, telephone, address, comment} = req.body;
-
+  console.warn(req.body)
   sProduct.map((e, i) => {
-    price += e.c * e.d; // 수량 * 출고 가격
-    prices.push(e.c * e.d);
+    price += e.quantity * e.price; // 수량 * 출고 가격
   })
 
   connection.query(`INSERT INTO \`order\` (\`customer_id\`, \`date\`, \`price\`, \`telephone\`, \`cellphone\`, \`address\`, \`comment\`) VALUES ('${sCustomer}', '${date}', '${price}', '${telephone}', '${cellphone}', '${address}', '${comment}')`, function(err, rows) {
@@ -61,7 +59,7 @@ router.post('/order', (req, res) => {
 
     let order_id = rows.insertId;
     sProduct.map((e, i) => {
-      connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`quantity\`, \`price\`) VALUES ('${order_id}', '${e.a}', '${e.c}', '${prices[i]}')`, function(err_, rows_) {
+      connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`quantity\`, \`price\`, \`tax\`) VALUES ('${order_id}', '${e.id}', '${e.quantity}', '${sProduct[i].price * sProduct[i].quantity}', ${e.tax})`, function(err_, rows_) {
         if(err) throw err_;
         console.log('product '+i+' : '+rows_);
       })
