@@ -48,7 +48,6 @@ router.get('/order_summary', function(req, res) {
 router.post('/order', (req, res) => {
   let price = 0; //총액
   let {sCustomer, sProduct, date, cellphone, telephone, address, comment, orderDate} = req.body;
-  console.warn(req.body)
   sProduct.map((e, i) => {
     price += e.quantity * e.price; // 수량 * 출고 가격
   })
@@ -119,10 +118,40 @@ router.put('/order/changeState/:id/:state', function(req, res) {
   connection.query(`UPDATE \`order\` SET \`state\`='${state}' WHERE \`id\`=${id}`, function(err, rows) {
     if(err) throw err;
 
-    console.log(`UPDATE /order/changeState/${id}/${state}` + rows);
+    console.log(`PUT /order/changeState/${id}/${state}` + rows);
     res.header("Access-Control-Allow-Origin", "*");
     res.send(rows);
   });
+});
+
+router.put('/order/modify/:id', function(req, res) {
+  let {id} = req.params;
+  let {orderInfo, productInfo} = req.body;
+  orderInfo = orderInfo[0];
+  //console.log(`UPDATE \`order\` SET \`cellphone\`='${orderInfo.cellphone}', \`telephone\`='${orderInfo.telephone}', \`address\`=${orderInfo.address}, \`comment\`=${orderInfo.comment}, \`date\`=${orderInfo.date} WHERE \`id\`=${id}`);
+  connection.query(`UPDATE \`order\` SET \`cellphone\`='${orderInfo.cellphone}', \`telephone\`='${orderInfo.telephone}', \`address\`='${orderInfo.address}', \`comment\`='${orderInfo.comment}' WHERE \`id\`=${id}`, function(err, rows) {
+    if(err) throw err;
+
+    connection.query('DELETE FROM order_product WHERE \`order_id\`='+id);
+
+    productInfo.map((e, i) => {  
+      connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`quantity\`, \`price\`, \`tax\`) VALUES ('${id}', '${e.id}', '${e.quantity}', '${e.price}', ${e.tax})`, function(err_, rows_) {
+        if(err) throw err_;
+        console.log('product '+i+' : '+rows_);
+      })
+    });
+
+    console.log('PUT /order/modify/'+id);
+    res.header("Access-Control-Allow-Origin", "*");
+    res.send(rows);
+  });
+});
+
+router.options('/order/modify/:id', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  next();
 });
 
 router.options('/order/changeState/:id/:state', (req, res, next) => {
