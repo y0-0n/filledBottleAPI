@@ -128,8 +128,13 @@ router.put('/order/modify/:id', function(req, res) {
   let {id} = req.params;
   let {orderInfo, productInfo} = req.body;
   orderInfo = orderInfo[0];
-  //console.log(`UPDATE \`order\` SET \`cellphone\`='${orderInfo.cellphone}', \`telephone\`='${orderInfo.telephone}', \`address\`=${orderInfo.address}, \`comment\`=${orderInfo.comment}, \`date\`=${orderInfo.date} WHERE \`id\`=${id}`);
-  connection.query(`UPDATE \`order\` SET \`cellphone\`='${orderInfo.cellphone}', \`telephone\`='${orderInfo.telephone}', \`address\`='${orderInfo.address}', \`comment\`='${orderInfo.comment}' WHERE \`id\`=${id}`, function(err, rows) {
+  let price = 0;
+  console.log(productInfo)
+  productInfo.map((e, i) => {
+    price += e.quantity * e['price_shipping']; // 수량 * 출고 가격
+  });
+
+  connection.query(`UPDATE \`order\` SET \`cellphone\`='${orderInfo.cellphone}', \`telephone\`='${orderInfo.telephone}', \`address\`='${orderInfo.address}', \`comment\`='${orderInfo.comment}', \`price\`=${price} WHERE \`id\`=${id}`, function(err, rows) {
     if(err) throw err;
 
     connection.query('DELETE FROM order_product WHERE \`order_id\`='+id);
