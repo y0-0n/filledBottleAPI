@@ -15,6 +15,7 @@ const stock = require('./src/routes/stock');
 app.set('port', process.env.PORT || 4000);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/static', express.static(__dirname + '/public'));
 app.use(passport.initialize());
 
 
