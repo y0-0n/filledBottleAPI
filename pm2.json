@@ -1,0 +1,6 @@
+{
+    "script": "pm2 start index.js",
+    "watch": false,
+    "ignore_watch": ["uploads"],
+    "name": "ERP"
+}
