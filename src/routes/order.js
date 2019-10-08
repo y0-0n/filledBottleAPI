@@ -4,33 +4,16 @@ const express = require('express');
 const router = express.Router();
 const connection = require('../../config/dbConnection').connection;
 
-router.get('/order/', function(req, res){
-  let {page} = req.params;
-  page = parseInt(page);
-  
-  connection.query(`SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.orderDate from \`order\` AS A JOIN \`customer\` AS B ON A.customer_id = B.id ORDER BY A.orderDate DESC`, function(err, rows) {
-    if(err) throw err;
-
-    console.log('GET /order : ' + rows);
-    res.header("Access-Control-Allow-Origin", "*");
-    res.send(rows);
-  });
-});
-
-
-router.get('/order/total', function(req, res){
-  connection.query('SELECT count(*) as total from `order`', function(err, rows) {
-    if(err) throw err;
-
-    console.log('GET /order/total : ' + rows);
-    res.header("Access-Control-Allow-Origin", "*");
-    res.send(rows);
-  });
-});
-
-router.get('/order/total/:state', function(req, res){
-  let {state} = req.params;
-  connection.query(`SELECT count(*) as total from \`order\` WHERE \`state\`='${state}'`, function(err, rows) {
+router.get('/order/total/:state/:name', function(req, res){
+  let {state, name} = req.params;
+  console.log(state)
+  let sql = `SELECT count(*) as total
+             from \`order\` as A JOIN \`customer\` AS B ON A.customer_id = B.id
+             ${(state !== 'all' || name !== 'a' ? 'WHERE ' : '')}
+             ${(state !== 'all' ? `A.state = '${state}'` : '')}
+             ${(state !== 'all' && name !== 'a' ? 'AND' : '')}
+             ${(name !== 'a' ? `B.name = '${name}'`: '')}`
+  connection.query(sql, function(err, rows) {
     if(err) throw err;
 
     console.log('GET /order/total/:state : ' + rows);
@@ -39,25 +22,20 @@ router.get('/order/total/:state', function(req, res){
   });
 });
 
-router.get('/order/:page', function(req, res){
-  let {page} = req.params;
-  page = parseInt(page);
-  
-  connection.query(`SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.orderDate from \`order\` AS A JOIN \`customer\` AS B ON A.customer_id = B.id ORDER BY A.orderDate DESC LIMIT ${5*(page-1)}, 5`, function(err, rows) {
+router.get('/order/:page/:state/:name', function(req, res){
+  let {state, page, name} = req.params; // 상태로 검색
+  let sql = `SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.orderDate
+             from \`order\` AS A JOIN \`customer\` AS B ON A.customer_id = B.id
+             ${(state !== 'all' || name !== 'a' ? 'WHERE ' : '')}
+             ${(state !== 'all' ? `A.state = '${state}'` : '')}
+             ${(state !== 'all' && name !== 'a' ? 'AND' : '')}
+             ${(name !== 'a' ? `B.name = '${name}'`: '')}
+             ORDER BY A.orderDate DESC LIMIT ${5*(page-1)}, 5`;
+  console.log(state, page, state !== 'all' || name !== '')
+  connection.query(sql, function(err, rows) {
     if(err) throw err;
 
-    console.log('GET /order : ' + rows);
-    res.header("Access-Control-Allow-Origin", "*");
-    res.send(rows);
-  });
-});
-
-router.get('/order/:page/:state', function(req, res){
-  let {state} = req.params; // 상태로 검색
-  connection.query(`SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.orderDate from \`order\` AS A JOIN \`customer\` AS B ON A.customer_id = B.id WHERE A.state = '${state}' ORDER BY A.orderDate DESC`, function(err, rows) {
-    if(err) throw err;
-
-    console.log('GET /order/:state : ' + rows);
+    console.log('GET /order/'+page+'/'+state+' : ' + rows);
     res.header("Access-Control-Allow-Origin", "*");
     res.send(rows);
   });
