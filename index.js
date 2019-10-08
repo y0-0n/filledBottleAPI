@@ -10,7 +10,7 @@ const product = require('./src/routes/product');
 const plant = require('./src/routes/plant');
 const order = require('./src/routes/order');
 const stock = require('./src/routes/stock');
-
+const users = require('./src/routes/users');
 // configuration ===============================================================
 app.set('port', process.env.PORT || 4000);
 app.use(express.json());
@@ -25,6 +25,7 @@ app.use(product);
 app.use(plant);
 app.use(order);
 app.use(stock);
+app.use(users);
 
 var whitelist = ['ec2-54-180-104-51.ap-northeast-2.compute.amazonaws.com']
 
