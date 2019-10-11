@@ -29,7 +29,7 @@ router.get('/customer/:id', function(req, res){
 
 router.post('/customer', upload.single('file'), (req, res) => {
   let {name, delegate, telephone, cellphone, keyword, set, transfer, address, manager} = req.body;
-  let fileName = req.file ? req.file.filename : null;
+  let fileName = req.file ? req.file.filename : '318x180.svg';
   connection.query("INSERT INTO customer (`name`, `delegate`, `telephone`, `cellphone`, `keyword`, `set`, `transfer`, `address`, `manager`, `file_name`) VALUES ('"+name+"', '"+delegate+"', '"+telephone+"', '"+cellphone+"', '1', '1', '2', '"+address+"', '"+manager+"', '"+fileName+"')", function(err, rows) {
     if(err) throw err;
     

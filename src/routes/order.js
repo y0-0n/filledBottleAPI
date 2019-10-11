@@ -30,7 +30,8 @@ router.get('/order/:page/:state/:name', function(req, res){
              ${(state !== 'all' ? `A.state = '${state}'` : '')}
              ${(state !== 'all' && name !== 'a' ? 'AND' : '')}
              ${(name !== 'a' ? `B.name = '${name}'`: '')}
-             ORDER BY A.orderDate DESC LIMIT ${5*(page-1)}, 5`;
+             ORDER BY A.orderDate DESC
+             ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`;
   console.log(state, page, state !== 'all' || name !== '')
   connection.query(sql, function(err, rows) {
     if(err) throw err;
