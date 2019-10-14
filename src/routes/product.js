@@ -15,9 +15,19 @@ router.get('/product', function(req, res){
   });
 });
 
+router.get('/product/unset', function(req, res){
+  connection.query('SELECT * from product WHERE \`set\`=0', function(err, rows) {
+    if(err) throw err;
+
+    console.log('GET /product/unset : ' + rows);
+    res.header("Access-Control-Allow-Origin", "*");
+    res.send(rows);
+  });
+});
+
 router.get('/product/search/:keyword', function(req, res){
   let {keyword} = req.params; // 검색어로 검색
-  connection.query(`SELECT * from product WHERE name = "${keyword}" AND \`set\`=1`, function(err, rows) {
+  connection.query(`SELECT * from product WHERE name = "${keyword}"`, function(err, rows) {
     if(err) throw err;
     console.log('GET /product/search : ' + rows);
     res.header("Access-Control-Allow-Origin", "*");
@@ -33,6 +43,18 @@ router.get('/product/:id', function(req, res) {
 
     console.log('GET /product/'+id+' : ' + rows);
     res.header("Access-Control-Allow-Origin", "*");
+    res.send(rows);
+  });
+});
+
+router.put('/product', function(req, res){
+  connection.query(`UPDATE product SET \`set\`=1 WHERE \`id\`=${req.body.id};`, function(err, rows) {
+    if(err) throw err;
+
+    console.log('DELETE /product : ' + rows);
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
     res.send(rows);
   });
 });

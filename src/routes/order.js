@@ -24,7 +24,7 @@ router.get('/order/total/:state/:name', function(req, res){
 
 router.get('/order/:page/:state/:name', function(req, res){
   let {state, page, name} = req.params; // 상태로 검색
-  let sql = `SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.orderDate
+  let sql = `SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.orderDate, B.set
              from \`order\` AS A JOIN \`customer\` AS B ON A.customer_id = B.id
              ${(state !== 'all' || name !== 'a' ? 'WHERE ' : '')}
              ${(state !== 'all' ? `A.state = '${state}'` : '')}

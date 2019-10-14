@@ -14,10 +14,20 @@ router.get('/customer', function(req, res){
   });
 });
 
+router.get('/customer/unset', function(req, res){
+  connection.query(`SELECT * from customer WHERE \`set\`=0`, function(err, rows) {
+    if(err) throw err;
+
+    console.log('GET /customer/unset : ' + rows);
+    res.header("Access-Control-Allow-Origin", "*");
+    res.send(rows);
+  });
+});
+
 router.get('/customer/:id', function(req, res){
   var id = req.params.id; // 거래처 이름
 
-  connection.query(`SELECT * from customer WHERE id = ${id} AND \`set\`=1`, function(err, rows) {
+  connection.query(`SELECT * from customer WHERE id = ${id}`, function(err, rows) {
     if(err) throw err;
 
     console.log('GET /customer/'+id+' : ' + rows);
@@ -25,6 +35,19 @@ router.get('/customer/:id', function(req, res){
     res.send(rows);
   });
 });
+
+router.put('/customer', function(req, res){
+  connection.query("UPDATE customer SET \`set\`=1 WHERE `id`="+req.body.id+";", function(err, rows) {
+    if(err) throw err;
+
+    console.log('PUT /customer : ' + rows);
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+    res.send(rows);
+  });
+});
+
 
 router.post('/customer', upload.single('file'), (req, res) => {
   let {name, delegate, telephone, cellphone, keyword, set, transfer, address, manager} = req.body;
