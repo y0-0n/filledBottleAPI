@@ -2,8 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const connection = require('../../config/dbConnection').connection;
-const multer = require('multer');
-const upload = require("../modules/fileupload");
+const upload = require("../modules/fileUploadCustomer");
 
 router.get('/customer', function(req, res){
   connection.query('SELECT * from customer', function(err, rows) {
@@ -29,7 +28,7 @@ router.get('/customer/:id', function(req, res){
 
 router.post('/customer', upload.single('file'), (req, res) => {
   let {name, delegate, telephone, cellphone, keyword, set, transfer, address, manager} = req.body;
-  let fileName = req.file ? req.file.filename : '318x180.svg';
+  let fileName = req.file ? 'customer/'+req.file.filename : '318x180.svg';
   connection.query("INSERT INTO customer (`name`, `delegate`, `telephone`, `cellphone`, `keyword`, `set`, `transfer`, `address`, `manager`, `file_name`) VALUES ('"+name+"', '"+delegate+"', '"+telephone+"', '"+cellphone+"', '1', '1', '2', '"+address+"', '"+manager+"', '"+fileName+"')", function(err, rows) {
     if(err) throw err;
     

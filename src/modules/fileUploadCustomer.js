@@ -4,7 +4,7 @@ const moment = require("moment");
 const storage = multer.diskStorage({
   //File 저장 경로
   destination: function (req, file, cb) {
-    cb(null, 'public/');
+    cb(null, 'public/customer/');
   },
   //File 저장명
   filename: function (req, file, cb) {

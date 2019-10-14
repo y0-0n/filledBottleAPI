@@ -3,6 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const connection = require('../../config/dbConnection').connection;
+const upload = require("../modules/fileUploadProduct");
 
 router.get('/product', function(req, res){
   connection.query('SELECT * from product', function(err, rows) {
@@ -36,9 +37,11 @@ router.get('/product/:id', function(req, res) {
   });
 });
 
-router.post('/product', (req, res) => {
+router.post('/product', upload.single('file'), (req, res) => {
   let {name, price, grade, weight} = req.body;
-  connection.query(`INSERT INTO \`product\` (\`name\`, \`image\`, \`grade\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`weight\`, \`safety_stock\`) VALUES ('${name}', '2', '${grade}', '4', '5', '${price}', '${weight}', '8');`, function(err, rows) {
+  let fileName = req.file ? 'product/'+req.file.filename : '318x180.svg';
+
+  connection.query(`INSERT INTO \`product\` (\`name\`, \`image\`, \`grade\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`weight\`, \`safety_stock\`, \`file_name\`) VALUES ('${name}', '2', '${grade}', '4', '5', '${price}', '${weight}', '8', '${fileName}');`, function(err, rows) {
     if(err) throw err;
 
     console.log('POST /product : ' + rows);
