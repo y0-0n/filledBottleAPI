@@ -93,25 +93,13 @@ router.options('/order', (req, res, next) => {
   next();
 });
 
-router.delete('/customer', function(req, res){
-  connection.query("DELETE FROM customer WHERE  `id`="+req.body.id+";", function(err, rows) {
-    if(err) throw err;
-
-    console.log('DELETE /customer : ' + rows);
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-    res.send(rows);
-  });
-});
-
 router.get('/orderDetail/:id', function(req, res){
   let {id} = req.params; // id로 검색
 
   connection.query(`SELECT date, name, o.address as address, o.telephone as telephone, o.cellphone as cellphone, comment, state from \`order\` as o JOIN \`customer\` as c ON o.customer_id = c.id WHERE o.id=${id}`, function(err, rows) {
     if(err) throw err;
 
-    connection.query(`SELECT * from \`order\` as o JOIN \`order_product\` as op ON o.id = op.order_id JOIN product as p ON op.product_id = p.id WHERE o.id=${id}`, function(err, rows2) {
+    connection.query(`SELECT op.id, op.quantity, p.name, op.price, op.tax, op.refund from \`order\` as o JOIN \`order_product\` as op ON o.id = op.order_id JOIN product as p ON op.product_id = p.id WHERE o.id=${id}`, function(err, rows2) {
       if(err) throw err;
 
       console.log('GET /orderDetail/' + id + ' : ' + rows);
@@ -128,6 +116,23 @@ router.get('/orderDetail/:id', function(req, res){
     res.send(rows);
   });*/
 });
+
+router.put('/orderDetail/refund/:id', function(req, res) {
+  let {id} = req.params;
+
+  connection.query(`UPDATE \`order_product\` SET \`refund\`=
+    CASE
+      WHEN refund=1 THEN 0
+      ELSE 1
+    END
+    WHERE id = ${id}`, function(err, rows){
+    if(err) throw err;
+
+    console.log(`PUT /orderDetail/refund/${id}`);
+    res.header("Access-Control-Allow-Origin", "*");
+    res.send(rows);
+  })
+})
 
 router.put('/order/changeState/:id/:state', function(req, res) {
   let {id, state} = req.params;
@@ -167,6 +172,12 @@ router.put('/order/modify/:id', function(req, res) {
     res.header("Access-Control-Allow-Origin", "*");
     res.send(rows);
   });
+});
+router.options('/orderDetail/refund/:id', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  next();
 });
 
 router.options('/order/modify/:id', (req, res, next) => {
