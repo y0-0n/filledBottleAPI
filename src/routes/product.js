@@ -6,7 +6,7 @@ const connection = require('../../config/dbConnection').connection;
 const upload = require("../modules/fileUploadProduct");
 
 router.get('/product', function(req, res){
-  connection.query('SELECT * from product', function(err, rows) {
+  connection.query('SELECT * from product WHERE \`set\`=1', function(err, rows) {
     if(err) throw err;
 
     console.log('GET /product : ' + rows);
@@ -17,7 +17,7 @@ router.get('/product', function(req, res){
 
 router.get('/product/search/:keyword', function(req, res){
   let {keyword} = req.params; // 검색어로 검색
-  connection.query(`SELECT * from product WHERE name = "${keyword}"`, function(err, rows) {
+  connection.query(`SELECT * from product WHERE name = "${keyword}" AND \`set\`=1`, function(err, rows) {
     if(err) throw err;
     console.log('GET /product/search : ' + rows);
     res.header("Access-Control-Allow-Origin", "*");
@@ -66,7 +66,7 @@ router.options('/product', (req, res, next) => {
 });
 
 router.delete('/product', function(req, res){
-  connection.query(`DELETE FROM product WHERE \`id\`=${req.body.id};`, function(err, rows) {
+  connection.query(`UPDATE product SET \`set\`=0 WHERE \`id\`=${req.body.id};`, function(err, rows) {
     if(err) throw err;
 
     console.log('DELETE /product : ' + rows);

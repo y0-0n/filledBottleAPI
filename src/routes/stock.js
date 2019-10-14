@@ -5,7 +5,7 @@ const router = express.Router();
 const connection = require('../../config/dbConnection').connection;
 
 router.get('/stock', function(req, res){
-  connection.query('SELECT quantity, s.id as id, weight, name, grade from stock as s JOIN product as p ON s.product_id = p.id', function(err, rows) {
+  connection.query('SELECT quantity, s.id as id, weight, name, grade from stock as s JOIN product as p ON s.product_id = p.id WHERE p.\`set\`=1', function(err, rows) {
     if(err) throw err;
 
     console.log('GET /stock : ' + rows);

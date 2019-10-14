@@ -5,7 +5,7 @@ const connection = require('../../config/dbConnection').connection;
 const upload = require("../modules/fileUploadCustomer");
 
 router.get('/customer', function(req, res){
-  connection.query('SELECT * from customer', function(err, rows) {
+  connection.query(`SELECT * from customer WHERE \`set\`=1`, function(err, rows) {
     if(err) throw err;
 
     console.log('GET /customer : ' + rows);
@@ -17,7 +17,7 @@ router.get('/customer', function(req, res){
 router.get('/customer/:id', function(req, res){
   var id = req.params.id; // 거래처 이름
 
-  connection.query('SELECT * from customer WHERE id = "'+id+'"', function(err, rows) {
+  connection.query(`SELECT * from customer WHERE id = ${id} AND \`set\`=1`, function(err, rows) {
     if(err) throw err;
 
     console.log('GET /customer/'+id+' : ' + rows);
@@ -48,7 +48,7 @@ router.options('/customer', (req, res, next) => {
 
 
 router.delete('/customer', function(req, res){
-  connection.query("DELETE FROM customer WHERE  `id`="+req.body.id+";", function(err, rows) {
+  connection.query("UPDATE customer SET \`set\`=0 WHERE `id`="+req.body.id+";", function(err, rows) {
     if(err) throw err;
 
     console.log('DELETE /customer : ' + rows);
