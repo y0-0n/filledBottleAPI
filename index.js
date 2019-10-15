@@ -4,13 +4,15 @@ var cors = require('cors');
 
 var app = express();
 //routes
-const index = require('./src/routes/index');
+const index = require('./src/routes/');
 const customer = require('./src/routes/customer');
 const product = require('./src/routes/product');
 const plant = require('./src/routes/plant');
 const order = require('./src/routes/order');
 const stock = require('./src/routes/stock');
 const users = require('./src/routes/users');
+const api = require('./src/routes/api');
+
 // configuration ===============================================================
 app.set('port', process.env.PORT || 4000);
 app.use(express.json());
@@ -18,14 +20,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/static', express.static(__dirname + '/public'));
 app.use(passport.initialize());
 
-
-app.use(index);
-app.use(customer);
-app.use(product);
-app.use(plant);
-app.use(order);
-app.use(stock);
-app.use(users);
+app.use('/', index);
+app.use('/customer', customer);
+app.use('/api', api);
+app.use('/product', product);
+//app.use(plant);
+app.use('/order', order);
+app.use('/stock', stock);
+app.use('/users', users);
 
 var whitelist = ['ec2-54-180-104-51.ap-northeast-2.compute.amazonaws.com']
 

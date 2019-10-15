@@ -5,7 +5,7 @@ const router = express.Router();
 const connection = require('../../config/dbConnection').connection;
 const upload = require("../modules/fileUploadProduct");
 
-router.get('/product', function(req, res){
+router.get('/', function(req, res){
   connection.query('SELECT * from product WHERE \`set\`=1', function(err, rows) {
     if(err) throw err;
 
@@ -15,7 +15,7 @@ router.get('/product', function(req, res){
   });
 });
 
-router.get('/product/unset', function(req, res){
+router.get('/unset', function(req, res){
   connection.query('SELECT * from product WHERE \`set\`=0', function(err, rows) {
     if(err) throw err;
 
@@ -25,7 +25,7 @@ router.get('/product/unset', function(req, res){
   });
 });
 
-router.get('/product/search/:keyword', function(req, res){
+router.get('/search/:keyword', function(req, res){
   let {keyword} = req.params; // 검색어로 검색
   connection.query(`SELECT * from product WHERE name = "${keyword}"`, function(err, rows) {
     if(err) throw err;
@@ -35,7 +35,7 @@ router.get('/product/search/:keyword', function(req, res){
   });
 });
 
-router.get('/product/:id', function(req, res) {
+router.get('/:id', function(req, res) {
   let id = req.params.id; // id로 검색
 
   connection.query('SELECT * from product WHERE id = "'+id+'"', function(err, rows) {
@@ -47,11 +47,11 @@ router.get('/product/:id', function(req, res) {
   });
 });
 
-router.put('/product', function(req, res){
+router.put('/', function(req, res){
   connection.query(`UPDATE product SET \`set\`=1 WHERE \`id\`=${req.body.id};`, function(err, rows) {
     if(err) throw err;
 
-    console.log('DELETE /product : ' + rows);
+    console.log('PUT /product : ' + rows);
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
@@ -59,7 +59,7 @@ router.put('/product', function(req, res){
   });
 });
 
-router.post('/product', upload.single('file'), (req, res) => {
+router.post('/', upload.single('file'), (req, res) => {
   let {name, price, grade, weight} = req.body;
   let fileName = req.file ? 'product/'+req.file.filename : '318x180.svg';
 
@@ -80,14 +80,14 @@ router.post('/product', upload.single('file'), (req, res) => {
   })
 });
 
-router.options('/product', (req, res, next) => {
+router.options('/', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
   next();
 });
 
-router.delete('/product', function(req, res){
+router.delete('/', function(req, res){
   connection.query(`UPDATE product SET \`set\`=0 WHERE \`id\`=${req.body.id};`, function(err, rows) {
     if(err) throw err;
 

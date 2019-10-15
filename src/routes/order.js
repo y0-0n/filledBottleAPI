@@ -4,7 +4,7 @@ const express = require('express');
 const router = express.Router();
 const connection = require('../../config/dbConnection').connection;
 
-router.get('/order/total/:state/:name', function(req, res){
+router.get('/total/:state/:name', function(req, res){
   let {state, name} = req.params;
   console.log(state)
   let sql = `SELECT count(*) as total
@@ -22,7 +22,7 @@ router.get('/order/total/:state/:name', function(req, res){
   });
 });
 
-router.get('/order/:page/:state/:name', function(req, res){
+router.get('/:page/:state/:name', function(req, res){
   let {state, page, name} = req.params; // 상태로 검색
   let sql = `SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.orderDate, B.set
              from \`order\` AS A JOIN \`customer\` AS B ON A.customer_id = B.id
@@ -46,7 +46,7 @@ router.get('/order_product', function(req, res) {
   connection.query('SELECT * from order_product', function(err, rows) {
     if(err) throw err;
 
-    console.log('GET /order_product : ' + rows);
+    console.log('GET /irder/order_product : ' + rows);
     res.header("Access-Control-Allow-Origin", "*");
     res.send(rows);
   })
@@ -56,13 +56,13 @@ router.get('/order_summary', function(req, res) {
   connection.query('SELECT * from `order` as A JOIN `order_product` as B ON A.id = B.order_id', function(err, rows) {
     if(err) throw err;
 
-    console.log('GET /order_summary : ' + rows);
+    console.log('GET /order/order_summary : ' + rows);
     res.header("Access-Control-Allow-Origin", "*");
     res.send(rows);
   })
 });
 
-router.post('/order', (req, res) => {
+router.post('/', (req, res) => {
   let price = 0; //총액
   let {sCustomer, sProduct, date, cellphone, telephone, address, comment, orderDate} = req.body;
   sProduct.map((e, i) => {
@@ -86,7 +86,7 @@ router.post('/order', (req, res) => {
   });
 });
 
-router.options('/order', (req, res, next) => {
+router.options('/', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
@@ -134,7 +134,7 @@ router.put('/orderDetail/refund/:id', function(req, res) {
   })
 })
 
-router.put('/order/changeState/:id/:state', function(req, res) {
+router.put('/changeState/:id/:state', function(req, res) {
   let {id, state} = req.params;
 
   connection.query(`UPDATE \`order\` SET \`state\`='${state}' WHERE \`id\`=${id}`, function(err, rows) {
@@ -146,7 +146,7 @@ router.put('/order/changeState/:id/:state', function(req, res) {
   });
 });
 
-router.put('/order/modify/:id', function(req, res) {
+router.put('/modify/:id', function(req, res) {
   let {id} = req.params;
   let {orderInfo, productInfo} = req.body;
   orderInfo = orderInfo[0];
@@ -180,14 +180,14 @@ router.options('/orderDetail/refund/:id', (req, res, next) => {
   next();
 });
 
-router.options('/order/modify/:id', (req, res, next) => {
+router.options('/modify/:id', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
   next();
 });
 
-router.options('/order/changeState/:id/:state', (req, res, next) => {
+router.options('/changeState/:id/:state', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');

@@ -15,7 +15,7 @@ router.post('/users/signup', (req, res) => {
 	});
 
 	res.header("Access-Control-Allow-Origin", "*");
-	res.send('A');
+	res.send("Success");
 });
 
 router.options('/users/signup', (req, res, next) => {

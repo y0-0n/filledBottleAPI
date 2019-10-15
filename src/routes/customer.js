@@ -4,7 +4,7 @@ const router = express.Router();
 const connection = require('../../config/dbConnection').connection;
 const upload = require("../modules/fileUploadCustomer");
 
-router.get('/customer', function(req, res){
+router.get('/', function(req, res){
   connection.query(`SELECT * from customer WHERE \`set\`=1`, function(err, rows) {
     if(err) throw err;
 
@@ -14,7 +14,7 @@ router.get('/customer', function(req, res){
   });
 });
 
-router.get('/customer/unset', function(req, res){
+router.get('/unset', function(req, res){
   connection.query(`SELECT * from customer WHERE \`set\`=0`, function(err, rows) {
     if(err) throw err;
 
@@ -24,7 +24,7 @@ router.get('/customer/unset', function(req, res){
   });
 });
 
-router.get('/customer/:id', function(req, res){
+router.get('/:id', function(req, res){
   var id = req.params.id; // 거래처 이름
 
   connection.query(`SELECT * from customer WHERE id = ${id}`, function(err, rows) {
@@ -36,7 +36,7 @@ router.get('/customer/:id', function(req, res){
   });
 });
 
-router.put('/customer', function(req, res){
+router.put('/', function(req, res){
   connection.query("UPDATE customer SET \`set\`=1 WHERE `id`="+req.body.id+";", function(err, rows) {
     if(err) throw err;
 
@@ -49,7 +49,7 @@ router.put('/customer', function(req, res){
 });
 
 
-router.post('/customer', upload.single('file'), (req, res) => {
+router.post('/', upload.single('file'), (req, res) => {
   let {name, delegate, telephone, cellphone, keyword, set, transfer, address, manager} = req.body;
   let fileName = req.file ? 'customer/'+req.file.filename : '318x180.svg';
   connection.query("INSERT INTO customer (`name`, `delegate`, `telephone`, `cellphone`, `keyword`, `set`, `transfer`, `address`, `manager`, `file_name`) VALUES ('"+name+"', '"+delegate+"', '"+telephone+"', '"+cellphone+"', '1', '1', '2', '"+address+"', '"+manager+"', '"+fileName+"')", function(err, rows) {
@@ -62,7 +62,7 @@ router.post('/customer', upload.single('file'), (req, res) => {
   });
 });
 
-router.options('/customer', (req, res, next) => {
+router.options('/', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
@@ -70,7 +70,7 @@ router.options('/customer', (req, res, next) => {
 });
 
 
-router.delete('/customer', function(req, res){
+router.delete('/', function(req, res){
   connection.query("UPDATE customer SET \`set\`=0 WHERE `id`="+req.body.id+";", function(err, rows) {
     if(err) throw err;
 
