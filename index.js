@@ -29,6 +29,8 @@ app.use('/order', order);
 app.use('/stock', stock);
 app.use('/users', users);
 
+
+//====================  cors  ==========================================
 var whitelist = ['ec2-54-180-104-51.ap-northeast-2.compute.amazonaws.com']
 
 var corsOptions = {

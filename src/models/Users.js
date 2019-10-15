@@ -28,3 +28,25 @@ module.exports.addUser = (data, callback) => {
   });
 };
 
+/**
+ * 이메일 중복 체크
+ * @param email
+ * @param callback
+ */
+module.exports.emailCheck = (email, callback) => {
+  pool.getConnection(function(err, conn) {
+    if (err) {
+      console.log(err);
+      conn.release();
+      throw err;
+    }
+
+    const query = 'SELECT id FROM users WHERE user_id = ?';
+    const exec = conn.query(query, email, (err, rows) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+
+      return callback(err, rows);
+    });
+  });
+};
