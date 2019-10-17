@@ -1,5 +1,5 @@
 {
-    "script": "pm2 start index.js",
+    "script": "npm start",
     "watch": false,
     "ignore_watch": ["uploads"],
     "name": "ERP"

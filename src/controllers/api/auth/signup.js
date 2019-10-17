@@ -4,11 +4,23 @@
 const Users = require('../../../models/Users');
 const { validationResult } = require('express-validator');
 
+exports.addUser = (req, res) => {
+	data = req.body
+	Users.addUser(data, (err, result) => {
+		if(err) throw err;
+
+		console.log(result);
+	});
+
+	res.header("Access-Control-Allow-Origin", "*");
+	res.send("Success");
+}
+
+
 exports.emailCheck = (req, res) => {
   const email = req.body.email;
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
-		console.log('Fail')
     return res.status(422).json({ errors: errors.array() });
   }
 	Users.emailCheck(email, (error, result) => {

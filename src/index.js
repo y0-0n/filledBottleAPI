@@ -1,23 +1,25 @@
-var express    = require('express');
+let express    = require('express');
 const passport = require('passport');
-var cors = require('cors');
+let cors = require('cors');
+let path = require('path');
 
-var app = express();
+let app = express();
 //routes
-const index = require('./src/routes/');
-const customer = require('./src/routes/customer');
-const product = require('./src/routes/product');
-const plant = require('./src/routes/plant');
-const order = require('./src/routes/order');
-const stock = require('./src/routes/stock');
-const users = require('./src/routes/users');
-const api = require('./src/routes/api');
+const index = require('./controllers');
+const customer = require('./controllers/customer');
+const product = require('./controllers/product');
+const plant = require('./controllers/plant');
+const order = require('./controllers/order');
+const stock = require('./controllers/stock');
+const users = require('./controllers/users');
+const api = require('./controllers/api');
 
 // configuration ===============================================================
 app.set('port', process.env.PORT || 4000);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/static', express.static(__dirname + '/public'));
+app.use('/static', express.static(path.join(__dirname+'/../public')));
+
 app.use(passport.initialize());
 
 app.use('/', index);

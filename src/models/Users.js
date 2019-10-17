@@ -18,7 +18,6 @@ module.exports.addUser = (data, callback) => {
     }
 
     const query = 'INSERT INTO users SET ? ';
-    console.log(data);
     const exec = conn.query(query, data, (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
