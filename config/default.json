@@ -1,0 +1,19 @@
+{
+    "server": {
+        "port": 4000
+    },
+    "auth": {
+        "jwt": {
+            "secret": "",
+            "expiresIn": 604800
+        },
+        "local": {
+            "saltSize": 18,
+            "pbkdf2": {
+                "iteration": 12345,
+                "keylen": 64,
+                "digest": "sha512"
+              }        
+        }
+    } 
+}

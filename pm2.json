@@ -1,6 +1,0 @@
-{
-    "script": "npm start",
-    "watch": false,
-    "ignore_watch": ["uploads"],
-    "name": "ERP"
-}
