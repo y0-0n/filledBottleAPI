@@ -12,6 +12,9 @@
 #public
 /public
 
+#config
+/config
+
 # misc
 .DS_Store
 .idea

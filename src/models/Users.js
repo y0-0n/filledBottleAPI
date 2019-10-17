@@ -40,7 +40,7 @@ module.exports.emailCheck = (email, callback) => {
       throw err;
     }
 
-    const query = 'SELECT id FROM users WHERE user_id = ?';
+    const query = 'SELECT id FROM users WHERE email = ?';
     const exec = conn.query(query, email, (err, rows) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
