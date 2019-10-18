@@ -4,7 +4,7 @@
     },
     "auth": {
         "jwt": {
-            "secret": "",
+            "secret": "{JWT SECRET}",
             "expiresIn": 604800
         },
         "local": {

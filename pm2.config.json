@@ -1,0 +1,15 @@
+{
+    "apps" : [{
+        "name"        : "ERP",
+        "script"      : "npm start",
+        "watch"       : true,
+        "instance_var": "INSTANCE_ID",
+        "env": {
+            "port": 4000,
+            "NODE_ENV": "develop"
+        },
+        "env_production" : {
+           "NODE_ENV": "production"
+        }
+      }]
+}
