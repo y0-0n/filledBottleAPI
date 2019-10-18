@@ -4,9 +4,21 @@ const express = require('express');
 const router = express.Router();
 const connection = require('../../config/dbConnection').connection;
 
-router.get('/total/:state/:name', function(req, res){
+function checkAuthed(req, res, next) {
+  if (req.isAuthenticated()) {
+    next();
+  } else {
+    console.log('a')
+    res.header('Access-Control-Allow-Credentials', true);
+    res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
+    
+    res.status(401).json({ message: 'Not logged in!' });
+    //res.redirect(301, 'http://cosimo.iptime.org:3000/#/login')
+  }
+}
+
+router.get('/total/:state/:name', checkAuthed, function(req, res) {
   let {state, name} = req.params;
-  console.log(state)
   let sql = `SELECT count(*) as total
              from \`order\` as A JOIN \`customer\` AS B ON A.customer_id = B.id
              ${(state !== 'all' || name !== 'a' ? 'WHERE ' : '')}
@@ -17,27 +29,29 @@ router.get('/total/:state/:name', function(req, res){
     if(err) throw err;
 
     console.log('GET /order/total/:state : ' + rows);
-    res.header("Access-Control-Allow-Origin", "*");
+    res.header('Access-Control-Allow-Credentials', true);
+    res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
     res.send(rows);
   });
 });
 
-router.get('/:page/:state/:name', function(req, res){
+router.get('/:page/:state/:name', checkAuthed, function(req, res){
   let {state, page, name} = req.params; // 상태로 검색
+  console.log(req.user)
   let sql = `SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.orderDate, B.set
-             from \`order\` AS A JOIN \`customer\` AS B ON A.customer_id = B.id
-             ${(state !== 'all' || name !== 'a' ? 'WHERE ' : '')}
-             ${(state !== 'all' ? `A.state = '${state}'` : '')}
-             ${(state !== 'all' && name !== 'a' ? 'AND' : '')}
-             ${(name !== 'a' ? `B.name = '${name}'`: '')}
+             from \`order\` AS A JOIN \`customer\` AS B JOIN \`users\` as C ON A.customer_id = B.id AND A.user_id = C.id
+             WHERE C.email='${req.user.email}'
+             ${(state !== 'all' ? `AND A.state = '${state}'` : '')}
+             ${(name !== 'a' ? `AND B.name = '${name}'`: '')}
              ORDER BY A.orderDate DESC
              ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`;
-  console.log(state, page, state !== 'all' || name !== '')
+  //console.log(state, page, state !== 'all' || name !== '')
   connection.query(sql, function(err, rows) {
     if(err) throw err;
 
     console.log('GET /order/'+page+'/'+state+' : ' + rows);
-    res.header("Access-Control-Allow-Origin", "*");
+    res.header('Access-Control-Allow-Credentials', true);
+    res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
     res.send(rows);
   });
 });
@@ -87,6 +101,7 @@ router.post('/', (req, res) => {
 });
 
 router.options('/', (req, res, next) => {
+  res.header('Access-Control-Allow-Credentials', true);
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
@@ -173,6 +188,15 @@ router.put('/modify/:id', function(req, res) {
     res.send(rows);
   });
 });
+
+router.options('/:page/:state/:name', (req, res, next) => {
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header('Access-Control-Allow-Origin', 'http://cosimo.iptime.org:3000');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, Access-Control-Allow-Origin, Origin, Accept, Access-Control-Request-Headers, Authorization, Access-Control-Request-Method');
+  next();
+});
+
 router.options('/orderDetail/refund/:id', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
