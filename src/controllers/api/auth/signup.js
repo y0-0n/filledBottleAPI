@@ -14,8 +14,10 @@ exports.addUser = (req, res) => {
 	}
 	data = req.body;
 	const salt = auth.generateSalt();
+	data.salt = salt;
 	data.password = auth.hashPassword(data.password, salt);
 	Users.emailCheck(req.body.email, (err, rows) => {
+		if(err) throw err;
 		if(rows.length > 0) {//이미 있는 계정일 경우
 			return res.status(400).json({ message: "THe email already exists" });
 		} else {//회원가입 성공

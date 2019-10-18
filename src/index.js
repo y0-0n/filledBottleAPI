@@ -2,6 +2,7 @@ let express    = require('express');
 const passport = require('passport');
 let cors = require('cors');
 let path = require('path');
+const session = require('express-session');
 
 let app = express();
 //routes
@@ -20,7 +21,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/static', express.static(path.join(__dirname+'/../public')));
 
+app.use(session({
+  secret: 'ChangeItLaterToRandom',
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    secure: false,
+  }
+}));
 app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/', index);
 app.use('/customer', customer);
@@ -31,9 +41,8 @@ app.use('/order', order);
 app.use('/stock', stock);
 app.use('/users', users);
 
-
 //====================  cors  ==========================================
-var whitelist = ['ec2-54-180-104-51.ap-northeast-2.compute.amazonaws.com']
+var whitelist = ['http://cosimo.iptime.org:3000']
 
 var corsOptions = {
 
@@ -51,7 +60,7 @@ var corsOptions = {
 
 }
 
-app.use( cors(corsOptions) );                                                                                                            
+app.use( cors(corsOptions) );
 
 //===============================================================
 
