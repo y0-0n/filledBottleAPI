@@ -12,10 +12,11 @@ const localAuth = (email, password, done) => {
   Users.emailCheck(email, (err, rows) => {
     if(err) throw err;
     if(rows.length > 0) {
-      let correctPwd = rows[0].password, salt = rows[0].salt;
+      let correctPwd = rows[0].password, salt = rows[0].salt, id = rows[0].id;
       if(correctPwd === auth.hashPassword(password, salt)){
         done(null, {
-          email
+          email,
+          id
         })
       } else {
         done(null, false, 'Wrong Password');
