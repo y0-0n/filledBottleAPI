@@ -54,6 +54,13 @@ router.post('/login', (req, res, next) =>
   { session: false })(req, res, next)
 );
 
+router.get('/logout', (req, res, next) => {
+  req.logout();
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header('Access-Control-Allow-Origin', 'http://cosimo.iptime.org:3000')
+  res.json({message: 'Logout success'});
+})
+
 router.options('/login', (req, res, next) => {
   res.header('Access-Control-Allow-Credentials', true);
   res.header('Access-Control-Allow-Origin', 'http://cosimo.iptime.org:3000');
