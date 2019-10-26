@@ -2,6 +2,7 @@ const router = require('express').Router();
 const signup = require('./signup');
 const { check } = require('express-validator');
 const passport = require('../../../modules/passport');
+const user = require('./user');
 
 const preventDupAuth = (req, res, next) => {
   if (req.isAuthenticated()) {
@@ -10,6 +11,18 @@ const preventDupAuth = (req, res, next) => {
     next();
   }
 };
+
+function checkAuthed(req, res, next) {
+  if (req.isAuthenticated()) {
+    next();
+  } else {
+    res.header('Access-Control-Allow-Credentials', true);
+    res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
+    
+    res.status(401).json({ message: 'Not logged in!' });
+    //res.redirect(301, 'http://cosimo.iptime.org:3000/#/login')
+  }
+}
 
 /**
  * POST /api/auth/emailCheck
@@ -47,7 +60,7 @@ router.post('/login', (req, res, next) =>
         req.session.user = user;
         res.header('Access-Control-Allow-Origin', 'http://cosimo.iptime.org:3000')
         res.header('Access-Control-Allow-Credentials', true);
-        return res.json(req.user);
+        res.json(req.user);
       });  
     }
   },
@@ -60,6 +73,8 @@ router.get('/logout', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'http://cosimo.iptime.org:3000')
   res.json({message: 'Logout success'});
 })
+
+router.get('/info',  checkAuthed, user.info);
 
 router.options('/login', (req, res, next) => {
   res.header('Access-Control-Allow-Credentials', true);

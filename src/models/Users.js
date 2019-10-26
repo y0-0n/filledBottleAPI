@@ -35,7 +35,6 @@ module.exports.addUser = (data, callback) => {
 module.exports.emailCheck = (email, callback) => {
   pool.getConnection(function(err, conn) {
     if (err) {
-      console.log(err);
       conn.release();
       throw err;
     }
@@ -49,3 +48,20 @@ module.exports.emailCheck = (email, callback) => {
     });
   });
 };
+
+module.exports.info = (id, callback) => {
+  pool.getConnection(function(err, conn) {
+    if(err) {
+      conn.release();
+      throw err;
+    }
+
+    const query = 'SELECT id, email, name, address, phone FROM users WHERE id = ?';
+    const exec = conn.query(query, id, (err, rows) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+
+      return callback(err, rows);
+    });
+  });
+}
