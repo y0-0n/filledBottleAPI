@@ -47,8 +47,6 @@ router.get('/:page/:state/:name', checkAuthed, function(req, res){
     if(err) throw err;
 
     console.log('GET /order/'+page+'/'+state+' : ' + rows);
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
     res.send(rows);
   });
 });

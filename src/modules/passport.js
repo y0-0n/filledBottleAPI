@@ -28,12 +28,12 @@ const localAuth = (email, password, done) => {
 };
 
 passport.serializeUser((user, done) => {
-  console.log(user)
+  console.log('s: ', user)
   done(null, user);
 });
 
 passport.deserializeUser((user, done) => {
-  console.log(user)
+  console.log('ds: ', user);
   done(null, user);
 });
 
@@ -42,26 +42,18 @@ passport.use(new LocalStrategy({
   passwordField: 'password',
 }, localAuth));
 
-
-/*passport.use('JWT', new JWTStrategy({
+passport.use('JWT', new JWTStrategy({
   jwtFromRequest: extractJWT.fromAuthHeaderAsBearerToken(),
   secretOrKey: JWT_SECRET,
 }, (jwtUser, done) => {
-  const UserModel = auth.getUserModel(jwtUser);
-
-  UserModel.findOne({ id: jwtUser.id })
-    .then((user) => {
-      if (user) {
-        done(null, jwtUser);
-      } else {
-        done(null, false);
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-      done(err);
-    });
-}));*/
-
+  Users.emailCheck(jwtUser.email, (err, rows) => {
+    if(err) throw err;
+    if(rows.length > 0) {
+      done(null, jwtUser);
+    } else {
+      done(null, false);
+    }
+  })
+}));
 
 module.exports = passport;

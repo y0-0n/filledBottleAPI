@@ -9,11 +9,7 @@ module.exports = {
     const token = jwt.sign(
       {
         id: user.id,
-        email: user.email,
-        name: user.name,
-        phone: user.phone,
-        address: user.address,
-        createdDate: user.create_date
+        email: user.email
       },
       JWT_SECRET,
       {

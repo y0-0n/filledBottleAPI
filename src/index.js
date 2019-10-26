@@ -20,6 +20,7 @@ app.set('port', process.env.PORT || 4000);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/static', express.static(path.join(__dirname+'/../public')));
+app.use( cors() );
 
 app.use(session({
   secret: 'ChangeItLaterToRandom',
@@ -37,7 +38,10 @@ app.use('/customer', customer);
 app.use('/api', api);
 app.use('/product', product);
 //app.use(plant);
-app.use('/order', order);
+app.use('/order',
+  passport.authenticate('JWT', { session: false }),
+  order
+);
 app.use('/stock', stock);
 app.use('/users', users);
 
@@ -60,7 +64,6 @@ var corsOptions = {
 
 }
 
-app.use( cors(corsOptions) );
 
 //===============================================================
 

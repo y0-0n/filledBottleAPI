@@ -1,8 +1,10 @@
-module.exports = {
-  auth = (req, res, next) =>
+const passport = require('../../../modules/passport');
+const jwt = require('../../../modules/jwt');
+
+exports.auth = (req, res, done) =>
   passport.authenticate('local',
   function (err, user, info) {
-    if(err) return next(err);
+    if(err) return done(err);
     if(!user) {
       res.header('Access-Control-Allow-Origin', 'http://cosimo.iptime.org:3000');
       res.header('Access-Control-Allow-Credentials', true);
@@ -10,12 +12,15 @@ module.exports = {
     } else {
       req.logIn(user, function(err) {
         if (err) return next(err);
-        req.session.user = user;
-        res.header('Access-Control-Allow-Origin', 'http://cosimo.iptime.org:3000');
-        res.header('Access-Control-Allow-Credentials', true);
-        res.json(req.user);
+        done(null, user)
       });  
     }
   },
-  { session: false })
-}
+  { session: false })(req, res, done);
+
+exports.authResponse = (req, res) => {
+  res.header('Access-Control-Allow-Origin', 'http://cosimo.iptime.org:3000');
+  res.header('Access-Control-Allow-Credentials', true);
+  res.json(jwt.sign(req.user));
+};
+  
