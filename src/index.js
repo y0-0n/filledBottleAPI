@@ -34,15 +34,30 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/', index);
-app.use('/customer', customer);
+app.use('/customer', 
+  passport.authenticate('JWT', { session: false }),
+  customer
+);
+
 app.use('/api', api);
-app.use('/product', product);
+
+app.use('/product', 
+  passport.authenticate('JWT', { session: false }),
+  product
+);
+
 //app.use(plant);
+
 app.use('/order',
   passport.authenticate('JWT', { session: false }),
   order
 );
-app.use('/stock', stock);
+
+app.use('/stock',
+  passport.authenticate('JWT', { session: false }),
+  stock
+);
+
 app.use('/users', users);
 
 //====================  cors  ==========================================

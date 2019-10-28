@@ -3,6 +3,7 @@ const signup = require('./signup');
 const { check } = require('express-validator');
 const user = require('./user');
 const login = require('./login');
+const passport = require('passport');
 
 const preventDupAuth = (req, res, next) => {
   if (req.isAuthenticated()) {
@@ -16,9 +17,7 @@ function checkAuthed(req, res, next) {
   if (req.isAuthenticated()) {
     next();
   } else {
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
-    
+    res.header('Access-Control-Allow-Origin', '*');
     res.status(401).json({ message: 'Not logged in!' });
     //res.redirect(301, 'http://cosimo.iptime.org:3000/#/login')
   }
@@ -51,18 +50,14 @@ router.post('/login',
   login.authResponse
 );
 
-router.get('/logout', (req, res, next) => {
-  req.logout();
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Origin', 'http://cosimo.iptime.org:3000')
-  res.json({message: 'Logout success'});
-})
-
-router.get('/info',  checkAuthed, user.info);
+router.get('/info',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  user.info
+);
 
 router.options('/login', (req, res, next) => {
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Origin', 'http://cosimo.iptime.org:3000');
+  res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
 	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
   next();
@@ -70,7 +65,6 @@ router.options('/login', (req, res, next) => {
 
 
 router.options('/signup', (req, res, next) => {
-  res.header('Access-Control-Allow-Credentials', true);
 	res.header('Access-Control-Allow-Origin', '*');
 	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
 	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');

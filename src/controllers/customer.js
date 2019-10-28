@@ -25,8 +25,6 @@ router.get('/', checkAuthed, function(req, res){
       if(err) throw err;
 
       console.log('GET /customer : ' + rows);
-      res.header('Access-Control-Allow-Credentials', true);
-      res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
       res.send(rows);
     }
   );
@@ -41,8 +39,6 @@ router.get('/unset', checkAuthed, function(req, res){
       if(err) throw err;
 
       console.log('GET /customer/unset : ' + rows);
-      res.header('Access-Control-Allow-Credentials', true);
-      res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
       res.send(rows);
     }
   );
@@ -56,8 +52,6 @@ router.get('/:id', checkAuthed, function(req, res){
     if(err) throw err;
 
     console.log('GET /customer/'+id+' : ' + rows);
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
     res.send(rows);
   });
 });
@@ -67,8 +61,6 @@ router.put('/', checkAuthed, function(req, res){
     if(err) throw err;
 
     console.log('PUT /customer : ' + rows);
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
     res.send(rows);
   });
 });
@@ -82,31 +74,16 @@ router.post('/', checkAuthed, upload.single('file'), (req, res) => {
     if(err) throw err;
     
     console.log('POST /customer : ' + rows);
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
 
     res.send(rows);
   });
 });
-
-router.options('/', (req, res, next) => {
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-  next();
-});
-
 
 router.delete('/', checkAuthed, function(req, res){
   connection.query("UPDATE customer SET \`set\`=0 WHERE `id`="+req.body.id+";", function(err, rows) {
     if(err) throw err;
 
     console.log('DELETE /customer : ' + rows);
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
     res.send(rows);
   });
 });

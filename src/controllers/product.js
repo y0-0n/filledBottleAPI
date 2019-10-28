@@ -25,8 +25,6 @@ router.get('/', checkAuthed, function(req, res){
     if(err) throw err;
 
     console.log('GET /product : ' + rows);
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
     res.send(rows);
   });
 });
@@ -39,8 +37,6 @@ router.get('/unset', checkAuthed, function(req, res){
     if(err) throw err;
 
     console.log('GET /product/unset : ' + rows);
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
     res.send(rows);
   });
 });
@@ -50,8 +46,7 @@ router.get('/search/:keyword', checkAuthed, function(req, res){
   connection.query(`SELECT * from product WHERE name = "${keyword}"`, function(err, rows) {
     if(err) throw err;
     console.log('GET /product/search : ' + rows);
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
+
     res.send(rows);
   });
 });
@@ -63,8 +58,6 @@ router.get('/:id', checkAuthed, function(req, res) {
     if(err) throw err;
 
     console.log('GET /product/'+id+' : ' + rows);
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
     res.send(rows);
   });
 });
@@ -74,10 +67,7 @@ router.put('/', checkAuthed, function(req, res){
     if(err) throw err;
 
     console.log('PUT /product : ' + rows);
-    res.header('Access-Control-Allow-Origin', 'http://cosimo.iptime.org:3000');
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+
     res.send(rows);
   });
 });
@@ -98,19 +88,9 @@ router.post('/', checkAuthed, upload.single('file'), (req, res) => {
       if(err_) throw err_;
       console.log('stock '+rows_);
 
-      res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
-      res.header('Access-Control-Allow-Credentials', true);
       res.send(rows);
     });
   })
-});
-
-router.options('/', (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://cosimo.iptime.org:3000');
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, Cache-Control');
-  next();
 });
 
 router.delete('/', checkAuthed, function(req, res){
@@ -118,10 +98,6 @@ router.delete('/', checkAuthed, function(req, res){
     if(err) throw err;
 
     console.log('DELETE /product : ' + rows);
-    res.header('Access-Control-Allow-Origin', 'http://cosimo.iptime.org:3000');
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
     res.send(rows);
   });
 });

@@ -24,8 +24,6 @@ router.get('/', checkAuthed, function(req, res){
     if(err) throw err;
 
     console.log('GET /stock : ' + rows);
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
     res.send(rows); 
   });
 });
@@ -36,18 +34,8 @@ router.put('/', function(req, res){
     if(err) throw err;
 
     console.log('PUT /stock : ' + row);
-    res.header('Access-Control-Allow-Credentials', true);
-    res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
     res.send(row); 
   });
 })
-
-router.options('/', (req, res, next) => {
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header("Access-Control-Allow-Origin", "http://cosimo.iptime.org:3000");
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
-  next();
-});
 
 module.exports = router;
