@@ -27,7 +27,7 @@ exports.addUser = (req, res) => {
 				console.log(result);
 			});
 		
-			res.status(200).send({message: "Success"});		
+			res.status(200).send({message: "Success"});
 		}
 	})
 }
