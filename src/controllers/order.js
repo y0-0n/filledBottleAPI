@@ -15,6 +15,21 @@ function checkAuthed(req, res, next) {
   }
 }
 
+router.get('/total/refund/:name', checkAuthed, function(req, res) {
+  let {name} = req.params;
+  let sql = `SELECT count(*) as total
+             from \`order\` as A JOIN \`customer\` AS B JOIN \`users\` AS C JOIN \`order_product\` as D ON A.customer_id = B.id AND A.user_id = C.id AND A.id = D.order_id
+             WHERE C.id='${req.user.id}' AND D.refund = true
+             ${(name !== 'a' ? `AND B.name = '${name}'`: '')}`
+  connection.query(sql, function(err, rows) {
+    if(err) throw err;
+
+    console.log('GET /order/total/:state : ' + rows);
+    res.send(rows);
+  });
+});
+
+
 router.get('/total/:state/:name', checkAuthed, function(req, res) {
   let {state, name} = req.params;
   let sql = `SELECT count(*) as total
@@ -30,6 +45,25 @@ router.get('/total/:state/:name', checkAuthed, function(req, res) {
   });
 });
 
+router.get('/:page/refund/:name', checkAuthed, function(req, res){
+  let {state, page, name} = req.params; // 상태로 검색
+  let sql = `SELECT O.id, O.state, O.date, O.price, O.received, C.name, O.orderDate, C.set
+             from \`order\` AS O JOIN \`customer\` AS C JOIN \`users\` as U JOIN \`order_product\` as OP ON O.customer_id = C.id AND O.user_id = U.id AND O.id = OP.order_id
+             WHERE U.id='${req.user.id}' AND OP.refund = true
+             ${(name !== 'a' ? `AND C.name = '${name}'`: '')}
+             ORDER BY O.orderDate DESC
+             ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`;
+  //console.log(state, page, state !== 'all' || name !== '')
+  connection.query(sql, function(err, rows) {
+    if(err) throw err;
+
+    console.log('GET /order/'+page+'/'+state+' : ' + rows);
+    res.send(rows);
+  });
+});
+
+
+`FROM order as O JOIN order_product as OP ON O.id = OP.order_id WHERE OP.refund = true AND user_id = 30`
 router.get('/:page/:state/:name', checkAuthed, function(req, res){
   let {state, page, name} = req.params; // 상태로 검색
   let sql = `SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.orderDate, B.set
