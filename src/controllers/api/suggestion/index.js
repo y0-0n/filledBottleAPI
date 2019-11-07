@@ -18,6 +18,13 @@ router.get('/',
   suggestion.getSuggestion
 );
 
+router.get('/:id',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  suggestion.getSuggestionById
+);
+
+
 router.post('/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
