@@ -56,6 +56,17 @@ router.get('/:id', checkAuthed, function(req, res){
   });
 });
 
+router.get('/search/:keyword', checkAuthed, function(req, res){
+  let {keyword} = req.params; // 검색어로 검색
+  connection.query(`SELECT * from customer WHERE name = "${keyword}"
+    AND \`set\` = 1`, function(err, rows) {
+    if(err) throw err;
+    console.log('GET /customer/search : ' + rows);
+
+    res.send(rows);
+  });
+});
+
 router.put('/', checkAuthed, function(req, res){
   connection.query("UPDATE customer SET \`set\`=1 WHERE `id`="+req.body.id+";", function(err, rows) {
     if(err) throw err;

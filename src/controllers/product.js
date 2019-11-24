@@ -43,7 +43,9 @@ router.get('/unset', checkAuthed, function(req, res){
 
 router.get('/search/:keyword', checkAuthed, function(req, res){
   let {keyword} = req.params; // 검색어로 검색
-  connection.query(`SELECT * from product WHERE name = "${keyword}"`, function(err, rows) {
+  connection.query(`SELECT * from product
+    WHERE name = "${keyword}"
+    AND \`set\` = 1`, function(err, rows) {
     if(err) throw err;
     console.log('GET /product/search : ' + rows);
 
