@@ -100,6 +100,21 @@ router.get('/order_summary', function(req, res) {
   })
 });
 
+router.get('/income/:month', function(req, res) {
+  connection.query(`SELECT SUM(OP.price) as sum
+    FROM \`order\` as O JOIN order_product as OP ON O.id = OP.order_id
+    WHERE ${req.params.month} = MONTH(O.orderDate)
+    AND O.state = 'shipping'
+    AND O.user_id = ${req.user.id}
+    `, function(err, rows) {
+    if(err) throw err;
+    console.log(rows);
+    
+    console.log('GET /order/income_this_month : ' + rows);
+    res.send(rows);
+  })
+})
+
 router.post('/', (req, res) => {
   let price = 0; //총액
   let {sCustomer, sProduct, date, cellphone, telephone, address, comment, orderDate} = req.body;
