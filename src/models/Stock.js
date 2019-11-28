@@ -9,7 +9,8 @@ const pool = require('../../config/dbpool').pool;
  * @param callback
  */
 
-module.exports.convertStock = (user, data, callback) => {
+ //생산 모듈을 통한 재고 변경
+module.exports.convertStockByProduce = (user, data, callback) => {
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
@@ -68,8 +69,26 @@ module.exports.getStock = (user, callback) => {
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
-      console.log(result)
       return callback(err, result);
     });
   });
+}
+
+module.exports.getStockDetail = (user, product_id, callback) => {
+  pool.getConnection(function(err, conn) {
+    if (err) {
+      conn.release();
+      throw err;
+    }
+    const query = `SELECT P.name as name, S.quantity, S.changeDate as date, S.change FROM \`stock\` AS S JOIN \`product\` as P ON S.product_id = P.id
+    WHERE P.id = ?
+    AND P.user_id = ?
+    ORDER BY \`changeDate\` DESC`;
+    const exec = conn.query(query, [product_id, user.id], (err, result) => {
+      conn.release();
+      console.log(result)
+      console.log('실행 sql : ', exec.sql);
+      return callback(err, result);
+    })
+  })
 }

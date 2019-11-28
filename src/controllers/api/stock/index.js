@@ -18,4 +18,10 @@ router.get('/',
   stock.getStock
 );
 
+router.get('/:id',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  stock.getStockDetail
+);
+
 module.exports = router;
