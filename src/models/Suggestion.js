@@ -24,7 +24,6 @@ module.exports.getSuggestionById = (user_id, id, callback) => {
 
   pool.getConnection(function(err, conn) {
     if (err) {
-      console.log(err);
       conn.release();
       throw err;
     }
@@ -42,11 +41,9 @@ module.exports.getSuggestionById = (user_id, id, callback) => {
 module.exports.addSuggestion = (user, data, callback) => {
   pool.getConnection(function(err, conn) {
     if (err) {
-      console.log(err);
       conn.release();
       throw err;
     }
-    console.log(user, data)
     const query = 'INSERT INTO suggestion SET title = ?, content = ?, user_id = ?';
     const exec = conn.query(query, [data.title, data.content, user], (err, result) => {
       conn.release();
