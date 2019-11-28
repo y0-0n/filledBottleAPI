@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const passport = require('passport');
-const produce = require('./produce');
+const manufacture = require('./manufacture');
 
 function checkAuthed(req, res, next) {
   if (req.isAuthenticated()) {
@@ -20,7 +20,7 @@ router.get('/',
 router.post('/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
-  produce.produce
+  manufacture.manufacture
 );
 
 

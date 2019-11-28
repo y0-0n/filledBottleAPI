@@ -24,4 +24,10 @@ router.get('/:id',
   stock.getStockDetail
 );
 
+router.put('/:id',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  stock.convertStock
+)
+
 module.exports = router;
