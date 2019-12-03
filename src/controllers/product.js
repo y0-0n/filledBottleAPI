@@ -17,38 +17,63 @@ function checkAuthed(req, res, next) {
   }
 }
 
-router.get('/', checkAuthed, function(req, res){
+router.get('/total/:name', checkAuthed, function(req, res) {
+  let {name} = req.params;
+  let sql = `SELECT count(*) as total
+            FROM product as A JOIN users as B ON A.user_id = B.id
+            WHERE \`set\`=1
+            AND B.id='${req.user.id}'
+            ${(name !== 'a' ? `AND A.name = '${name}'`: '')}`
+  connection.query(sql, function(err, rows) {
+    if(err) throw err;
+
+    console.log('GET /product/total/:state : ' + rows);
+    res.send(rows);
+  });
+});
+
+router.get('/total/unset/:name', checkAuthed, function(req, res) {
+  let {name} = req.params;
+  let sql = `SELECT count(*) as total
+            FROM product as A JOIN users as B ON A.user_id = B.id
+            WHERE \`set\`=0
+            AND B.id='${req.user.id}'
+            ${(name !== 'a' ? `AND A.name = '${name}'`: '')}`
+  connection.query(sql, function(err, rows) {
+    if(err) throw err;
+
+    console.log('GET /product/total/unset/:state : ' + rows);
+    res.send(rows);
+  });
+});
+
+
+router.get('/:page/:name', checkAuthed, function(req, res){
+  let {page, name} = req.params;
   connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name
                     FROM product as A JOIN users as B ON A.user_id = B.id
                     WHERE \`set\`=1
-                    AND B.id = '${req.user.id}'`, function(err, rows) {
+                    AND B.id = '${req.user.id}'
+                    ${name !== 'a' ? `AND A.name = '${name}'` : ``}
+                    ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`, function(err, rows) {
     if(err) throw err;
 
-    console.log('GET /product : ' + rows);
+    console.log('GET /product/:page/:name : ' + rows);
     res.send(rows);
   });
 });
 
-router.get('/unset', checkAuthed, function(req, res){
+router.get('/unset/:page/:name', checkAuthed, function(req, res){
+  let {page, name} = req.params;
   connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name
                     FROM product as A JOIN users as B ON A.user_id = B.id
                     WHERE \`set\`=0
-                    AND B.id = '${req.user.id}'`, function(err, rows) {
+                    AND B.id = '${req.user.id}'
+                    ${name !== 'a' ? `AND A.name = '${name}'` : ``}
+                    ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`, function(err, rows) {
     if(err) throw err;
 
-    console.log('GET /product/unset : ' + rows);
-    res.send(rows);
-  });
-});
-
-router.get('/search/:keyword', checkAuthed, function(req, res){
-  let {keyword} = req.params; // 검색어로 검색
-  connection.query(`SELECT * from product
-    WHERE name = "${keyword}"
-    AND \`set\` = 1`, function(err, rows) {
-    if(err) throw err;
-    console.log('GET /product/search : ' + rows);
-
+    console.log('GET /product/:page/:name : ' + rows);
     res.send(rows);
   });
 });

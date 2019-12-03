@@ -62,8 +62,6 @@ router.get('/:page/refund/:name', checkAuthed, function(req, res){
   });
 });
 
-
-`FROM order as O JOIN order_product as OP ON O.id = OP.order_id WHERE OP.refund = true AND user_id = 30`
 router.get('/:page/:state/:name', checkAuthed, function(req, res){
   let {state, page, name} = req.params; // 상태로 검색
   let sql = `SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.orderDate, B.set
