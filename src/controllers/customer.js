@@ -16,32 +16,65 @@ function checkAuthed(req, res, next) {
   }
 }
 
-router.get('/', checkAuthed, function(req, res){
+router.get('/total/:name', checkAuthed, function(req, res){
+  let {page, name} = req.params;
+  connection.query(`SELECT count(*) as total
+                    FROM customer as A JOIN users as B ON A.user_id = B.id
+                    WHERE \`set\`=1
+                    AND B.id = '${req.user.id}'
+                    ${name !== 'a' ? `AND A.name = '${name}'` : ``}`, function(err, rows) {
+    if(err) throw err;
+
+    console.log('GET /customer/total/:name : ' + rows);
+    res.send(rows);
+  });
+});
+
+router.get('/total/unset/:name', checkAuthed, function(req, res) {
+  let {name} = req.params;
+  let sql = `SELECT count(*) as total
+            FROM customer as A JOIN users as B ON A.user_id = B.id
+            WHERE \`set\`=0
+            AND B.id='${req.user.id}'
+            ${(name !== 'a' ? `AND A.name = '${name}'`: '')}`
+  connection.query(sql, function(err, rows) {
+    if(err) throw err;
+
+    console.log('GET /customer/total/unset/:state : ' + rows);
+    res.send(rows);
+  });
+});
+
+router.get('/:page/:name', checkAuthed, function(req, res){
+  let {page, name} = req.params;
   connection.query(`SELECT A.id as id, A.\`name\` as \`name\`, A.telephone as telephone, A.cellphone as cellphone, A.\`set\` as \`set\`, A.address as address, A.manager as manager, A.file_name 
                     FROM customer as A JOIN users as B ON A.user_id = B.id
                     WHERE \`set\`=1
-                    AND B.id = '${req.user.id}'`,
+                    AND B.id = '${req.user.id}'
+                    ${name !== 'a' ? `AND A.name = '${name}'` : ``}
+                    ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`,
     function(err, rows) {
       if(err) throw err;
 
-      console.log('GET /customer : ' + rows);
+      console.log('GET /customer/:page/:name : ' + rows);
       res.send(rows);
     }
   );
 });
 
-router.get('/unset', checkAuthed, function(req, res){
+router.get('/unset/:page/:name', checkAuthed, function(req, res){
+  let {page, name} = req.params;
   connection.query(`SELECT A.id as id, A.\`name\` as \`name\`, A.telephone as telephone, A.cellphone as cellphone, A.\`set\` as \`set\`, A.address as address, A.manager as manager, A.file_name
                     FROM customer as A JOIN users as B ON A.user_id = B.id
                     WHERE \`set\`=0
-                    AND B.id = '${req.user.id}'`,
-    function(err, rows) {
-      if(err) throw err;
+                    AND B.id = '${req.user.id}'
+                    ${name !== 'a' ? `AND A.name = '${name}'` : ``}
+                    ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`, function(err, rows) {
+    if(err) throw err;
 
-      console.log('GET /customer/unset : ' + rows);
-      res.send(rows);
-    }
-  );
+    console.log('GET /customer/unset/:page/:name : ' + rows);
+    res.send(rows);
+  });
 });
 
 router.get('/:id', checkAuthed, function(req, res){
@@ -52,17 +85,6 @@ router.get('/:id', checkAuthed, function(req, res){
     if(err) throw err;
 
     console.log('GET /customer/'+id+' : ' + rows);
-    res.send(rows);
-  });
-});
-
-router.get('/search/:keyword', checkAuthed, function(req, res){
-  let {keyword} = req.params; // 검색어로 검색
-  connection.query(`SELECT * from customer WHERE name = "${keyword}"
-    AND \`set\` = 1`, function(err, rows) {
-    if(err) throw err;
-    console.log('GET /customer/search : ' + rows);
-
     res.send(rows);
   });
 });

@@ -47,7 +47,6 @@ router.get('/total/unset/:name', checkAuthed, function(req, res) {
   });
 });
 
-
 router.get('/:page/:name', checkAuthed, function(req, res){
   let {page, name} = req.params;
   connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name
