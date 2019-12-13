@@ -7,6 +7,13 @@ exports.getStock = (req, res) => {
   })
 }
 
+exports.getStockList = (req, res) => {
+  Stock.getStockList(req.user, req.params.page, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
 exports.getStockDetail = (req, res) => {
   Stock.getStockDetail(req.user, req.params.id, (err, msg) => {
     if(err) throw err;

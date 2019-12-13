@@ -18,6 +18,12 @@ router.get('/',
   stock.getStock
 );
 
+router.get('/list/:page',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  stock.getStockList
+);
+
 router.get('/:id',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
