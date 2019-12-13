@@ -54,6 +54,7 @@ router.get('/:page/:name', checkAuthed, function(req, res){
                     WHERE \`set\`=1
                     AND B.id = '${req.user.id}'
                     ${name !== 'a' ? `AND A.name = '${name}'` : ``}
+                    ORDER BY A.date DESC
                     ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`, function(err, rows) {
     if(err) throw err;
 
@@ -88,16 +89,6 @@ router.get('/:id', checkAuthed, function(req, res) {
   });
 });
 
-router.put('/', checkAuthed, function(req, res){
-  connection.query(`UPDATE product SET \`set\`=1 WHERE \`id\`=${req.body.id};`, function(err, rows) {
-    if(err) throw err;
-
-    console.log('PUT /product : ' + rows);
-
-    res.send(rows);
-  });
-});
-
 router.post('/', checkAuthed, upload.single('file'), (req, res) => {
   let {name, price, grade, weight} = req.body;
   let fileName = req.file ? 'product/'+req.file.filename : '318x180.svg';
@@ -113,19 +104,37 @@ router.post('/', checkAuthed, upload.single('file'), (req, res) => {
     connection.query(`INSERT INTO stock (\`product_id\`, \`quantity\`) VALUES ('${product_id}', '${0}')`, function(err_, rows_) {
       if(err_) throw err_;
       console.log('stock '+rows_);
-
       res.send(rows);
     });
   })
 });
 
-router.delete('/', checkAuthed, function(req, res){
-  connection.query(`UPDATE product SET \`set\`=0 WHERE \`id\`=${req.body.id};`, function(err, rows) {
+router.put('/activate', checkAuthed, function(req, res){
+  connection.query(`UPDATE product SET \`set\`=1 WHERE \`id\`=${req.body.id};`, function(err, rows) {
     if(err) throw err;
 
-    console.log('DELETE /product : ' + rows);
+    console.log('PUT /product : ' + rows);
+
     res.send(rows);
   });
 });
+
+router.put('/deactivate', checkAuthed, function(req, res){
+  connection.query(`UPDATE product SET \`set\`=0 WHERE \`id\`=${req.body.id};`, function(err, rows) {
+    if(err) throw err;
+
+    console.log('DELETE /product : ', rows);
+    res.send(rows);
+  });
+});
+
+router.put('/modify/:id', checkAuthed, upload.single('file'), function(req, res) {
+  connection.query(`UPDATE product SET \`name\`='${req.body.name}', \`grade\`='${req.body.grade}', \`weight\`='${req.body.weight}', \`price_shipping\`='${req.body.price}' WHERE \`id\`=${req.params.id};`, function(err, rows) {
+    if(err) throw err;
+
+    console.log('PUT /product/modify/:id : ', rows);
+    res.send(rows);
+  });
+})
 
 module.exports = router;
