@@ -4,7 +4,7 @@ const Manufacture = require('../../../models/Manufacture');
 exports.manufacture = (req, res) => {
   Manufacture.addManufacture(req.user, req.body, (err, msg) => {
     if(err) throw err;
-    Stock.convertStockByManufacture(req.user, req.body, (err, msg) => {
+    Stock.convertStockByManufacture(req.user, req.body, msg.insertId, (err, msg) => {
       if(err) throw err;
       res.status(200).send(msg);
     })

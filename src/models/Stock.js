@@ -29,7 +29,7 @@ module.exports.convertStock = (product_id, quantity, user, callback) => {
 };
 
 //생산 모듈을 통한 재고 변경
-module.exports.convertStockByManufacture = (user, data, callback) => {
+module.exports.convertStockByManufacture = (user, data, manufacture_id, callback) => {
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
@@ -52,8 +52,8 @@ module.exports.convertStockByManufacture = (user, data, callback) => {
         console.log('실행 sql : ', exec.sql);
         const current = result[0].quantity;
         const change = -e.quantity;
-        const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`change\`)
-                              VALUES (${e.id}, ${current+change}, ${change})`;
+        const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`change\`, \`flag\`, \`flag_id\`)
+                              VALUES (${e.id}, ${current+change}, ${change}, 'manufacture_consume', ${manufacture_id})`;
         const exec2 = conn.query(insert_query, (err2, result2) => {
           console.log('실행 sql : ', exec2.sql);
         })
@@ -72,8 +72,8 @@ module.exports.convertStockByManufacture = (user, data, callback) => {
           console.log('실행 sql : ', exec.sql);
           const current = result[0].quantity
           const change = e.quantity;
-          const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`change\`)
-                                VALUES (${e.id}, ${parseInt(current)+parseInt(change)}, ${change})`;
+          const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`change\`, \`flag\`, \`flag_id\`)
+                                VALUES (${e.id}, ${parseInt(current)+parseInt(change)}, ${change}, 'manufacture_produce', ${manufacture_id})`;
           const exec2 = conn.query(insert_query, (err2, result2) => {
             conn.release();
             console.log('실행 sql : ', exec2.sql);
