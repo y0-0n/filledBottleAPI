@@ -1,7 +1,16 @@
 const Suggestion = require('../../../models/Suggestion');
 
-exports.getSuggestion = (req, res) => {
-  Suggestion.getSuggestion(req.user.id, (err, rows) => {
+exports.getList = (req, res) => {
+  let {page} = req.params;
+
+  Suggestion.getList(req.user.id, page, (err, rows) => {
+    if(err) throw err;
+    res.status(200).send(rows);
+  })
+}
+
+exports.getTotal = (req, res) => {
+  Suggestion.getTotal(req.user.id, (err, rows) => {
     if(err) throw err;
     res.status(200).send(rows);
   })

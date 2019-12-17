@@ -11,14 +11,19 @@ function checkAuthed(req, res, next) {
     //res.redirect(301, 'http://cosimo.iptime.org:3000/#/login')
   }
 }
-
-router.get('/',
+router.get('/total',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
-  suggestion.getSuggestion
+  suggestion.getTotal
 );
 
-router.get('/:id',
+router.get('/:page',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  suggestion.getList
+);
+
+router.get('/detail/:id',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
   suggestion.getSuggestionById
