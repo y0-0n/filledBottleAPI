@@ -17,6 +17,34 @@ module.exports.convertStock = (product_id, quantity, user, callback) => {
     `;
     const exec = conn.query(select_query, [user.id, product_id], (err, result) => {
       console.log('실행 sql : ', exec.sql);
+      console.log(result)
+      const current = result[0].quantity
+      const change = quantity - current;
+      const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`change\`) VALUES (${product_id}, ${quantity}, ${change})`;
+      const exec2 = conn.query(insert_query, (err2, result2) => {
+        console.log('실행 sql : ', exec2.sql);
+        return callback(err2, result2);
+      })
+    });
+  });
+};
+
+//생산 모듈을 통한 재고 변경
+module.exports.convertStockByProduce = (user, data, callback) => {
+  pool.getConnection(function(err, conn) {
+    if (err) {
+      conn.release();
+      throw err;
+    }
+    const select_query = `SELECT S.* FROM stock as S JOIN product as P ON S.product_id = P.id
+    WHERE P.user_id = ?
+    AND P.\`set\` = 1
+    AND P.id = ?
+    ORDER BY changeDate DESC
+    LIMIT 1
+    `;
+    const exec = conn.query(select_query, [user.id, product_id], (err, result) => {
+      console.log('실행 sql : ', exec.sql);
       const current = result[0].quantity
       const change = quantity - current;
       const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`change\`) VALUES (${product_id}, ${quantity}, ${change})`;
