@@ -128,7 +128,7 @@ router.put('/deactivate', checkAuthed, function(req, res){
   });
 });
 
-router.put('/modify/:id', checkAuthed, upload.single('file'), function(req, res) {
+router.put('/modify/:id', checkAuthed, upload.none(), function(req, res) {
   connection.query(`UPDATE product SET \`name\`='${req.body.name}', \`grade\`='${req.body.grade}', \`weight\`='${req.body.weight}', \`price_shipping\`='${req.body.price}' WHERE \`id\`=${req.params.id};`, function(err, rows) {
     if(err) throw err;
 
