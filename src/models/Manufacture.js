@@ -34,14 +34,38 @@ module.exports.addManufactureStock = (stock_id, manufacture_id, flag, callback) 
   });
 };
 
-module.exports.getList = (user, callback) => {
+module.exports.getTotal = (user, name, callback) => {
+  pool.getConnection(function(err, conn) {
+    if(err) {
+      conn.release();
+      throw err;
+    }
+    const query = `SELECT count(*) as total FROM manufacture
+                  WHERE user_id = ?
+                  ${name !== 'a' ? `AND A.name = '${name}'` : ``}
+                  ORDER BY date DESC`;
+
+    const exec = conn.query(query, [user.id], (err, result) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+
+      return callback(err, result);
+    });
+  })
+}
+
+module.exports.getList = (user, page, name, callback) => {
   pool.getConnection(function(err, conn) {
     if(err) {
       conn.release();
       throw err;
     }
     const query = `SELECT * FROM manufacture
-    WHERE user_id = ?`;
+                  WHERE user_id = ?
+                  ${name !== 'a' ? `AND A.name = '${name}'` : ``}
+                  ORDER BY date DESC
+                  ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`;
+
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);

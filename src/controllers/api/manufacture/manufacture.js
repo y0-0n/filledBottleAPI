@@ -23,12 +23,25 @@ exports.manufacture = (req, res) => {
   })
 }
 
-exports.getList = (req, res) => {
-  Manufacture.getList(req.user, (err, msg) => {
+exports.getTotal = (req, res) => {
+  let {name} = req.params;
+
+  Manufacture.getTotal(req.user, name, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })
 }
+
+exports.getList = (req, res) => {
+  let {page, name} = req.params;
+
+  Manufacture.getList(req.user, page, name, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+
 
 exports.getDetail = (req, res) => {
   Manufacture.getDetail(req.user, req.params, (err, msg) => {
