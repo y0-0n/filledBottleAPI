@@ -89,16 +89,6 @@ router.get('/:id', checkAuthed, function(req, res){
   });
 });
 
-router.put('/', checkAuthed, function(req, res){
-  connection.query("UPDATE customer SET \`set\`=1 WHERE `id`="+req.body.id+";", function(err, rows) {
-    if(err) throw err;
-
-    console.log('PUT /customer : ' + rows);
-    res.send(rows);
-  });
-});
-
-
 router.post('/', checkAuthed, upload.single('file'), (req, res) => {
   let {name, delegate, telephone, cellphone, keyword, set, transfer, address, manager} = req.body;
   let fileName = req.file ? 'customer/'+req.file.filename : '318x180.svg';
@@ -112,7 +102,28 @@ router.post('/', checkAuthed, upload.single('file'), (req, res) => {
   });
 });
 
-router.delete('/', checkAuthed, function(req, res){
+router.put('/modify/:id', checkAuthed, upload.none(), function(req, res){
+  let {name, telephone, cellphone, address} = req.body;
+  
+  connection.query(`UPDATE customer SET \`name\`='${name}', \`telephone\`='${telephone}', \`cellphone\`='${cellphone}', \`address\`='${address}'
+                    WHERE \`id\`="${req.params.id}";`, function(err, rows) {
+    if(err) throw err;
+
+    console.log('PUT /customer : ' + rows);
+    res.send(rows);
+  });
+});
+
+router.put('/activate', checkAuthed, function(req, res){
+  connection.query("UPDATE customer SET \`set\`=1 WHERE `id`="+req.body.id+";", function(err, rows) {
+    if(err) throw err;
+
+    console.log('PUT /customer : ' + rows);
+    res.send(rows);
+  });
+});
+
+router.put('/deactivate', checkAuthed, function(req, res){
   connection.query("UPDATE customer SET \`set\`=0 WHERE `id`="+req.body.id+";", function(err, rows) {
     if(err) throw err;
 
