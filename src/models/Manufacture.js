@@ -42,8 +42,7 @@ module.exports.getTotal = (user, name, callback) => {
     }
     const query = `SELECT count(*) as total FROM manufacture
                   WHERE user_id = ?
-                  ${name !== 'a' ? `AND A.name = '${name}'` : ``}
-                  ORDER BY date DESC`;
+                  ${name !== 'a' ? `AND A.name = '${name}'` : ``}`;
 
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
