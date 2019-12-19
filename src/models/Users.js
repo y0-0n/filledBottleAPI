@@ -49,14 +49,31 @@ module.exports.emailCheck = (email, callback) => {
   });
 };
 
-module.exports.info = (id, callback) => {
+module.exports.getInfo = (id, callback) => {
   pool.getConnection(function(err, conn) {
     if(err) {
       conn.release();
       throw err;
     }
 
-    const query = 'SELECT id, email, name, address, phone FROM users WHERE id = ?';
+    const query = 'SELECT email, name, address, phone FROM users WHERE id = ?';
+    const exec = conn.query(query, id, (err, rows) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+
+      return callback(err, rows);
+    });
+  });
+}
+
+module.exports.updateInfo = (id, data, callback) => {
+  pool.getConnection(function(err, conn) {
+    if(err) {
+      conn.release();
+      throw err;
+    }
+
+    const query = `UPDATE users SET name = '${data.name}', address = '${data.address}', phone = '${data.phone}' WHERE id = ?`;
     const exec = conn.query(query, id, (err, rows) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
