@@ -89,11 +89,10 @@ router.get('/:id', checkAuthed, function(req, res){
   });
 });
 
-router.post('/', checkAuthed, upload.single('file'), (req, res) => {
+router.post('/', checkAuthed, upload.none(), (req, res) => {
   let {name, delegate, telephone, cellphone, keyword, set, transfer, address, manager} = req.body;
-  let fileName = req.file ? 'customer/'+req.file.filename : '318x180.svg';
-  connection.query(`INSERT INTO customer (\`name\`, \`delegate\`, \`telephone\`, \`cellphone\`, \`keyword\`, \`set\`, \`transfer\`, \`address\`, \`manager\`, \`file_name\`, \`user_id\`)
-                  VALUES ('${name}', '${delegate}', '${telephone}', '${cellphone}', '${1}', '${1}', '${2}', '${address}', '${manager}', '${fileName}', '${req.user.id}')`, function(err, rows) {
+  connection.query(`INSERT INTO customer (\`name\`, \`delegate\`, \`telephone\`, \`cellphone\`, \`keyword\`, \`set\`, \`transfer\`, \`address\`, \`manager\`, \`user_id\`)
+                  VALUES ('${name}', '${delegate}', '${telephone}', '${cellphone}', '${1}', '${1}', '${2}', '${address}', '${manager}', '${req.user.id}')`, function(err, rows) {
     if(err) throw err;
     
     console.log('POST /customer : ' + rows);
