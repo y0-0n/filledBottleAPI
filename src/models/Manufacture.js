@@ -4,13 +4,17 @@ const pool = require('../../config/dbpool').pool;
 
 module.exports.addManufacture = (user, data, callback) => {
   const title = (`${data.sProduct2[0].name}${data.sProduct2.length === 1 ? '' : `외 ${data.sProduct2.length-1}건`}`)
+  let total = 0;
+  data.sProduct2.map((e, i) => {
+    total += parseInt(e.quantity);
+  })
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
       throw err;
     }
-    const query = 'INSERT INTO manufacture SET title = ?, user_id = ?';
-    const exec = conn.query(query, [title, user.id], (err, result) => {
+    const query = 'INSERT INTO manufacture SET title = ?, user_id = ?, total = ?';
+    const exec = conn.query(query, [title, user.id, total], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
 
