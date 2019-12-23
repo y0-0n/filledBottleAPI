@@ -8,8 +8,8 @@ module.exports.create = (user, data, callback) => {
       conn.release();
       throw err;
     }
-    const query = `INSERT INTO \`produce\` (\`user_id\`, \`weather\`, \`rain\`, \`snow\`, \`temperatures\`, \`min_temp\`, \`max_temp\`, \`product_id\`, \`process\`, \`name\`, \`content\`, \`area\`, \`expected_output\`)
-                    VALUES (?, '${data.weather}', ${data.rain}, ${data.snow}, ${data.temperatures}, ${data.minTemp}, ${data.maxTemp}, ?, '${data.process}', '${data.name}', '${data.content}', ${data.area}, ${data.expected});`;
+    const query = `INSERT INTO \`produce\` (\`user_id\`, \`weather\`, \`rain\`, \`snow\`, \`temperatures\`, \`min_temp\`, \`max_temp\`, \`product_id\`, \`process\`, \`name\`, \`content\`, \`area\`, \`expected_output\`, \`previous_id\`)
+                    VALUES (?, '${data.weather}', ${data.rain}, ${data.snow}, ${data.temperatures}, ${data.minTemp}, ${data.maxTemp}, ?, '${data.process}', '${data.name}', '${data.content}', ${data.area}, ${data.expected}, ${data.previous_id});`;
     const exec = conn.query(query, [user.id, data.product_id], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
@@ -46,7 +46,7 @@ module.exports.getList = (user, page, name, callback) => {
       conn.release();
       throw err;
     }
-    const query = `SELECT P.created_date, Pt.name as productName, Pt.id, P.name
+    const query = `SELECT P.id as id, P.created_date, Pt.name as productName, Pt.id as productId, P.name, P.process, P.area, P.expected_output as expected
     FROM produce as P JOIN users as U ON P.user_id = U.id
     JOIN product as Pt ON Pt.id = P.product_id
     WHERE P.user_id = ?
