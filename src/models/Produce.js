@@ -27,8 +27,9 @@ module.exports.getTotal = (user, name, callback) => {
     }
     const query = `SELECT count(*) as total
                   FROM produce as P JOIN users as U ON P.user_id = U.id
+                  JOIN product as Pt ON P.product_id = Pt.id
                   WHERE P.user_id = ?
-                  ${name !== 'a' ? `AND A.name = '${name}'` : ``}`;
+                  ${name !== 'a' ? `AND Pt.name = '${name}'` : ``}`;
 
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
@@ -49,7 +50,7 @@ module.exports.getList = (user, page, name, callback) => {
     FROM produce as P JOIN users as U ON P.user_id = U.id
     JOIN product as Pt ON Pt.id = P.product_id
     WHERE P.user_id = ?
-    ${name !== 'a' ? `AND A.name = '${name}'` : ``}
+    ${name !== 'a' ? `AND Pt.name = '${name}'` : ``}
     ORDER BY created_date DESC
     ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`;
 
