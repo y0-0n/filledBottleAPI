@@ -8,7 +8,7 @@ module.exports.getFamilyList = (user, callback) => {
       conn.release();
       throw err;
     }
-    const query = `SELECT F.name
+    const query = `SELECT F.name, F.id
     FROM product_family as F JOIN users as U ON F.user_id = U.id
     WHERE U.id = ?`;
     const exec = conn.query(query, [user.id], (err, result) => {
