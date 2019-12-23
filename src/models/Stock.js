@@ -12,7 +12,7 @@ module.exports.convertStock = (product_id, quantity, user, callback) => {
     WHERE P.user_id = ?
     AND P.\`set\` = 1
     AND P.id = ?
-    ORDER BY changeDate DESC
+    ORDER BY S.id DESC
     LIMIT 1
     `;
     const exec = conn.query(select_query, [user.id, product_id], (err, result) => {
@@ -39,7 +39,7 @@ module.exports.convertStockByProduce = (user, data, callback) => {
     WHERE P.user_id = ?
     AND P.\`set\` = 1
     AND P.id = ?
-    ORDER BY changeDate DESC
+    ORDER BY S.id DESC
     LIMIT 1
     `;
     const exec = conn.query(select_query, [user.id, product_id], (err, result) => {
@@ -75,7 +75,7 @@ module.exports.convertStockByManufacture = async (user, data, callback) => {
                             WHERE P.user_id = ?
                             AND P.\`set\` = 1
                             AND P.id = ${e.id}
-                            ORDER BY changeDate DESC
+                            ORDER BY S.id DESC
                             LIMIT 1`;
       const exec = conn.query(select_query, [user.id], (err, result) => {
         console.log('실행 sql : ', exec.sql);
@@ -97,7 +97,7 @@ module.exports.convertStockByManufacture = async (user, data, callback) => {
                               WHERE P.user_id = ?
                               AND P.\`set\` = 1
                               AND P.id = ${e.id}
-                              ORDER BY changeDate DESC
+                              ORDER BY S.id DESC
                               LIMIT 1`;
         const exec = conn.query(select_query, [user.id], (err, result) => {
           console.log('실행 sql : ', exec.sql);
@@ -150,10 +150,15 @@ module.exports.getStockList = (user, page, callback) => {
       conn.release();
       throw err;
     }
-    const query = `SELECT b.* FROM (SELECT product_id, MAX(changeDate) AS changeDate
-    FROM \`en\`.\`stock\` GROUP BY product_id) AS a JOIN
-    (SELECT S.quantity, S.id as id, P.weight, P.name, P.grade, S.product_id, S.changeDate, P.date FROM \`en\`.\`stock\` AS S JOIN \`en\`.\`product\` AS P ON S.product_id = P.id WHERE P.user_id = ? AND P.\`set\` = 1) AS b
-    ON a.product_id = b.product_id AND a.changeDate = b.changeDate
+    const query = `SELECT b.* FROM
+    (SELECT product_id, MAX(id) as id
+      FROM \`en\`.\`stock\` GROUP BY product_id
+    ) AS a JOIN
+    (SELECT S.quantity, S.id as id, P.weight, P.name, P.grade, S.product_id, S.changeDate, P.date
+      FROM \`en\`.\`stock\` AS S JOIN \`en\`.\`product\` AS P ON S.product_id = P.id
+      WHERE P.user_id = ? AND P.\`set\` = 1
+    ) AS b
+    ON a.product_id = b.product_id AND a.id = b.id
     ORDER BY b.date DESC
     ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')};`;
     const exec = conn.query(query, [user.id], (err, result) => {
