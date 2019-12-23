@@ -3,13 +3,14 @@
 const pool = require('../../config/dbpool').pool;
 
 module.exports.addManufacture = (user, data, callback) => {
+  const title = (`${data.sProduct2[0].name}${data.sProduct2.length === 1 ? '' : `외 ${data.sProduct2.length-1}건`}`)
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
       throw err;
     }
     const query = 'INSERT INTO manufacture SET title = ?, user_id = ?';
-    const exec = conn.query(query, ['Test', user.id], (err, result) => {
+    const exec = conn.query(query, [title, user.id], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
 
@@ -42,7 +43,7 @@ module.exports.getTotal = (user, name, callback) => {
     }
     const query = `SELECT count(*) as total FROM manufacture
                   WHERE user_id = ?
-                  ${name !== 'a' ? `AND A.name = '${name}'` : ``}`;
+                  ${name !== 'a' ? `AND title = '${name}'` : ``}`;
 
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
@@ -61,7 +62,7 @@ module.exports.getList = (user, page, name, callback) => {
     }
     const query = `SELECT * FROM manufacture
                   WHERE user_id = ?
-                  ${name !== 'a' ? `AND A.name = '${name}'` : ``}
+                  ${name !== 'a' ? `AND title = '${name}'` : ``}
                   ORDER BY date DESC
                   ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`;
 
