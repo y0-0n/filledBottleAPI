@@ -8,7 +8,7 @@ exports.getList = (req, res) => {
 }
 
 exports.getDetail = (req, res) => {
-  Produce.getStockDetail(req.user, req.params.id, (err, msg) => {
+  Produce.getDetail(req.user, req.params.id, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })

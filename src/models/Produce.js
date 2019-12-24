@@ -62,3 +62,24 @@ module.exports.getList = (user, page, name, callback) => {
     });
   });
 };
+
+module.exports.getDetail = (user, id, callback) => {
+  pool.getConnection(function(err, conn) {
+    if (err) {
+      conn.release();
+      throw err;
+    }
+    const query = `SELECT P.*, Pt.name as productName
+                  FROM produce as P JOIN users as U ON P.user_id = U.id
+                  JOIN product as Pt ON P.product_id = Pt.id
+                  WHERE P.user_id = ?
+                  AND P.id = ?`;
+
+    const exec = conn.query(query, [user.id, id], (err, result) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+
+      return callback(err, result);
+    });
+  });
+};

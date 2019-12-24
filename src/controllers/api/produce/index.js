@@ -13,11 +13,6 @@ function checkAuthed(req, res, next) {
   }
 }
 
-router.get('/',
-  passport.authenticate('JWT', { session: false }),
-  checkAuthed,
-);
-
 router.get('/list/:page/:name',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
@@ -33,6 +28,7 @@ router.get('/total/:name',
 router.get('/:id',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
+  produce.getDetail
 );
 
 router.post('/',

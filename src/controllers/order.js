@@ -15,12 +15,14 @@ function checkAuthed(req, res, next) {
   }
 }
 
-router.get('/total/refund/:name', checkAuthed, function(req, res) {
-  let {name} = req.params;
+router.post('/total/refund/', checkAuthed, function(req, res) {
+  let {first_date, last_date, keyword} = req.body;
+  const name = keyword;
   let sql = `SELECT count(*) as total
              from \`order\` as A JOIN \`customer\` AS B JOIN \`users\` AS C JOIN \`order_product\` as D ON A.customer_id = B.id AND A.user_id = C.id AND A.id = D.order_id
              WHERE C.id='${req.user.id}' AND D.refund = true
-             ${(name !== 'a' ? `AND B.name = '${name}'`: '')}`
+             AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
+             ${(name !== '' ? `AND B.name = '${name}'`: '')}`
   connection.query(sql, function(err, rows) {
     if(err) throw err;
 
@@ -30,46 +32,50 @@ router.get('/total/refund/:name', checkAuthed, function(req, res) {
 });
 
 
-router.get('/total/:state/:name', checkAuthed, function(req, res) {
-  let {state, name} = req.params;
+router.post('/total/', checkAuthed, function(req, res) {
+  let {first_date, last_date, process_, keyword} = req.body; // 상태로 검색
+  let name = keyword, state = process_;
   let sql = `SELECT count(*) as total
              from \`order\` as A JOIN \`customer\` AS B JOIN \`users\` AS C ON A.customer_id = B.id AND A.user_id = C.id
              WHERE C.id='${req.user.id}'
+             AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
              ${(state !== 'all' ? `AND A.state = '${state}'` : '')}
-             ${(name !== 'a' ? `AND B.name = '${name}'`: '')}`
+             ${(name !== '' ? `AND B.name = '${name}'`: '')}`
   connection.query(sql, function(err, rows) {
     if(err) throw err;
 
-    console.log('GET /order/total/:state : ' + rows);
+    console.log('GET /order/total/ : ' + rows);
     res.send(rows);
   });
 });
 
-router.get('/:page/refund/:name', checkAuthed, function(req, res){
-  let {state, page, name} = req.params; // 상태로 검색
+router.post('/list/refund/', checkAuthed, function(req, res){
+  let {first_date, last_date, keyword, number} = req.body; // 상태로 검색
+  let name = keyword, page = number;
   let sql = `SELECT O.id, O.state, O.date, O.price, O.received, C.name, O.orderDate, C.set
              from \`order\` AS O JOIN \`customer\` AS C JOIN \`users\` as U JOIN \`order_product\` as OP ON O.customer_id = C.id AND O.user_id = U.id AND O.id = OP.order_id
              WHERE U.id='${req.user.id}' AND OP.refund = true
-             ${(name !== 'a' ? `AND C.name = '${name}'`: '')}
+             ${(name !== '' ? `AND C.name = '${name}'`: '')}
+             AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
              ORDER BY O.orderDate DESC
              ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`;
   //console.log(state, page, state !== 'all' || name !== '')
   connection.query(sql, function(err, rows) {
     if(err) throw err;
 
-    console.log('GET /order/'+page+'/'+state+' : ' + rows);
+    console.log('GET /order/'+page+'/' + rows);
     res.send(rows);
   });
 });
 
-router.post('/', checkAuthed, function(req, res){
+router.post('/list', checkAuthed, function(req, res){
   let {first_date, last_date, number, process_, keyword} = req.body; // 상태로 검색
   let name = keyword, state = process_, page = number;
   let sql = `SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.orderDate, B.set
              from \`order\` AS A JOIN \`customer\` AS B JOIN \`users\` as C ON A.customer_id = B.id AND A.user_id = C.id
              WHERE C.id='${req.user.id}'
              ${(state !== 'all' ? `AND A.state = '${state}'` : '')}
-             ${(name !== 'a' ? `AND B.name = '${name}'`: '')}
+             ${(name !== '' ? `AND B.name = '${name}'`: '')}
              AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
              ORDER BY A.orderDate DESC
              ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`;
