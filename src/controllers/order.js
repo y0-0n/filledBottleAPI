@@ -62,13 +62,15 @@ router.get('/:page/refund/:name', checkAuthed, function(req, res){
   });
 });
 
-router.get('/:page/:state/:name', checkAuthed, function(req, res){
-  let {state, page, name} = req.params; // 상태로 검색
+router.post('/', checkAuthed, function(req, res){
+  let {first_date, last_date, number, process_, keyword} = req.body; // 상태로 검색
+  let name = keyword, state = process_, page = number;
   let sql = `SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.orderDate, B.set
              from \`order\` AS A JOIN \`customer\` AS B JOIN \`users\` as C ON A.customer_id = B.id AND A.user_id = C.id
              WHERE C.id='${req.user.id}'
              ${(state !== 'all' ? `AND A.state = '${state}'` : '')}
              ${(name !== 'a' ? `AND B.name = '${name}'`: '')}
+             AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
              ORDER BY A.orderDate DESC
              ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`;
   //console.log(state, page, state !== 'all' || name !== '')
