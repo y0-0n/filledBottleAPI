@@ -144,7 +144,7 @@ router.post('/', (req, res) => {
   });
 });
 
-router.get('/orderDetail/:id', checkAuthed, function(req, res){
+router.get('/detail/:id', checkAuthed, function(req, res){
   let {id} = req.params; // id로 검색
 
   connection.query(`SELECT date, name, o.address as address, o.telephone as telephone, o.cellphone as cellphone, comment, state, o.user_id from \`order\` as o JOIN \`customer\` as c ON o.customer_id = c.id WHERE o.id=${id}`, function(err, rows) {
@@ -171,7 +171,7 @@ router.get('/orderDetail/:id', checkAuthed, function(req, res){
   });*/
 });
 
-router.put('/orderDetail/refund/:id', checkAuthed, function(req, res) {
+router.put('/detail/refund/:id', checkAuthed, function(req, res) {
   let {id} = req.params;
 
   connection.query(`UPDATE \`order_product\` SET \`refund\`=
