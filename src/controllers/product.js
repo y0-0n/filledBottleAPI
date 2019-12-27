@@ -49,8 +49,9 @@ router.get('/total/unset/:name', checkAuthed, function(req, res) {
 
 router.get('/:page/:name', checkAuthed, function(req, res){
   let {page, name} = req.params;
-  connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name
+  connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName
                     FROM product as A JOIN users as B ON A.user_id = B.id
+                    LEFT JOIN product_family as F ON A.family = F.id
                     WHERE \`set\`=1
                     AND B.id = '${req.user.id}'
                     ${name !== 'a' ? `AND A.name = '${name}'` : ``}
@@ -81,7 +82,9 @@ router.get('/unset/:page/:name', checkAuthed, function(req, res){
 router.get('/:id', checkAuthed, function(req, res) {
   let id = req.params.id; // id로 검색
 
-  connection.query('SELECT * from product WHERE id = "'+id+'"', function(err, rows) {
+  connection.query(`SELECT P.*, F.\`name\` as familyName
+                    FROM product as P LEFT JOIN product_family as F ON P.family = F.id
+                    WHERE P.id = ${id}`, function(err, rows) {
     if(err) throw err;
 
     console.log('GET /product/'+id+' : ' + rows);
