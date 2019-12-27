@@ -22,7 +22,9 @@ exports.getTotal = (req, res) => {
 }
 
 exports.create = (req, res) => {
-  Produce.create(req.user, req.body, (err, msg) => {
+  let fileName = req.file ? 'produce/'+req.file.filename : '318x180.svg';
+
+  Produce.create(req.user, req.body, fileName, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })

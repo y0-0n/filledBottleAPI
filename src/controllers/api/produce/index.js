@@ -34,7 +34,7 @@ router.get('/:id',
 router.post('/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
-  upload.none(),
+  upload.single('file'),
   produce.create
 )
 
