@@ -68,13 +68,14 @@ router.post('/list', checkAuthed, function(req, res){
 });
 
 router.post('/list/unset/', checkAuthed, function(req, res){
-  let {page, name, family} = req.params;
+  let {page, name, family} = req.body;
+
   connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name
                     FROM product as A JOIN users as B ON A.user_id = B.id
                     WHERE \`set\`=0
                     ${family !== 0 ? `AND A.family = '${family}'` : ``}
                     AND B.id = '${req.user.id}'
-                    ${name !== 'a' ? `AND A.name = '${name}'` : ``}
+                    ${name !== '' ? `AND A.name = '${name}'` : ``}
                     ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`, function(err, rows) {
     if(err) throw err;
 
@@ -135,7 +136,7 @@ router.put('/deactivate', checkAuthed, function(req, res){
 });
 
 router.put('/modify/:id', checkAuthed, upload.none(), function(req, res) {
-  connection.query(`UPDATE product SET \`name\`='${req.body.name}', \`grade\`='${req.body.grade}', \`weight\`='${req.body.weight}', \`price_shipping\`='${req.body.price}' WHERE \`id\`=${req.params.id};`, function(err, rows) {
+  connection.query(`UPDATE product SET \`name\`='${req.body.name}', \`grade\`='${req.body.grade}', \`weight\`='${req.body.weight}', \`price_shipping\`='${req.body.price}', \`family\`=${req.body.productFamily} WHERE \`id\`=${req.params.id};`, function(err, rows) {
     if(err) throw err;
 
     console.log('PUT /product/modify/:id : ', rows);

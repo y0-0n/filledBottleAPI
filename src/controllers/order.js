@@ -50,8 +50,8 @@ router.post('/total/', checkAuthed, function(req, res) {
 });
 
 router.post('/list/refund/', checkAuthed, function(req, res){
-  let {first_date, last_date, keyword, number} = req.body; // 상태로 검색
-  let name = keyword, page = number;
+  let {first_date, last_date, keyword, page} = req.body; // 상태로 검색
+  let name = keyword;
   let sql = `SELECT O.id, O.state, O.date, O.price, O.received, C.name, O.orderDate, C.set
              from \`order\` AS O JOIN \`customer\` AS C JOIN \`users\` as U JOIN \`order_product\` as OP ON O.customer_id = C.id AND O.user_id = U.id AND O.id = OP.order_id
              WHERE U.id='${req.user.id}' AND OP.refund = true
@@ -69,8 +69,8 @@ router.post('/list/refund/', checkAuthed, function(req, res){
 });
 
 router.post('/list', checkAuthed, function(req, res){
-  let {first_date, last_date, number, process_, keyword} = req.body; // 상태로 검색
-  let name = keyword, state = process_, page = number;
+  let {first_date, last_date, page, process_, keyword} = req.body; // 상태로 검색
+  let name = keyword, state = process_;
   let sql = `SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.orderDate, B.set
              from \`order\` AS A JOIN \`customer\` AS B JOIN \`users\` as C ON A.customer_id = B.id AND A.user_id = C.id
              WHERE C.id='${req.user.id}'
