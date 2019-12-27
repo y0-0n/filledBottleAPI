@@ -17,13 +17,14 @@ function checkAuthed(req, res, next) {
   }
 }
 
-router.get('/total/:name', checkAuthed, function(req, res) {
-  let {name} = req.params;
+router.post('/total/', checkAuthed, function(req, res) {
+  let {name, family} = req.body;
   let sql = `SELECT count(*) as total
             FROM product as A JOIN users as B ON A.user_id = B.id
             WHERE \`set\`=1
+            ${family !== 0 ? `AND A.family = '${family}'` : ``}
             AND B.id='${req.user.id}'
-            ${(name !== 'a' ? `AND A.name = '${name}'`: '')}`
+            ${(name !== '' ? `AND A.name = '${name}'`: '')}`
   connection.query(sql, function(err, rows) {
     if(err) throw err;
 
@@ -32,11 +33,12 @@ router.get('/total/:name', checkAuthed, function(req, res) {
   });
 });
 
-router.get('/total/unset/:name', checkAuthed, function(req, res) {
-  let {name} = req.params;
+router.post('/total/unset/', checkAuthed, function(req, res) {
+  let {name, family} = req.body;
   let sql = `SELECT count(*) as total
             FROM product as A JOIN users as B ON A.user_id = B.id
             WHERE \`set\`=0
+            ${family !== 0 ? `AND A.family = '${family}'` : ``}
             AND B.id='${req.user.id}'
             ${(name !== 'a' ? `AND A.name = '${name}'`: '')}`
   connection.query(sql, function(err, rows) {
@@ -47,14 +49,15 @@ router.get('/total/unset/:name', checkAuthed, function(req, res) {
   });
 });
 
-router.get('/:page/:name', checkAuthed, function(req, res){
-  let {page, name} = req.params;
+router.post('/list', checkAuthed, function(req, res){
+  let {page, name, family} = req.body;
   connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName
                     FROM product as A JOIN users as B ON A.user_id = B.id
                     LEFT JOIN product_family as F ON A.family = F.id
                     WHERE \`set\`=1
                     AND B.id = '${req.user.id}'
-                    ${name !== 'a' ? `AND A.name = '${name}'` : ``}
+                    ${family !== 0 ? `AND A.family = '${family}'` : ``}
+                    ${name !== '' ? `AND A.name = '${name}'` : ``}
                     ORDER BY A.date DESC
                     ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`, function(err, rows) {
     if(err) throw err;
@@ -64,11 +67,12 @@ router.get('/:page/:name', checkAuthed, function(req, res){
   });
 });
 
-router.get('/unset/:page/:name', checkAuthed, function(req, res){
-  let {page, name} = req.params;
+router.post('/list/unset/', checkAuthed, function(req, res){
+  let {page, name, family} = req.params;
   connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name
                     FROM product as A JOIN users as B ON A.user_id = B.id
                     WHERE \`set\`=0
+                    ${family !== 0 ? `AND A.family = '${family}'` : ``}
                     AND B.id = '${req.user.id}'
                     ${name !== 'a' ? `AND A.name = '${name}'` : ``}
                     ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`, function(err, rows) {
