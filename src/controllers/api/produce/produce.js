@@ -1,7 +1,9 @@
 const Produce = require('../../../models/Produce');
 
 exports.getList = (req, res) => {
-  Produce.getList(req.user, req.params.page, req.params.name, (err, msg) => {
+  let {page, keyword, first_date, last_date} = req.body;
+
+  Produce.getList(req.user, page, keyword, first_date, last_date, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })
@@ -15,7 +17,9 @@ exports.getDetail = (req, res) => {
 }
 
 exports.getTotal = (req, res) => {
-  Produce.getTotal(req.user, req.params.name, (err, msg) => {
+  let {keyword, first_date, last_date} = req.body;
+
+  Produce.getTotal(req.user, keyword, first_date, last_date, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })

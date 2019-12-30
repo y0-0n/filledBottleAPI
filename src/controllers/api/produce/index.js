@@ -13,13 +13,13 @@ function checkAuthed(req, res, next) {
   }
 }
 
-router.get('/list/:page/:name',
+router.post('/list',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
   produce.getList
 );
 
-router.get('/total/:name',
+router.post('/total',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
   produce.getTotal
