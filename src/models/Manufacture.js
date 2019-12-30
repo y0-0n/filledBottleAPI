@@ -39,7 +39,7 @@ module.exports.addManufactureStock = (stock_id, manufacture_id, flag, callback) 
   });
 };
 
-module.exports.getTotal = (user, name, callback) => {
+module.exports.getTotal = (user, name, first_date, last_date, callback) => {
   pool.getConnection(function(err, conn) {
     if(err) {
       conn.release();
@@ -47,7 +47,8 @@ module.exports.getTotal = (user, name, callback) => {
     }
     const query = `SELECT count(*) as total FROM manufacture
                   WHERE user_id = ?
-                  ${name !== 'a' ? `AND title = '${name}'` : ``}`;
+                  AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
+                  ${name !== '' ? `AND title = '${name}'` : ``}`;
 
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
@@ -58,7 +59,7 @@ module.exports.getTotal = (user, name, callback) => {
   })
 }
 
-module.exports.getList = (user, page, name, callback) => {
+module.exports.getList = (user, page, name, first_date, last_date, callback) => {
   pool.getConnection(function(err, conn) {
     if(err) {
       conn.release();
@@ -66,9 +67,11 @@ module.exports.getList = (user, page, name, callback) => {
     }
     const query = `SELECT * FROM manufacture
                   WHERE user_id = ?
-                  ${name !== 'a' ? `AND title = '${name}'` : ``}
+                  ${name !== '' ? `AND title = '${name}'` : ``}
+                  AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
                   ORDER BY date DESC
-                  ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`;
+                  ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}
+                  `;
 
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();

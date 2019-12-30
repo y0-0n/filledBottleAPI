@@ -24,18 +24,18 @@ exports.manufacture = (req, res) => {
 }
 
 exports.getTotal = (req, res) => {
-  let {name} = req.params;
+  let {keyword, first_date, last_date} = req.body;
 
-  Manufacture.getTotal(req.user, name, (err, msg) => {
+  Manufacture.getTotal(req.user, keyword, first_date, last_date, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })
 }
 
 exports.getList = (req, res) => {
-  let {page, name} = req.params;
+  let {page, keyword, first_date, last_date} = req.body;
 
-  Manufacture.getList(req.user, page, name, (err, msg) => {
+  Manufacture.getList(req.user, page, keyword, first_date, last_date, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })
