@@ -3,6 +3,8 @@
 const express = require('express');
 const router = express.Router();
 const connection = require('../../config/dbConnection').connection;
+const Stock = require('../models/Stock');
+
 
 function checkAuthed(req, res, next) {
   if (req.isAuthenticated()) {
@@ -137,8 +139,9 @@ router.post('/', (req, res) => {
     sProduct.map((e, i) => {
       connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`quantity\`, \`price\`, \`tax\`) VALUES ('${order_id}', '${e.id}', '${e.quantity}', '${sProduct[i].price * sProduct[i].quantity}', ${e.tax})`, function(err_, rows_) {
         if(err) throw err_;
-        console.log('product '+i+' : '+rows_);
-      })
+				console.log('product '+i+' : '+rows_);
+				
+      });
     });
     res.send(rows);
   });
@@ -187,13 +190,22 @@ router.put('/detail/refund/:id', checkAuthed, function(req, res) {
   })
 })
 
-router.put('/changeState/:id/:state', checkAuthed, function(req, res) {
-  let {id, state} = req.params;
-
-  connection.query(`UPDATE \`order\` SET \`state\`='${state}' WHERE \`id\`=${id}`, function(err, rows) {
+router.post('/changeState/', checkAuthed, function(req, res) {
+  let {id, prev, next} = req.body;
+	if(next === 'shipping') {
+		console.log('재고 변경')
+		Stock.convertStockByOrder(req.user, req.body, (err, msg) => {
+			if(err) throw err;
+		})
+	}
+	if(prev == 'shipping') {
+		Stock.convertStockByOrderReverse(req.user, req.body, (err, msg) => {
+			if(err) throw err;
+		})
+	}
+  connection.query(`UPDATE \`order\` SET \`state\`='${next}' WHERE \`id\`=${id}`, function(err, rows) {
     if(err) throw err;
-
-    console.log(`PUT /order/changeState/${id}/${state}` + rows);
+    console.log(`PUT /order/changeState/`, rows);
     res.send(rows);
   });
 });

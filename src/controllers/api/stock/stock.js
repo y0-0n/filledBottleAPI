@@ -24,7 +24,7 @@ exports.getStockDetail = (req, res) => {
 exports.convertStock = (req, res) => {
   const {id} = req.params;
   const {quantity} = req.body;
-  Stock.convertStock(id, quantity, req.user, (err, msg) => {
+  Stock.convertStock(id, quantity, req.user, '재고 직접 수정', (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })
