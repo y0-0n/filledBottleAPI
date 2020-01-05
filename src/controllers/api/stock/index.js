@@ -24,6 +24,12 @@ router.get('/list/:page',
   stock.getStockList
 );
 
+router.post('/list/',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  stock.getStockList2
+);
+
 router.get('/:id',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
