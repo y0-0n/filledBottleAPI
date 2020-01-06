@@ -106,7 +106,7 @@ module.exports.getStockFromManufactureByProduce = (id, callback) => {
       conn.release();
       throw err;
     }
-    const query = `SELECT S.quantity, P.name, P.grade, P.weight, P.price_shipping, S.change
+    const query = `SELECT P.id as product_id, S.quantity, P.name, P.grade, P.weight, P.price_shipping, S.change
     FROM manufacture AS M JOIN stock_manufacture AS SM ON M.id = SM.manufacture_id
     JOIN stock AS S ON S.id = SM.stock_id
     JOIN product AS P ON P.id = S.product_id
@@ -128,7 +128,7 @@ module.exports.getStockFromManufactureByConsume = (id, callback) => {
       conn.release();
       throw err;
     }
-    const query = `SELECT S.quantity, P.name, P.grade, P.weight, P.price_shipping, S.change
+    const query = `SELECT P.id as product_id, S.quantity, P.name, P.grade, P.weight, P.price_shipping, S.change
     FROM manufacture AS M JOIN stock_manufacture AS SM ON M.id = SM.manufacture_id
     JOIN stock AS S ON S.id = SM.stock_id
     JOIN product AS P ON P.id = S.product_id
@@ -142,4 +142,23 @@ module.exports.getStockFromManufactureByConsume = (id, callback) => {
       return callback(err, result);
     });
   });
+}
+
+module.exports.cancel = (user, data, callback) => {
+  pool.getConnection(function(err, conn) {
+    if(err) {
+      conn.release();
+      throw err;
+    }
+		const query = `UPDATE \`manufacture\`
+									SET \`set\` = '0'
+									WHERE \`user_id\` = ?
+									AND \`id\` = ?`;
+    const exec = conn.query(query, [user.id, data.id], (err, result) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+
+      return callback(err, result);
+    });
+  })
 }

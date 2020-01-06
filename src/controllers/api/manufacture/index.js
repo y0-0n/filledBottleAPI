@@ -30,6 +30,12 @@ router.get('/:id',
   manufacture.getDetail
 );
 
+router.put('/cancel/:id',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  manufacture.manufactureReverse
+);
+
 router.post('/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,

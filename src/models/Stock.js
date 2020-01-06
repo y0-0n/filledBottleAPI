@@ -149,8 +149,8 @@ module.exports.convertStockByManufacture = async (user, data, callback) => {
     }
     if(data.sProduct2[0].id === '') {
       data.sProduct2 = [];
-    }
-
+		}
+		
     data.sProduct1.forEach(e => {
       const select_query = `SELECT S.* FROM stock as S JOIN product as P ON S.product_id = P.id
                             WHERE P.user_id = ?
@@ -202,6 +202,76 @@ module.exports.convertStockByManufacture = async (user, data, callback) => {
     }
   });
 };
+
+//생산 모듈을 통한 재고 변경
+module.exports.convertStockByManufactureReverse = async (user, data, callback) => {
+  var res = {consume: [], produce: []};
+  await pool.getConnection(function(err, conn) {
+    if (err) {
+      conn.release();
+      throw err;
+    }
+    if(data.sProduct1[0].id === '') {
+      data.sProduct1 = [];
+    }
+    if(data.sProduct2[0].id === '') {
+      data.sProduct2 = [];
+    }
+
+    data.sProduct1.forEach(e => {
+      const select_query = `SELECT S.* FROM stock as S JOIN product as P ON S.product_id = P.id
+                            WHERE P.user_id = ?
+                            AND P.\`set\` = 1
+                            AND P.id = ${e.product_id}
+                            ORDER BY S.id DESC
+                            LIMIT 1`;
+      const exec = conn.query(select_query, [user.id], (err, result) => {
+        console.log('실행 sql : ', exec.sql);
+				const current = result[0].quantity;
+				console.log(current)
+        const change = -e.change;
+        const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`change\`, \`memo\`)
+                              VALUES (${e.product_id}, ${parseInt(current)+parseInt(change)}, ${change}, '제조 취소로 인한 재고 수정')`;
+        const exec2 = conn.query(insert_query, (err2, result2) => {
+          console.log('실행 sql : ', exec2.sql);
+          res.consume.push(result2);
+        })
+      });
+    });
+
+    if(data.sProduct2.length !== 0) {
+      let {length} = data.sProduct2
+      data.sProduct2.forEach(e => {
+        const select_query = `SELECT S.* FROM stock as S JOIN product as P ON S.product_id = P.id
+                              WHERE P.user_id = ?
+                              AND P.\`set\` = 1
+                              AND P.id = ${e.product_id}
+                              ORDER BY S.id DESC
+                              LIMIT 1`;
+        const exec = conn.query(select_query, [user.id], (err, result) => {
+          console.log('실행 sql : ', exec.sql);
+					const current = result[0].quantity;
+					console.log(current)
+          const change = -e.change;
+          const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`change\`, \`memo\`)
+                                VALUES (${e.product_id}, ${parseInt(current)+parseInt(change)}, ${change}, '제조 취소로 인한 재고 수정')`;
+          const exec2 = conn.query(insert_query, (err2, result2) => {
+            console.log('실행 sql : ', exec2.sql);
+            res.produce.push(result2);
+            if((--length) == 0){
+              conn.release();
+              return callback(false, res);
+            }
+          })
+        });
+      });
+    } else {
+      conn.release();
+      return callback(false, res);
+    }
+  });
+};
+
 
 //재고 리스트 주기
 module.exports.getStock = (user, callback) => {
@@ -286,7 +356,7 @@ module.exports.getStockFromManufactureByConsume = (id, callback) => {
       conn.release();
       throw err;
     }
-    const query = `SELECT S.quantity, P.name, P.grade, P.weight, P.price_shipping, S.change
+    const query = `SELECT P.id as product_id, S.quantity, P.name, P.grade, P.weight, P.price_shipping, S.change
     FROM stock as S JOIN product as P ON S.product_id = P.id
     WHERE flag = 'manufacture_consume'
     AND flag_id = ?`;
@@ -306,7 +376,7 @@ module.exports.getStockFromManufactureByProduce = (id, callback) => {
       conn.release();
       throw err;
     }
-    const query = `SELECT S.quantity, P.name, P.grade, P.weight, P.price_shipping, S.change
+    const query = `SELECT P.id as product_id, S.quantity, P.name, P.grade, P.weight, P.price_shipping, S.change
     FROM stock as S JOIN product as P ON S.product_id = P.id
     WHERE flag = 'manufacture_produce'
     AND flag_id = ?`;
