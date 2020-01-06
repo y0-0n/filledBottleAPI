@@ -94,9 +94,9 @@ router.get('/:id', checkAuthed, function(req, res){
 });
 
 router.post('/', checkAuthed, upload.none(), (req, res) => {
-  let {name, delegate, telephone, cellphone, keyword, set, transfer, address, manager} = req.body;
-  connection.query(`INSERT INTO customer (\`name\`, \`delegate\`, \`telephone\`, \`cellphone\`, \`keyword\`, \`set\`, \`transfer\`, \`address\`, \`manager\`, \`user_id\`)
-                  VALUES ('${name}', '${delegate}', '${telephone}', '${cellphone}', '${1}', '${1}', '${2}', '${address}', '${manager}', '${req.user.id}')`, function(err, rows) {
+  let {name, delegate, telephone, cellphone, keyword, set, transfer, address, manager, crNumber} = req.body;
+  connection.query(`INSERT INTO customer (\`name\`, \`delegate\`, \`telephone\`, \`cellphone\`, \`keyword\`, \`set\`, \`transfer\`, \`address\`, \`manager\`, \`user_id\`, \`crNumber\`)
+                  VALUES ('${name}', '${delegate}', '${telephone}', '${cellphone}', '${1}', '${1}', '${2}', '${address}', '${manager}', '${req.user.id}', ${crNumber})`, function(err, rows) {
     if(err) throw err;
     
     console.log('POST /customer : ' + rows);
@@ -106,9 +106,9 @@ router.post('/', checkAuthed, upload.none(), (req, res) => {
 });
 
 router.put('/modify/:id', checkAuthed, upload.none(), function(req, res){
-  let {name, telephone, cellphone, address} = req.body;
+  let {name, telephone, cellphone, address, crNumber} = req.body;
   
-  connection.query(`UPDATE customer SET \`name\`='${name}', \`telephone\`='${telephone}', \`cellphone\`='${cellphone}', \`address\`='${address}'
+  connection.query(`UPDATE customer SET \`name\`='${name}', \`telephone\`='${telephone}', \`cellphone\`='${cellphone}', \`address\`='${address}', \`crNumber\`='${crNumber}'
                     WHERE \`id\`="${req.params.id}";`, function(err, rows) {
     if(err) throw err;
 
