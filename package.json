@@ -12,6 +12,7 @@
   "author": "l5vd5",
   "license": "ISC",
   "dependencies": {
+    "async": "^3.1.0",
     "config": "^3.2.3",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
