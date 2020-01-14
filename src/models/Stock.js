@@ -346,7 +346,7 @@ module.exports.getStockList2 = (user, data, callback) => {
     ) AS b
     ON a.product_id = b.product_id AND a.id = b.id
     ORDER BY b.date DESC
-    ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 15` : '')};`;
+    ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')};`;
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);

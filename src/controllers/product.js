@@ -59,7 +59,7 @@ router.post('/list', checkAuthed, function(req, res){
                     ${family !== 0 ? `AND A.family = '${family}'` : ``}
                     ${name !== '' ? `AND A.name = '${name}'` : ``}
                     ORDER BY A.date DESC
-                    ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 15` : '')}`, function(err, rows) {
+                    ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')}`, function(err, rows) {
     if(err) throw err;
 
     console.log('GET /product/:page/:name : ' + rows);

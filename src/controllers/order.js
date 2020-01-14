@@ -71,7 +71,10 @@ router.post('/list/refund/', checkAuthed, function(req, res){
 });
 
 router.post('/list', checkAuthed, function(req, res){
-  let {first_date, last_date, page, process_, keyword} = req.body; // 상태로 검색
+  let {first_date, last_date, page, process_, keyword, limit} = req.body; // 상태로 검색
+  if(!limit) {
+    limit = 15
+  }
   let name = keyword, state = process_;
   let sql = `SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.orderDate, B.set
              from \`order\` AS A JOIN \`customer\` AS B JOIN \`users\` as C ON A.customer_id = B.id AND A.user_id = C.id
@@ -80,7 +83,7 @@ router.post('/list', checkAuthed, function(req, res){
              ${(name !== '' ? `AND B.name = '${name}'`: '')}
              AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
              ORDER BY A.orderDate DESC
-             ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 15` : '')}`;
+             ${(page !== 'all' ? `LIMIT ${limit*(page-1)}, ${limit}` : '')}`;
   //console.log(state, page, state !== 'all' || name !== '')
   connection.query(sql, function(err, rows) {
     if(err) throw err;
