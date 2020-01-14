@@ -80,7 +80,7 @@ router.post('/list', checkAuthed, function(req, res){
              ${(name !== '' ? `AND B.name = '${name}'`: '')}
              AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
              ORDER BY A.orderDate DESC
-             ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`;
+             ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 15` : '')}`;
   //console.log(state, page, state !== 'all' || name !== '')
   connection.query(sql, function(err, rows) {
     if(err) throw err;

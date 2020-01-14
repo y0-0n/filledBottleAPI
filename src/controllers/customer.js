@@ -55,7 +55,7 @@ router.post('/list', checkAuthed, function(req, res){
                     WHERE \`set\`=1
                     AND B.id = '${req.user.id}'
                     ${name !== '' ? `AND A.name = '${name}'` : ``}
-                    ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`,
+                    ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 15` : '')}`,
     function(err, rows) {
       if(err) throw err;
 
