@@ -111,14 +111,13 @@ router.get('/order_summary', function(req, res) {
 router.get('/income/:month', function(req, res) {
   connection.query(`SELECT SUM(OP.price) as sum
     FROM \`order\` as O JOIN order_product as OP ON O.id = OP.order_id
-    WHERE ${req.params.month} = MONTH(O.orderDate)
+    WHERE ${req.params.month} = MONTH(O.date)
     AND O.state = 'shipping'
     AND O.user_id = ${req.user.id}
     `, function(err, rows) {
     if(err) throw err;
-    console.log(rows);
-    
-    console.log('GET /order/income_this_month : ' + rows);
+        
+    console.log('GET /order/income : ' + rows);
     res.send(rows);
   })
 })
