@@ -15,8 +15,14 @@ function checkAuthed(req, res, next) {
 router.get('/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
-  stock.getStock
+  stock.getStockQuantity
 );
+
+router.post('/history',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  stock.getStockHistoryList
+)
 
 router.get('/list/:page',
   passport.authenticate('JWT', { session: false }),

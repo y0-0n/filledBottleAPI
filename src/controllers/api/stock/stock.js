@@ -1,7 +1,7 @@
 const Stock = require('../../../models/Stock');
 
-exports.getStock = (req, res) => {
-  Stock.getStock(req.user, (err, msg) => {
+exports.getStockQuantity = (req, res) => {
+  Stock.getStockQuantity(req.user, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })
@@ -21,6 +21,12 @@ exports.getStockList2 = (req, res) => {
   })
 }
 
+exports.getStockHistoryList = (req, res) => {
+  Stock.getStockHistoryList(req.user, req.body, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
 
 exports.getStockDetail = (req, res) => {
   Stock.getStockDetail(req.user, req.params.id, (err, msg) => {

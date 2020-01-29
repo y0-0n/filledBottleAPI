@@ -94,9 +94,10 @@ router.get('/:id', checkAuthed, function(req, res){
 });
 
 router.post('/', checkAuthed, upload.none(), (req, res) => {
-  let {name, delegate, telephone, cellphone, keyword, set, transfer, address, manager, crNumber} = req.body;
+	let {name, delegate, telephone, cellphone, keyword, set, transfer, address, manager, crNumber} = req.body;
+
   connection.query(`INSERT INTO customer (\`name\`, \`delegate\`, \`telephone\`, \`cellphone\`, \`keyword\`, \`set\`, \`transfer\`, \`address\`, \`manager\`, \`user_id\`, \`crNumber\`)
-                  VALUES ('${name}', '${delegate}', '${telephone}', '${cellphone}', '${1}', '${1}', '${2}', '${address}', '${manager}', '${req.user.id}', ${crNumber})`, function(err, rows) {
+                  VALUES ('${name}', '${delegate}', '${telephone}', '${cellphone}', '${1}', '${1}', '${2}', '${address}', '${manager}', '${req.user.id}', '${crNumber}')`, function(err, rows) {
     if(err) throw err;
     
     console.log('POST /customer : ' + rows);
