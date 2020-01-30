@@ -2,6 +2,22 @@
 
 const pool = require('../../config/dbpool').pool;
 
+module.exports.getAllFamily = (user, callback) => {
+  pool.getConnection(function(err, conn) {
+    if (err) {
+      conn.release();
+      throw err;
+    }
+    const query = `SELECT F.name, F.id
+		FROM productFamily as F`;
+    const exec = conn.query(query, [user.id], (err, result) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+      return callback(err, result);
+    });
+  });
+}
+
 module.exports.getFamilyList = (user, callback) => {
   pool.getConnection(function(err, conn) {
     if (err) {
@@ -9,8 +25,9 @@ module.exports.getFamilyList = (user, callback) => {
       throw err;
     }
     const query = `SELECT F.name, F.id
-    FROM product_family as F JOIN users as U ON F.user_id = U.id
-    WHERE U.id = ?`;
+		FROM productFamily as F JOIN productFamily_user as FU ON F.id = FU.family_id
+		JOIN users as U ON FU.user_id = U.id
+		WHERE U.id = ?`;
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
@@ -25,7 +42,7 @@ module.exports.addFamily = (user, data, callback) => {
       conn.release();
       throw err;
     }
-    const query = `INSERT INTO product_family (\`name\`, \`user_id\`) VALUES ('${data.newFamily}', ?)`;
+    const query = `INSERT INTO productFamily (\`name\`, \`user_id\`) VALUES ('${data.newFamily}', ?)`;
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
@@ -40,7 +57,7 @@ module.exports.removeFamily = (user, data, callback) => {
       conn.release();
       throw err;
     }
-    const query = `INSERT INTO product_family (\`name\`, \`user_id\`) VALUES (${data.newFamily}, ?)`;
+    const query = `INSERT INTO productFamily (\`name\`, \`user_id\`) VALUES (${data.newFamily}, ?)`;
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);

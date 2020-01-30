@@ -53,7 +53,8 @@ router.post('/list', checkAuthed, function(req, res){
   let {page, name, family} = req.body;
   connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName
                     FROM product as A JOIN users as B ON A.user_id = B.id
-                    LEFT JOIN product_family as F ON A.family = F.id
+										LEFT JOIN productFamily_user as FU ON A.family = FU.family_id
+										JOIN productFamily as F ON F.id = FU.family_id
                     WHERE \`set\`=1
                     AND B.id = '${req.user.id}'
                     ${family !== 0 ? `AND A.family = '${family}'` : ``}
@@ -88,7 +89,7 @@ router.get('/:id', checkAuthed, function(req, res) {
   let id = req.params.id; // id로 검색
 
   connection.query(`SELECT P.*, F.\`name\` as familyName
-                    FROM product as P LEFT JOIN product_family as F ON P.family = F.id
+                    FROM product as P LEFT JOIN productFamily as F ON P.family = F.id
                     WHERE P.id = ${id}`, function(err, rows) {
     if(err) throw err;
 

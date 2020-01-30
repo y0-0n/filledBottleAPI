@@ -18,6 +18,12 @@ router.get('/familyList',
   product.getFamilyList
 );
 
+router.get('/allFamily',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  product.getAllFamily
+);
+
 router.post('/family',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
