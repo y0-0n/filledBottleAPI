@@ -14,6 +14,13 @@ exports.getStockList = (req, res) => {
   })
 }
 
+exports.getStockHistoryTotal = (req, res) => {
+  Stock.getStockHistoryTotal(req.user, req.body, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
 exports.getStockList2 = (req, res) => {
   Stock.getStockList2(req.user, req.body, (err, msg) => {
     if(err) throw err;

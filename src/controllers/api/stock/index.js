@@ -24,6 +24,12 @@ router.post('/history',
   stock.getStockHistoryList
 )
 
+router.post('/total',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  stock.getStockHistoryTotal
+)
+
 router.get('/list/:page',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,

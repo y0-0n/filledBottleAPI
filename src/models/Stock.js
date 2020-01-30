@@ -333,19 +333,44 @@ module.exports.getStockList = (user, page, callback) => {
     });
   });
 }
+module.exports.getStockHistoryTotal = (user, data, callback) => {
+	const {plant} = data;
 
-//재고 모듈에서 리스트 불러오기
-module.exports.getStockHistoryList = (user, data, callback) => {
-  const {page} = data;
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
       throw err;
     }
-		const query = `SELECT *
+		const query = `SELECT count(*) as total
 		FROM stock as S JOIN product as P ON S.product_id = P.id
-    ORDER BY S.id DESC
-    ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')};`;
+		JOIN plant as PL ON PL.id = S.plant_id
+		WHERE P.user_id = ?
+		${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}`;
+    const exec = conn.query(query, [user.id], (err, result) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+      return callback(err, result);
+    });
+  });
+}
+//재고 모듈에서 리스트 불러오기
+module.exports.getStockHistoryList = (user, data, callback) => {
+	const {page, limit, plant} = data;
+	if(!limit) {
+    limit = 15
+	}
+  pool.getConnection(function(err, conn) {
+    if (err) {
+      conn.release();
+      throw err;
+    }
+		const query = `SELECT S.*, P.*, PL.name as plantName
+		FROM stock as S JOIN product as P ON S.product_id = P.id
+		JOIN plant as PL ON PL.id = S.plant_id
+		WHERE P.user_id = ?
+		${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}
+		ORDER BY S.id DESC
+		${page !== 'all' ? `LIMIT ${limit*(page-1)}, ${limit}` : ''}`;
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
