@@ -52,15 +52,21 @@ router.post('/total/', checkAuthed, function(req, res) {
 });
 
 router.post('/list/refund/', checkAuthed, function(req, res){
-  let {first_date, last_date, keyword, page} = req.body; // 상태로 검색
-  let name = keyword;
+  let {first_date, last_date, keyword, page, limit} = req.body; // 상태로 검색
+	let name = keyword;
+	if(!limit) {
+    limit = 15
+  }
   let sql = `SELECT O.id, O.state, O.date, O.price, O.received, C.name, O.orderDate, C.set
-             from \`order\` AS O JOIN \`customer\` AS C JOIN \`users\` as U JOIN \`order_product\` as OP ON O.customer_id = C.id AND O.user_id = U.id AND O.id = OP.order_id
+						 from \`order\` AS O JOIN \`customer\` AS C ON O.customer_id = C.id
+						 JOIN \`users\` as U ON O.user_id = U.id
+						 JOIN \`order_product\` as OP ON O.id = OP.order_id
              WHERE U.id='${req.user.id}' AND OP.refund = true
              ${(name !== '' ? `AND C.name = '${name}'`: '')}
-             AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
+						 AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
+						 GROUP BY O.id
              ORDER BY O.orderDate DESC
-             ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`;
+             ${(page !== 'all' ? `LIMIT ${limit*(page-1)}, ${limit}` : '')}`;
   //console.log(state, page, state !== 'all' || name !== '')
   connection.query(sql, function(err, rows) {
     if(err) throw err;
