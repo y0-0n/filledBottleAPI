@@ -28,6 +28,49 @@ module.exports.convertStock = (product_id, quantity, user, memo, callback) => {
   });
 };
 
+module.exports.getLastStock = (data, user, callback) => {
+	let {productId, plant} = data; //id = 주문 id
+  pool.getConnection(function(err, conn) {
+    if (err) {
+      conn.release();
+      throw err;
+    }
+    const select_query = `SELECT S.* FROM stock as S JOIN product as P ON S.product_id = P.id
+    WHERE P.user_id = ?
+		AND P.\`set\` = 1
+		AND S.plant_id = ${plant}
+    AND P.id = ?
+    ORDER BY S.id DESC
+    LIMIT 1
+		`;
+		
+    const exec = conn.query(select_query, [user.id, productId], (err, result) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+			const current = result.length > 0 ? result[0].quantity : 0;
+      return callback(err, {current});
+    });
+	});
+}
+
+module.exports.createStock = (user, data, memo, callback) => {
+	let {productId, quantity, plant, type, price, current} = data; //id = 주문 id
+	console.log(data)
+
+  pool.getConnection(function(err, conn) {
+    if (err) {
+      conn.release();
+      throw err;
+    }
+		const insert_query = `INSERT INTO stock (\`product_id\`, \`plant_id\`, \`quantity\`, \`change\`, \`memo\`) VALUES (${productId}, ${plant}, ${parseInt(current)+parseInt(quantity)}, ${quantity}, '${type}')`;
+		const exec = conn.query(insert_query, (err, result) => {
+			conn.release();
+			console.log('실행 sql : ', exec.sql);
+			return callback(err, result);
+		})
+	});
+};
+
 //생산 모듈을 통한 재고 변경
 module.exports.convertStockByProduce = (user, data, callback) => {
   pool.getConnection(function(err, conn) {

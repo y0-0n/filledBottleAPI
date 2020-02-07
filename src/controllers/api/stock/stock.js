@@ -50,3 +50,17 @@ exports.convertStock = (req, res) => {
     res.status(200).send(msg);
   })
 }
+
+exports.getLastStock = (req, res) => {
+  Stock.getLastStock(req.body, req.user, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+exports.createStock = (req, res) => {
+  Stock.createStock(req.user, req.body, '재고 직접 수정', (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
