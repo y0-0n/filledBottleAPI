@@ -366,7 +366,7 @@ module.exports.getStockHistoryList = (user, data, callback) => {
     }
 		const query = `SELECT S.*, P.*, PL.name as plantName
 		FROM stock as S JOIN product as P ON S.product_id = P.id
-		JOIN plant as PL ON PL.id = S.plant_id
+		LEFT JOIN plant as PL ON PL.id = S.plant_id
 		WHERE P.user_id = ?
 		${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}
 		ORDER BY S.id DESC
