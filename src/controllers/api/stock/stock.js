@@ -28,6 +28,26 @@ exports.getStockList2 = (req, res) => {
   })
 }
 
+exports.getStockSum = (req, res) => {
+  Stock.getStockSum(req.user, req.body, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+exports.getLastStock = (req, res) => {
+  Stock.getLastStock(req.body, req.user, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+exports.transportStock = (req, res) => {
+  Stock.transportStock(req.body, req.user, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
 exports.getStockHistoryList = (req, res) => {
   Stock.getStockHistoryList(req.user, req.body, (err, msg) => {
     if(err) throw err;
@@ -46,13 +66,6 @@ exports.convertStock = (req, res) => {
   const {id} = req.params;
   const {quantity} = req.body;
   Stock.convertStock(id, quantity, req.user, '재고 직접 수정', (err, msg) => {
-    if(err) throw err;
-    res.status(200).send(msg);
-  })
-}
-
-exports.getLastStock = (req, res) => {
-  Stock.getLastStock(req.body, req.user, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })

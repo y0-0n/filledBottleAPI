@@ -2,6 +2,7 @@
 
 const pool = require('../../config/dbpool').pool;
 const async = require('async');
+
 module.exports.convertStock = (product_id, quantity, user, memo, callback) => {
   pool.getConnection(function(err, conn) {
     if (err) {
@@ -52,6 +53,33 @@ module.exports.getLastStock = (data, user, callback) => {
     });
 	});
 }
+
+module.exports.transportStock = (data, user, callback) => {
+	let {productId, start, dest, quantity, current1, current2} = data; //id = 주문 id
+	console.log(data);
+  pool.getConnection(function(err, conn) {
+    if (err) {
+      conn.release();
+      throw err;
+		}
+		const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`plant_id\`, \`change\`, \`memo\`)
+			VALUES (${productId}, ${current1-quantity}, ${start}, ${-quantity}, '창고 이동');`;
+
+    const exec = conn.query(insert_query, (err, result) => {
+      console.log('실행 sql : ', exec.sql);
+		});
+
+		const insert_query2 = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`plant_id\`, \`change\`, \`memo\`)
+			VALUES (${productId}, ${current2+quantity}, ${dest}, ${quantity}, '창고 이동');`;
+
+    const exec2 = conn.query(insert_query2, (err, result) => {
+      conn.release();
+      console.log('실행 sql : ', exec2.sql);
+      return callback(err, {});
+    });
+	});
+}
+
 
 module.exports.createStock = (user, data, memo, callback) => {
 	let {productId, quantity, plant, type, price, current} = data; //id = 주문 id
@@ -376,6 +404,7 @@ module.exports.getStockList = (user, page, callback) => {
     });
   });
 }
+
 module.exports.getStockHistoryTotal = (user, data, callback) => {
 	const {plant} = data;
 
@@ -424,25 +453,62 @@ module.exports.getStockHistoryList = (user, data, callback) => {
 
 //재고 리스트 주기
 module.exports.getStockList2 = (user, data, callback) => {
-	const {page, name, family} = data;
+	const {page, name, family, plant} = data;
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
       throw err;
     }
     const query = `SELECT b.* FROM
-    (SELECT product_id, MAX(id) as id
-      FROM \`en\`.\`stock\` GROUP BY product_id
+    (SELECT product_id, MAX(S.id) as id
+			FROM \`en\`.\`stock\` as S LEFT JOIN plant as P ON S.plant_id = P.id
+			GROUP BY product_id, plant_id
     ) AS a JOIN
-    (SELECT S.quantity, S.id as id, P.weight, P.name, P.grade, S.product_id, S.changeDate, P.date
-      FROM \`en\`.\`stock\` AS S JOIN \`en\`.\`product\` AS P ON S.product_id = P.id
+    (SELECT S.quantity, S.id as id, P.weight, P.name, P.grade, S.product_id, S.changeDate, P.date, P.file_name, PL.name as plantName
+			FROM \`en\`.\`stock\` AS S JOIN \`en\`.\`product\` AS P ON S.product_id = P.id
+			LEFT JOIN plant as PL ON PL.id = S.plant_id
 			WHERE P.user_id = ?
 			${name !== '' ? `AND P.name = '${name}'` : ``}
 			${family !== 0 ? `AND P.family = '${family}'` : ``}
+			${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}
 			AND P.\`set\` = 1
     ) AS b
     ON a.product_id = b.product_id AND a.id = b.id
     ORDER BY b.date DESC
+    ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')};`;
+    const exec = conn.query(query, [user.id], (err, result) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+      return callback(err, result);
+    });
+  });
+}
+
+//재고 리스트 주기
+module.exports.getStockSum = (user, data, callback) => {
+	const {page, name, family, plant} = data;
+  pool.getConnection(function(err, conn) {
+    if (err) {
+      conn.release();
+      throw err;
+    }
+    const query = `SELECT b.product_id, SUM(b.quantity) as quantity FROM
+    (SELECT product_id, MAX(S.id) as id
+			FROM \`en\`.\`stock\` as S LEFT JOIN plant as P ON S.plant_id = P.id
+			GROUP BY product_id, plant_id
+    ) AS a JOIN
+    (SELECT S.quantity, S.id as id, P.weight, P.name, P.grade, S.product_id, S.changeDate, P.date, P.file_name, PL.name as plantName
+			FROM \`en\`.\`stock\` AS S JOIN \`en\`.\`product\` AS P ON S.product_id = P.id
+			LEFT JOIN plant as PL ON PL.id = S.plant_id
+			WHERE P.user_id = ?
+			${name !== '' ? `AND P.name = '${name}'` : ``}
+			${family !== 0 ? `AND P.family = '${family}'` : ``}
+			${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}
+			AND P.\`set\` = 1
+    ) AS b
+		ON a.product_id = b.product_id AND a.id = b.id
+		GROUP BY a.product_id
+		ORDER BY b.date DESC
     ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')};`;
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();

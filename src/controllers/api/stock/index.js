@@ -24,6 +24,12 @@ router.post('/',
   stock.createStock
 );
 
+router.post('/transport',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  stock.transportStock
+);
+
 router.post('/last/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
@@ -53,6 +59,13 @@ router.post('/list/',
   checkAuthed,
   stock.getStockList2
 );
+
+router.post('/sum/',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  stock.getStockSum
+);
+
 
 router.get('/:id',
   passport.authenticate('JWT', { session: false }),
