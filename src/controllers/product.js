@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 const connection = require('../../config/dbConnection').connection;
 const upload = require("../modules/fileUploadProduct");
+const Plant = require('../models/Plant');
 
 function checkAuthed(req, res, next) {
   if (req.isAuthenticated()) {
@@ -108,12 +109,20 @@ router.post('/', checkAuthed, upload.single('file'), (req, res) => {
     console.log('POST /product : ' + rows);
 
     const product_id = rows.insertId;
-    
-    connection.query(`INSERT INTO stock (\`product_id\`, \`quantity\`) VALUES ('${product_id}', '${0}')`, function(err_, rows_) {
-      if(err_) throw err_;
-      console.log('stock '+rows_);
-      res.send(rows);
-    });
+		Plant.getList(req.user, (err, msg) => {
+			if(err) throw err;
+			let sql = '';
+			msg.map((e,i) => {
+				sql+=`INSERT INTO stock (\`product_id\`, \`quantity\`, \`plant_id\`) VALUES ('${product_id}', '${0}', '${e.id}'); `
+				console.warn(sql)
+			})
+			//sql = `INSERT INTO stock (\`product_id\`, \`quantity\`) VALUES ('${product_id}', '${0}');`
+			connection.query(sql, function(err_, rows_) {
+				if(err_) throw err_;
+				console.log('stock '+rows_);
+				res.send(rows);
+			});
+		});
   })
 });
 
