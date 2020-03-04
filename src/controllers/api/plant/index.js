@@ -18,4 +18,10 @@ router.get('/',
   plant.getList
 );
 
+router.post('/',
+	passport.authenticate('JWT', { session: false }),
+	checkAuthed,
+	plant.add
+)
+
 module.exports = router;
