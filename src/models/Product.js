@@ -72,8 +72,9 @@ module.exports.getUserFamilyCategory = (user, callback) => {
   });
 }
 
-//회원이 취급하는 품목 리스트 주기
+//회원이 취급하는 품목군 리스트 주기
 module.exports.getFamilyList = (user, data, callback) => {
+	const {categoryId} = data
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
@@ -84,11 +85,11 @@ module.exports.getFamilyList = (user, data, callback) => {
 		JOIN familyCategory as FC ON FC.id = F.category
 		JOIN users as U ON FU.user_id = U.id
 		WHERE U.id = ?
-		AND F.category = ?
+		${categoryId !== 'all' ? `AND F.category = ${categoryId}`: ``};
 		`;
-    const exec = conn.query(query, [user.id, data.categoryId], (err, result) => {
+    const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
-      console.warn('실행 sql : ', exec.sql);
+      console.log('실행 sql : ', exec.sql);
       return callback(err, result);
     });
   });

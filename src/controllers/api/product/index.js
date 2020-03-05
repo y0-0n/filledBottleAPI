@@ -12,6 +12,7 @@ function checkAuthed(req, res, next) {
   }
 }
 
+//회원이 취급하는 품목군 리스트 주기
 router.get('/familyList/:categoryId',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,

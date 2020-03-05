@@ -26,7 +26,7 @@ router.post('/total/', checkAuthed, function(req, res){
                     ${name !== '' ? `AND A.name = '${name}'` : ``}`, function(err, rows) {
     if(err) throw err;
 
-    console.log('GET /customer/total/:name : ' + rows);
+    console.log('POST /customer/total/ : ', rows);
     res.send(rows);
   });
 });

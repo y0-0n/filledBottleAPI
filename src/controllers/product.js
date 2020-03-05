@@ -19,13 +19,17 @@ function checkAuthed(req, res, next) {
 }
 
 router.post('/total/', checkAuthed, function(req, res) {
-  let {name, family} = req.body;
+	let {name, family, category} = req.body;
   let sql = `SELECT count(*) as total
-            FROM product as A JOIN users as B ON A.user_id = B.id
-            WHERE \`set\`=1
-						${family !== 0 ? `AND A.family = '${family}'` : ``}
-            AND B.id='${req.user.id}'
-            ${(name !== '' ? `AND A.name = '${name}'`: '')}`
+		FROM product as A JOIN users as B ON A.user_id = B.id
+		LEFT JOIN productFamily_user as FU ON A.family = FU.family_id
+		LEFT JOIN productFamily as F ON F.id = FU.family_id
+		WHERE \`set\`=1
+		AND B.id = '${req.user.id}'
+		${family !== 0 ? `AND A.family = '${family}'` : ``}
+		${name !== '' ? `AND A.name = '${name}'` : ``}
+		${category !== 0 ? `AND F.category = '${category}'` : ``}
+		ORDER BY A.date DESC;`
   connection.query(sql, function(err, rows) {
     if(err) throw err;
 
@@ -60,7 +64,7 @@ router.post('/list', checkAuthed, function(req, res){
                     AND B.id = '${req.user.id}'
                     ${family !== 0 ? `AND A.family = '${family}'` : ``}
 										${name !== '' ? `AND A.name = '${name}'` : ``}
-										AND F.category = '${category}'
+										${category !== 0 ? `AND F.category = '${category}'` : ``}
                     ORDER BY A.date DESC
                     ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')}`, function(err, rows) {
     if(err) throw err;
