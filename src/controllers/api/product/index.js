@@ -12,16 +12,28 @@ function checkAuthed(req, res, next) {
   }
 }
 
-router.get('/familyList',
+router.get('/familyList/:categoryId',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
   product.getFamilyList
 );
 
-router.get('/allFamily',
+router.get('/allFamily/:categoryId',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
   product.getAllFamily
+);
+
+router.get('/familyCategory',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  product.getFamilyCategory
+);
+
+router.get('/userFamilyCategory',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  product.getUserFamilyCategory
 );
 
 router.post('/family',
