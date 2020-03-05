@@ -35,12 +35,13 @@ exports.getStockTotal = (req, res) => {
   })
 }
 
-/*exports.getStockList3 = (req, res) => {
+//재고 실사에서 페이지네이션 없이 리스트 전달
+exports.getStockList3 = (req, res) => {
   Stock.getStockList3(req.user, req.body, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })
-}*/
+}
 
 exports.getStockSum = (req, res) => {
   Stock.getStockSum(req.user, req.body, (err, msg) => {

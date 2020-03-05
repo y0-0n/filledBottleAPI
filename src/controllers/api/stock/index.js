@@ -66,11 +66,11 @@ router.post('/list/total',
   stock.getStockTotal
 )
 
-/*router.post('/list2/',
+router.post('/list2/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
   stock.getStockList3
-);*/
+);
 
 router.post('/sum/',
   passport.authenticate('JWT', { session: false }),
