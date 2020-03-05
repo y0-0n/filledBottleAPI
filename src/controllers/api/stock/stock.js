@@ -28,6 +28,20 @@ exports.getStockList2 = (req, res) => {
   })
 }
 
+exports.getStockTotal = (req, res) => {
+  Stock.getStockTotal(req.user, req.body, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+/*exports.getStockList3 = (req, res) => {
+  Stock.getStockList3(req.user, req.body, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}*/
+
 exports.getStockSum = (req, res) => {
   Stock.getStockSum(req.user, req.body, (err, msg) => {
     if(err) throw err;

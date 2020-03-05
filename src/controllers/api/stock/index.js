@@ -48,17 +48,29 @@ router.post('/total',
   stock.getStockHistoryTotal
 )
 
-router.get('/list/:page',
+/*router.get('/list/:page',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
   stock.getStockList
-);
+);*/
 
 router.post('/list/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
   stock.getStockList2
 );
+
+router.post('/list/total',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  stock.getStockTotal
+)
+
+/*router.post('/list2/',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  stock.getStockList3
+);*/
 
 router.post('/sum/',
   passport.authenticate('JWT', { session: false }),
