@@ -307,8 +307,7 @@ module.exports.convertStockByManufactureReverse = async (user, data, callback) =
                             LIMIT 1`;
       const exec = conn.query(select_query, [user.id], (err, result) => {
         console.log('실행 sql : ', exec.sql);
-				const current = result[0].quantity;
-				console.log(current)
+				const current = result[0].quantity;				
         const change = -e.change;
         const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`change\`, \`memo\`)
                               VALUES (${e.product_id}, ${parseInt(current)+parseInt(change)}, ${change}, '제조 취소로 인한 재고 수정')`;
@@ -417,6 +416,7 @@ module.exports.getStockHistoryTotal = (user, data, callback) => {
 		FROM stock as S JOIN product as P ON S.product_id = P.id
 		JOIN plant as PL ON PL.id = S.plant_id
 		WHERE P.user_id = ?
+		AND \`change\` IS NOT NULL
 		${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}`;
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
@@ -440,6 +440,7 @@ module.exports.getStockHistoryList = (user, data, callback) => {
 		FROM stock as S JOIN product as P ON S.product_id = P.id
 		LEFT JOIN plant as PL ON PL.id = S.plant_id
 		WHERE P.user_id = ?
+		AND \`change\` IS NOT NULL
 		${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}
 		ORDER BY S.id DESC
 		${page !== 'all' ? `LIMIT ${limit*(page-1)}, ${limit}` : ''}`;
@@ -510,7 +511,6 @@ module.exports.getStockTotal = (user, data, callback) => {
     ON a.product_id = b.product_id AND a.id = b.id
     ORDER BY b.date DESC;`;
     const exec = conn.query(query, [user.id], (err, result) => {
-			console.warn(result)
       conn.release();
       console.log('실행 sql : ', exec.sql);
       return callback(err, result);
