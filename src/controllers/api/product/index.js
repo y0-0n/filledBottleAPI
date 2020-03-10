@@ -37,10 +37,10 @@ router.get('/userFamilyCategory',
   product.getUserFamilyCategory
 );
 
-router.post('/family',
-  passport.authenticate('JWT', { session: false }),
-  checkAuthed,
-  product.addFamily
-);
+router.post('/modifyFamily',
+	passport.authenticate('JWT', { session: false }),
+	checkAuthed,
+	product.modifyFamily
+)
 
 module.exports = router;

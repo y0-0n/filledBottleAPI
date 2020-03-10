@@ -28,9 +28,10 @@ exports.getUserFamilyCategory = (req, res) => {
   })
 }
 
-exports.addFamily = (req, res) => {
-  Product.addFamily(req.user, req.body, (err, msg) => {
+exports.modifyFamily = (req, res) => {
+  Product.modifyFamily(req.user, req.body, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })
 }
+

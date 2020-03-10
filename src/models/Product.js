@@ -95,32 +95,26 @@ module.exports.getFamilyList = (user, data, callback) => {
   });
 }
 
-module.exports.addFamily = (user, data, callback) => {
+module.exports.modifyFamily = (user, data, callback) => {
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
       throw err;
     }
-    const query = `INSERT INTO productFamily (\`name\`, \`user_id\`) VALUES ('${data.newFamily}', ?)`;
-    const exec = conn.query(query, [user.id], (err, result) => {
+		let insert_query = ``;
+		data.addFamilyList.map((e, i) => {
+			insert_query += `INSERT INTO productFamily_user (\`family_id\`, \`user_id\`) VALUES ('${e.id}', '${user.id}');`;
+		})
+		let delete_query = ``;
+		data.deleteFamilyList.map((e, i) => {
+			delete_query += `DELETE FROM productFamily_user WHERE family_id = '${e.id}' AND user_id = '${user.id}';`;
+		})
+		const query = insert_query + delete_query;
+    const exec = conn.query(query, (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
       return callback(err, result);
     });
-  });
-}
-
-module.exports.removeFamily = (user, data, callback) => {
-  pool.getConnection(function(err, conn) {
-    if (err) {
-      conn.release();
-      throw err;
-    }
-    const query = `INSERT INTO productFamily (\`name\`, \`user_id\`) VALUES (${data.newFamily}, ?)`;
-    const exec = conn.query(query, [user.id], (err, result) => {
-      conn.release();
-      console.log('실행 sql : ', exec.sql);
-      return callback(err, result);
-    });
-  });
+	});
+	
 }
