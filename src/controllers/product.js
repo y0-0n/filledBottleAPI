@@ -27,7 +27,7 @@ router.post('/total/', checkAuthed, function(req, res) {
 		WHERE \`set\`=1
 		AND B.id = '${req.user.id}'
 		${family !== 0 ? `AND A.family = '${family}'` : ``}
-		${name !== '' ? `AND A.name = '${name}'` : ``}
+		${name !== '' ? `AND A.name LIKE '%${name}%'` : ``}
 		${category !== 0 ? `AND F.category = '${category}'` : ``}
 		ORDER BY A.date DESC;`
   connection.query(sql, function(err, rows) {
@@ -57,19 +57,18 @@ router.post('/total/unset/', checkAuthed, function(req, res) {
 router.post('/list', checkAuthed, function(req, res){
   let {page, name, family, category} = req.body;
   connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName
-                    FROM product as A JOIN users as B ON A.user_id = B.id
-										LEFT JOIN productFamily_user as FU ON A.family = FU.family_id
-										LEFT JOIN productFamily as F ON F.id = FU.family_id
-                    WHERE \`set\`=1
-                    AND B.id = '${req.user.id}'
-                    ${family !== 0 ? `AND A.family = '${family}'` : ``}
-										${name !== '' ? `AND A.name = '${name}'` : ``}
-										${category !== 0 ? `AND F.category = '${category}'` : ``}
-                    ORDER BY A.date DESC
-                    ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')}`, function(err, rows) {
-    if(err) throw err;
-
-    console.log('GET /product/:page/:name : ' + rows);
+		FROM product as A JOIN users as B ON A.user_id = B.id
+		LEFT JOIN productFamily_user as FU ON A.family = FU.family_id
+		LEFT JOIN productFamily as F ON F.id = FU.family_id
+		WHERE \`set\`=1
+		AND B.id = '${req.user.id}'
+		${family !== 0 ? `AND A.family = '${family}'` : ``}
+		${name !== '' ? `AND A.name LIKE '%${name}%'` : ``}
+		${category !== 0 ? `AND F.category = '${category}'` : ``}
+		ORDER BY A.date DESC
+		${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')}`, function(err, rows) {
+		if(err) throw err;
+    console.log('POST /product/list : ', rows);
     res.send(rows);
   });
 });

@@ -23,7 +23,7 @@ router.post('/total/', checkAuthed, function(req, res){
                     FROM customer as A JOIN users as B ON A.user_id = B.id
                     WHERE \`set\`=1
                     AND B.id = '${req.user.id}'
-                    ${name !== '' ? `AND A.name = '${name}'` : ``}`, function(err, rows) {
+                    ${name !== '' ? `AND A.name like '%${name}%'` : ``}`, function(err, rows) {
     if(err) throw err;
 
     console.log('POST /customer/total/ : ', rows);
@@ -54,7 +54,7 @@ router.post('/list', checkAuthed, function(req, res){
                     FROM customer as A JOIN users as B ON A.user_id = B.id
                     WHERE \`set\`=1
                     AND B.id = '${req.user.id}'
-                    ${name !== '' ? `AND A.name = '${name}'` : ``}
+                    ${name !== '' ? `AND A.name LIKE '%${name}%'` : ``}
                     ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')}`,
     function(err, rows) {
       if(err) throw err;
