@@ -43,4 +43,18 @@ router.post('/modifyFamily',
 	product.modifyFamily
 )
 
+router.post('/modifyFamilyInPlant',
+	passport.authenticate('JWT', { session: false }),
+	checkAuthed,
+	product.modifyFamilyInPlant
+)
+
+//해당 창고(id)에서 취급하는 품목 반환
+router.get('/familyInPlant/:id',
+	passport.authenticate('JWT', { session: false }),
+	checkAuthed,
+	product.familyInPlant
+)
+
+
 module.exports = router;

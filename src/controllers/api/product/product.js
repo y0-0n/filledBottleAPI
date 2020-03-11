@@ -35,3 +35,16 @@ exports.modifyFamily = (req, res) => {
   })
 }
 
+exports.familyInPlant = (req, res) => {
+  Product.familyInPlant(req.user, req.params.id, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+exports.modifyFamilyInPlant = (req, res) => {
+  Product.modifyFamilyInPlant(req.user, req.body, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
