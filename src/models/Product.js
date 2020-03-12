@@ -95,14 +95,17 @@ module.exports.getFamilyList = (user, data, callback) => {
   });
 }
 
-//회원이 취급하는 품목군 리스트 주기
+//창고에서 취급하는 품목군 주기
 module.exports.familyInPlant = (user, plantId, callback) => {
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
       throw err;
     }
-		const query = `SELECT * FROM familyInPlant WHERE plant_id = ?`;
+		const query = `SELECT FIP.*, PFU.family_id as family, PF.name FROM familyInPlant as FIP
+		JOIN productFamily_user as PFU ON FIP.family_id = PFU.id
+		JOIN productFamily as PF ON PF.id = PFU.family_id
+		WHERE plant_id = ?`;
     const exec = conn.query(query, [plantId], (err, result) => {
       conn.release();
 			console.log('실행 sql : ', exec.sql);
