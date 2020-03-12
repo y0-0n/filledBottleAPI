@@ -452,7 +452,6 @@ module.exports.getStockHistoryList = (user, data, callback) => {
   });
 }
 
-//품목 관리 모듈에 재고 리스트 주기
 //재고 관리 모듈 리스트 주기
 module.exports.getStockList2 = (user, data, callback) => {
 	const {page, name, family, plant} = data;
@@ -460,29 +459,39 @@ module.exports.getStockList2 = (user, data, callback) => {
     if (err) {
       conn.release();
       throw err;
-    }
-    const query = `SELECT b.* FROM
-    (SELECT product_id, MAX(S.id) as id
-			FROM \`en\`.\`stock\` as S JOIN plant as P ON S.plant_id = P.id
-			GROUP BY product_id, plant_id
-    ) AS a JOIN
-    (SELECT S.quantity, S.id as id, P.weight, P.name, P.grade, S.product_id, S.changeDate, P.date, P.file_name, PL.name as plantName
-			FROM \`en\`.\`stock\` AS S JOIN \`en\`.\`product\` AS P ON S.product_id = P.id
-			JOIN plant as PL ON PL.id = S.plant_id
-			WHERE P.user_id = ?
-			${name !== '' ? `AND P.name = '${name}'` : ``}
-			${family !== 0 ? `AND P.family = '${family}'` : ``}
-			${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}
-			AND P.\`set\` = 1
-    ) AS b
-    ON a.product_id = b.product_id AND a.id = b.id
-    ORDER BY b.date DESC
-    ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')};`;
-    const exec = conn.query(query, [user.id], (err, result) => {
-      conn.release();
-      console.log('실행 sql : ', exec.sql);
-      return callback(err, result);
-    });
+		}
+		let familyInPlant = ``;
+		data.useFamilyData.map((e, i) => {
+				familyInPlant += `'${e.family}' ,`;
+		});
+		familyInPlant = familyInPlant.slice(0, -1);
+		if(familyInPlant.length !== 0){
+			const query = `SELECT b.* FROM
+			(SELECT product_id, MAX(S.id) as id
+				FROM \`en\`.\`stock\` as S JOIN plant as P ON S.plant_id = P.id
+				GROUP BY product_id, plant_id
+			) AS a JOIN
+			(SELECT S.quantity, S.id as id, P.weight, P.name, P.grade, S.product_id, S.changeDate, P.date, P.file_name, PL.name as plantName
+				FROM \`en\`.\`stock\` AS S JOIN \`en\`.\`product\` AS P ON S.product_id = P.id
+				JOIN plant as PL ON PL.id = S.plant_id
+				WHERE P.user_id = ?
+				${name !== '' ? `AND P.name = '${name}'` : ``}
+				${family !== 0 ? `AND P.family = '${family}'` : ``}
+				AND P.family IN (${familyInPlant})
+				${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}
+				AND P.\`set\` = 1
+			) AS b
+			ON a.product_id = b.product_id AND a.id = b.id
+			ORDER BY b.date DESC
+			${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')};`;
+			const exec = conn.query(query, [user.id], (err, result) => {
+				conn.release();
+				console.log('실행 sql : ', exec.sql);
+				return callback(err, result);
+			});
+		} else {
+			return callback(null, [])
+		}
   });
 }
 
@@ -538,6 +547,7 @@ module.exports.getStockList3 = (user, data, callback) => {
 			${name !== '' ? `AND P.name = '${name}'` : ``}
 			${family !== 0 ? `AND P.family = '${family}'` : ``}
 			${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}
+			${category !== 0 ? `AND F.category = '${category}'` : ``}
 			AND P.\`set\` = 1
     ) AS b
     ON a.product_id = b.product_id AND a.id = b.id
@@ -550,9 +560,9 @@ module.exports.getStockList3 = (user, data, callback) => {
   });
 }
 
-//
+//품목 관리 모듈에 재고 리스트 주기
 module.exports.getStockSum = (user, data, callback) => {
-	const {page, name, family, plant} = data;
+	const {page, name, family, category} = data;
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
@@ -566,10 +576,12 @@ module.exports.getStockSum = (user, data, callback) => {
     (SELECT S.quantity, S.id as id, P.weight, P.name, P.grade, S.product_id, S.changeDate, P.date, P.file_name, PL.name as plantName
 			FROM \`en\`.\`stock\` AS S JOIN \`en\`.\`product\` AS P ON S.product_id = P.id
 			LEFT JOIN plant as PL ON PL.id = S.plant_id
+			LEFT JOIN productFamily_user as FU ON P.family = FU.family_id
+			LEFT JOIN productFamily as F ON F.id = FU.family_id	
 			WHERE P.user_id = ?
 			${name !== '' ? `AND P.name = '${name}'` : ``}
 			${family !== 0 ? `AND P.family = '${family}'` : ``}
-			${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}
+			${category !== 0 ? `AND F.category = '${category}'` : ``}
 			AND P.\`set\` = 1
     ) AS b
 		ON a.product_id = b.product_id AND a.id = b.id
