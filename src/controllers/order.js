@@ -160,10 +160,9 @@ router.post('/', (req, res) => {
 
     let order_id = rows.insertId;
     sProduct.map((e, i) => {
-      connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`quantity\`, \`price\`, \`tax\`) VALUES ('${order_id}', '${e.id}', '${e.quantity}', '${sProduct[i].price * sProduct[i].quantity}', ${e.tax})`, function(err_, rows_) {
+      connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`plant_id\`, \`quantity\`, \`price\`, \`tax\`) VALUES ('${order_id}', '${e.id}', '${e.plant}', '${e.quantity}', '${sProduct[i].price * sProduct[i].quantity}', ${e.tax})`, function(err_, rows_) {
         if(err) throw err_;
 				console.log('product '+i+' : '+rows_);
-				
       });
     });
     res.send(rows);

@@ -185,6 +185,7 @@ module.exports.convertStockByOrder = (user, data, callback) => {
 				WHERE P.user_id = ?
 				AND P.\`set\` = 1
 				AND P.id = ${e.product_id}
+				AND S.plant_id = ${e.plant_id}
 				ORDER BY S.id DESC
 				LIMIT 1`;
         const exec = conn.query(select_query, [user.id], (err2, result2) => {
@@ -193,8 +194,8 @@ module.exports.convertStockByOrder = (user, data, callback) => {
 					const op_id = result2[0].id;
           const current = result2[0].quantity
           const change = -e.quantity;
-          const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`change\`, \`memo\`)
-                                VALUES (${e.product_id}, ${parseInt(current)+parseInt(change)}, ${change}, '출고로 인한 재고 수정')`;
+          const insert_query = `INSERT INTO stock (\`product_id\`, \`plant_id\`, \`quantity\`, \`change\`, \`memo\`)
+                                VALUES (${e.product_id}, ${e.plant_id}, ${parseInt(current)+parseInt(change)}, ${change}, '출고로 인한 재고 수정')`;
           const exec2 = conn.query(insert_query, (err3, result3) => {
 						console.log('실행 sql : ', exec2.sql);
 						const update_query = `UPDATE order_product SET \`stock_id\`=${result3.insertId} WHERE \`id\` = ${op_id}`
