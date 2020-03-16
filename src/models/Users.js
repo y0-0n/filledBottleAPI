@@ -15,10 +15,11 @@ module.exports.addUser = (data, callback) => {
       console.log(err);
       conn.release();
       throw err;
-    }
+		}
+		let {email, crNumber, password, name, address, postcode, phone, salt} = data;
 
-    const query = 'INSERT INTO users SET ? ';
-    const exec = conn.query(query, data, (err, result) => {
+    const query = `INSERT INTO users SET email = ?, crNumber = ?, password = ?, name = ?, address = ?, postcode = ?, phone = ?, salt =  ?`;
+    const exec = conn.query(query, [email, crNumber, password, name, address, postcode, phone, salt], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
 
