@@ -3,6 +3,7 @@
  */
 const auth = require("../../../modules/auth");
 const Users = require('../../../models/Users');
+const Plant = require('../../../models/Plant');
 const { validationResult } = require('express-validator');
 
 exports.addUser = (req, res) => {
@@ -23,11 +24,13 @@ exports.addUser = (req, res) => {
 		} else {//회원가입 성공
 			Users.addUser(data, (err, result) => {
 				if(err) throw err;
-		
-				console.log(result);
+
+				Plant.add({id: result.insertId}, {plantName: "기본"}, (err, msg) => {
+					if(err) throw err;
+					res.status(200).send({message: "Success"});
+					console.log(result, msg);
+				})
 			});
-		
-			res.status(200).send({message: "Success"});
 		}
 	})
 }
