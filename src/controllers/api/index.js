@@ -6,8 +6,10 @@ const stock = require('./stock');
 const produce = require('./produce');
 const product = require('./product');
 const plant = require('./plant');
+const customer = require('./customer');
 
 router.use('/auth', auth);
+router.use('/customer', customer);
 router.use('/suggestion', suggestion);
 router.use('/manufacture', manufacture);
 router.use('/stock', stock);
