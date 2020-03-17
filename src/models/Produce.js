@@ -9,8 +9,8 @@ module.exports.create = (user, data, fileName, callback) => {
       throw err;
     }
 
-    const query = `INSERT INTO \`produce\` (\`user_id\`, \`weather\`, \`rain\`, \`snow\`, \`temperatures\`, \`min_temp\`, \`max_temp\`, \`product_id\`, \`process\`, \`name\`, \`content\`, \`area\`, \`expected_output\`, \`previous_id\`, \`file_name\`)
-                    VALUES (?, '${data.weather}', ${data.rain}, ${data.snow}, ${data.temperatures}, ${data.minTemp}, ${data.maxTemp}, ?, '${data.process}', '${data.name}', '${data.content}', ${data.area}, ${data.expected}, ${data.previous_id}, '${fileName}');`;
+    const query = `INSERT INTO \`produce\` (\`user_id\`, \`weather\`, \`rain\`, \`snow\`, \`temperatures\`, \`min_temp\`, \`max_temp\`, \`product_id\`, \`process\`, \`name\`, \`content\`, \`area\`, \`expected_output\`, \`file_name\`)
+                    VALUES (?, '${data.weather}', ${data.rain}, ${data.snow}, ${data.temperatures}, ${data.minTemp}, ${data.maxTemp}, ?, '${data.process}', '${data.name}', '${data.content}', '${data.area}', '${data.expected}', '${fileName}');`;
     const exec = conn.query(query, [user.id, data.product_id], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
