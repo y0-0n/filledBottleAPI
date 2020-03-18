@@ -455,71 +455,72 @@ module.exports.getStockHistoryList = (user, data, callback) => {
 
 //재고 관리 모듈 리스트 주기
 module.exports.getStockList2 = (user, data, callback) => {
-	const {page, name, family, plant} = data;
+	const {page, name, family, plant, useFamilyData} = data;
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
       throw err;
 		}
 		let familyInPlant = ``;
-		data.useFamilyData.map((e, i) => {
+		useFamilyData.map((e, i) => {
 				familyInPlant += `'${e.family}' ,`;
 		});
 		familyInPlant = familyInPlant.slice(0, -1);
-		if(familyInPlant.length !== 0){
-			const query = `SELECT b.* FROM
-			(SELECT product_id, MAX(S.id) as id
-				FROM \`en\`.\`stock\` as S JOIN plant as P ON S.plant_id = P.id
-				GROUP BY product_id, plant_id
-			) AS a JOIN
-			(SELECT S.quantity, S.id as id, P.weight, P.name, P.grade, S.product_id, S.changeDate, P.date, P.file_name, PL.name as plantName
-				FROM \`en\`.\`stock\` AS S JOIN \`en\`.\`product\` AS P ON S.product_id = P.id
-				JOIN plant as PL ON PL.id = S.plant_id
-				WHERE P.user_id = ?
-				${name !== '' ? `AND P.name = '${name}'` : ``}
-				${family !== 0 ? `AND P.family = '${family}'` : ``}
-				AND P.family IN (${familyInPlant})
-				${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}
-				AND P.\`set\` = 1
-			) AS b
-			ON a.product_id = b.product_id AND a.id = b.id
-			ORDER BY b.date DESC
-			${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')};`;
-			const exec = conn.query(query, [user.id], (err, result) => {
-				conn.release();
-				console.log('실행 sql : ', exec.sql);
-				return callback(err, result);
-			});
-		} else {
-			return callback(null, [])
-		}
-  });
-}
-
-//재고 관리 모듈 리스트 총 개수 주기
-module.exports.getStockTotal = (user, data, callback) => {
-	const {name, family, plant} = data;
-  pool.getConnection(function(err, conn) {
-    if (err) {
-      conn.release();
-      throw err;
-    }
-    const query = `SELECT count(*) as total FROM
-    (SELECT product_id, MAX(S.id) as id
+		const query = `SELECT b.* FROM
+		(SELECT product_id, MAX(S.id) as id
 			FROM \`en\`.\`stock\` as S JOIN plant as P ON S.plant_id = P.id
 			GROUP BY product_id, plant_id
-    ) AS a JOIN
-    (SELECT S.quantity, S.id as id, P.weight, P.name, P.grade, S.product_id, S.changeDate, P.date, P.file_name, PL.name as plantName
+		) AS a JOIN
+		(SELECT S.quantity, S.id as id, P.weight, P.name, P.grade, S.product_id, S.changeDate, P.date, P.file_name, PL.name as plantName
 			FROM \`en\`.\`stock\` AS S JOIN \`en\`.\`product\` AS P ON S.product_id = P.id
 			JOIN plant as PL ON PL.id = S.plant_id
 			WHERE P.user_id = ?
 			${name !== '' ? `AND P.name = '${name}'` : ``}
 			${family !== 0 ? `AND P.family = '${family}'` : ``}
-			AND PL.id = '${plant}'
+			${useFamilyData.length !== 0 ? `AND P.family IN (${familyInPlant})` : `AND P.family = 0`}
+			${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}
 			AND P.\`set\` = 1
-    ) AS b
-    ON a.product_id = b.product_id AND a.id = b.id
-    ORDER BY b.date DESC;`;
+		) AS b
+		ON a.product_id = b.product_id AND a.id = b.id
+		ORDER BY b.date DESC
+		${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')};`;
+		const exec = conn.query(query, [user.id], (err, result) => {
+			conn.release();
+			console.log('실행 sql : ', exec.sql);
+			return callback(err, result);
+		});
+  });
+}
+
+//재고 관리 모듈 리스트 총 개수 주기
+module.exports.getStockTotal = (user, data, callback) => {
+	const {name, family, plant, useFamilyData} = data;
+  pool.getConnection(function(err, conn) {
+    if (err) {
+      conn.release();
+      throw err;
+		}
+		let familyInPlant = ``;
+		useFamilyData.map((e, i) => {
+				familyInPlant += `'${e.family}' ,`;
+		});
+		familyInPlant = familyInPlant.slice(0, -1);
+    const query = `SELECT count(*) as total FROM
+		(SELECT product_id, MAX(S.id) as id
+			FROM \`en\`.\`stock\` as S JOIN plant as P ON S.plant_id = P.id
+			GROUP BY product_id, plant_id
+		) AS a JOIN
+		(SELECT S.quantity, S.id as id, P.weight, P.name, P.grade, S.product_id, S.changeDate, P.date, P.file_name, PL.name as plantName
+			FROM \`en\`.\`stock\` AS S JOIN \`en\`.\`product\` AS P ON S.product_id = P.id
+			JOIN plant as PL ON PL.id = S.plant_id
+			WHERE P.user_id = ?
+			${name !== '' ? `AND P.name = '${name}'` : ``}
+			${family !== 0 ? `AND P.family = '${family}'` : ``}
+			${useFamilyData.length !== 0 ? `AND P.family IN (${familyInPlant})` : `AND P.family = 0`}
+			${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}
+			AND P.\`set\` = 1
+		) AS b
+		ON a.product_id = b.product_id AND a.id = b.id;`;
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
@@ -530,12 +531,17 @@ module.exports.getStockTotal = (user, data, callback) => {
 
 //재고 관리 모듈 재고 실사에서 페이지네이션 없이 리스트 전달
 module.exports.getStockList3 = (user, data, callback) => {
-	const {name, family, plant} = data;
+	const {name, family, plant, useFamilyData} = data;
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
       throw err;
-    }
+		}
+		let familyInPlant = ``;
+		useFamilyData.map((e, i) => {
+			familyInPlant += `'${e.family}' ,`;
+		});
+		familyInPlant = familyInPlant.slice(0, -1);
     const query = `SELECT b.* FROM
     (SELECT product_id, MAX(S.id) as id
 			FROM \`en\`.\`stock\` as S JOIN plant as P ON S.plant_id = P.id
@@ -548,7 +554,7 @@ module.exports.getStockList3 = (user, data, callback) => {
 			${name !== '' ? `AND P.name = '${name}'` : ``}
 			${family !== 0 ? `AND P.family = '${family}'` : ``}
 			${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}
-			${category !== 0 ? `AND F.category = '${category}'` : ``}
+			${useFamilyData.length !== 0 ? `AND P.family IN (${familyInPlant})` : `AND P.family = 0`}
 			AND P.\`set\` = 1
     ) AS b
     ON a.product_id = b.product_id AND a.id = b.id
