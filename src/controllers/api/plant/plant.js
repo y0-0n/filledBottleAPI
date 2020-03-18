@@ -13,3 +13,10 @@ exports.add = (req, res) => {
     res.status(200).send(msg);
   })
 }
+
+exports.searchPlant = (req, res) => {
+  Plant.searchPlant(req.user, req.body, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}

@@ -22,6 +22,29 @@ module.exports.getList = (user, callback) => {
   })
 }
 
+module.exports.searchPlant = (user, data, callback) => {
+	const {productFamily} = data;
+  pool.getConnection(function(err, conn) {
+    if(err) {
+      conn.release();
+      throw err;
+    }
+		const query = `SELECT P.* from plant as P
+		JOIN familyInPlant as FP ON P.id = FP.plant_id
+		WHERE user_id = ?
+		AND FP.family_id = ${productFamily}
+		GROUP BY P.id
+		`;
+
+    const exec = conn.query(query, [user.id], (err, result) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+
+      return callback(err, result);
+    });
+  })
+}
+
 module.exports.add = (user, data, callback) => {
   pool.getConnection(function(err, conn) {
     if(err) {

@@ -7,6 +7,13 @@ exports.getFamilyList = (req, res) => {
   })
 }
 
+exports.getFamilyId = (req, res) => {
+  Product.getFamilyId(req.user, req.params, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
 exports.getAllFamily = (req, res) => {
 	Product.getAllFamily(req.params.categoryId, (err, msg) => {
     if(err) throw err;

@@ -214,7 +214,7 @@ module.exports.convertStockByOrder = (user, data, callback) => {
 	});
 };
 
-//생산 모듈을 통한 재고 변경
+//제조 모듈을 통한 재고 변경
 module.exports.convertStockByManufacture = async (user, data, callback) => {
   var res = {consume: [], produce: []};
   await pool.getConnection(function(err, conn) {

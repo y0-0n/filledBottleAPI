@@ -2,6 +2,29 @@
 
 const pool = require('../../config/dbpool').pool;
 
+module.exports.getFamilyId = (user, data, callback) => {
+	const {productId} = data;
+	pool.getConnection((err, conn) => {
+		if(err) {
+			conn.release();
+			throw err;
+		}
+		const query = `SELECT PF.id as id from product as P
+		JOIN productFamily_user as PF ON P.family = PF.family_id
+		WHERE P.user_id = ?
+		AND P.id = ${productId}`
+
+		const exec = conn.query(query, [user.id], (err, result) => {
+			conn.release();
+			if(err) {
+				throw err;
+			}
+			console.log('실행 sql : ', exec.sql);
+			console.warn(result)
+			return callback(err, result);
+		})
+	})
+}
 
 module.exports.getList = (user, callback) => {
   pool.getConnection(function(err, conn) {

@@ -24,4 +24,11 @@ router.post('/',
 	plant.add
 )
 
+router.post('/searchPlant',
+	passport.authenticate('JWT', { session: false }),
+	checkAuthed,
+	plant.searchPlant
+)
+
+
 module.exports = router;
