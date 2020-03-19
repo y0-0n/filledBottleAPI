@@ -117,10 +117,11 @@ router.get('/order_summary', function(req, res) {
   })
 });
 
-router.get('/income/:month', function(req, res) {
+router.get('/income/:year/:month', function(req, res) {
   connection.query(`SELECT SUM(OP.price) as sum
     FROM \`order\` as O JOIN order_product as OP ON O.id = OP.order_id
-    WHERE ${req.params.month} = MONTH(O.date)
+		WHERE ${req.params.month} = MONTH(O.date)
+		AND ${req.params.year} = YEAR(O.date)
     AND O.state = 'shipping'
     AND O.user_id = ${req.user.id}
     `, function(err, rows) {
@@ -131,16 +132,17 @@ router.get('/income/:month', function(req, res) {
   })
 })
 
-router.get('/amount/:month', function(req, res) {
+router.get('/amount/:year/:month', function(req, res) {
   connection.query(`SELECT count(*) as amount
-    FROM \`order\` as O JOIN order_product as OP ON O.id = OP.order_id
-    WHERE ${req.params.month} = MONTH(O.date)
+    FROM \`order\` as O
+		WHERE ${req.params.month} = MONTH(O.date)
+		AND ${req.params.year} = YEAR(O.date)
     AND O.state = 'shipping'
-    AND O.user_id = ${req.user.id}
+		AND O.user_id = ${req.user.id}
     `, function(err, rows) {
     if(err) throw err;
         
-    console.log('GET /order/income : ' + rows);
+    console.log('GET /order/amount : ', rows);
     res.send(rows);
   })
 })
