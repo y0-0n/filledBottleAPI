@@ -71,7 +71,7 @@ exports.getStockHistoryList = (req, res) => {
 }
 
 exports.getStockDetail = (req, res) => {
-  Stock.getStockDetail(req.user, req.params.id, (err, msg) => {
+  Stock.getStockDetail(req.user, req.params, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })
