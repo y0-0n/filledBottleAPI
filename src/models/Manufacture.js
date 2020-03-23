@@ -13,8 +13,8 @@ module.exports.addManufacture = (user, data, callback) => {
       conn.release();
       throw err;
     }
-    const query = 'INSERT INTO manufacture SET title = ?, user_id = ?, total = ?';
-    const exec = conn.query(query, [title, user.id, total], (err, result) => {
+    const query = 'INSERT INTO manufacture SET title = ?, user_id = ?, total = ?, date = ?';
+    const exec = conn.query(query, [title, user.id, total, data.date], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
 
