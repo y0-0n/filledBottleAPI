@@ -20,7 +20,6 @@ module.exports.getFamilyId = (user, data, callback) => {
 				throw err;
 			}
 			console.log('실행 sql : ', exec.sql);
-			console.warn(result)
 			return callback(err, result);
 		})
 	})
@@ -152,11 +151,15 @@ module.exports.modifyFamily = (user, data, callback) => {
 			delete_query += `DELETE FROM productFamily_user WHERE family_id = '${e.id}' AND user_id = '${user.id}';`;
 		})
 		const query = insert_query + delete_query;
-    const exec = conn.query(query, (err, result) => {
-      conn.release();
-      console.log('실행 sql : ', exec.sql);
-      return callback(err, result);
-    });
+		if(query !== ``) {
+			const exec = conn.query(query, (err, result) => {
+				conn.release();
+				console.log('실행 sql : ', exec.sql);
+				return callback(err, result);
+			});
+		} else {
+			return callback(err, []);
+		}
 	});
 }
 
