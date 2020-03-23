@@ -56,7 +56,9 @@ module.exports.getLastStock = (data, user, callback) => {
 
 module.exports.transportStock = (data, user, callback) => {
 	let {productId, start, dest, quantity, current1, current2} = data; //id = 주문 id
-	console.log(data);
+	if(start === dest) {
+		return callback(null, {msg: 'same plant'});
+	}
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
@@ -66,6 +68,10 @@ module.exports.transportStock = (data, user, callback) => {
 			VALUES (${productId}, ${current1-quantity}, ${start}, ${-quantity}, '창고 이동');`;
 
     const exec = conn.query(insert_query, (err, result) => {
+			if(err) {
+				conn.release();
+				throw err;
+			}
       console.log('실행 sql : ', exec.sql);
 		});
 
