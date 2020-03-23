@@ -70,7 +70,7 @@ module.exports.transportStock = (data, user, callback) => {
 		});
 
 		const insert_query2 = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`plant_id\`, \`change\`, \`memo\`)
-			VALUES (${productId}, ${current2+quantity}, ${dest}, ${quantity}, '창고 이동');`;
+			VALUES (${productId}, ${parseInt(current2)+parseInt(quantity)}, ${dest}, ${quantity}, '창고 이동');`;
 
     const exec2 = conn.query(insert_query2, (err, result) => {
       conn.release();
@@ -217,7 +217,6 @@ module.exports.convertStockByOrder = (user, data, callback) => {
 //제조 모듈을 통한 재고 변경
 module.exports.convertStockByManufacture = async (user, data, callback) => {
 	var res = {consume: [], produce: []};
-	console.log(data)
   await pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
