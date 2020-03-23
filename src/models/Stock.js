@@ -216,7 +216,8 @@ module.exports.convertStockByOrder = (user, data, callback) => {
 
 //제조 모듈을 통한 재고 변경
 module.exports.convertStockByManufacture = async (user, data, callback) => {
-  var res = {consume: [], produce: []};
+	var res = {consume: [], produce: []};
+	console.log(data)
   await pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
@@ -240,8 +241,8 @@ module.exports.convertStockByManufacture = async (user, data, callback) => {
         console.log('실행 sql : ', exec.sql);
         const current = result[0].quantity;
         const change = -e.quantity;
-        const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`change\`, \`memo\`)
-                              VALUES (${e.id}, ${current+change}, ${change}, '제조로 인한 재고 수정')`;
+        const insert_query = `INSERT INTO stock (\`product_id\`, \`plant_id\`, \`quantity\`, \`change\`, \`memo\`)
+                              VALUES (${e.id}, ${e.plant}, ${current+change}, ${change}, '제조로 인한 재고 수정')`;
         const exec2 = conn.query(insert_query, (err2, result2) => {
           console.log('실행 sql : ', exec2.sql);
 					res.consume.push(result2);
@@ -260,8 +261,8 @@ module.exports.convertStockByManufacture = async (user, data, callback) => {
 									console.log('실행 sql : ', exec.sql);
 									const current = result[0].quantity
 									const change = e.quantity;
-									const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`change\`, \`memo\`)
-																				VALUES (${e.id}, ${parseInt(current)+parseInt(change)}, ${change}, '제조로 인한 재고 수정')`;
+									const insert_query = `INSERT INTO stock (\`product_id\`, \`plant_id\`, \`quantity\`, \`change\`, \`memo\`)
+																				VALUES (${e.id}, ${e.plant}, ${parseInt(current)+parseInt(change)}, ${change}, '제조로 인한 재고 수정')`;
 									const exec2 = conn.query(insert_query, (err2, result2) => {
 										console.log('실행 sql : ', exec2.sql);
 										res.produce.push(result2);
