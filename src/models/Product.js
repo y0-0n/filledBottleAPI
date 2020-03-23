@@ -179,12 +179,15 @@ module.exports.modifyFamilyInPlant = (user, data, callback) => {
 			delete_query += `DELETE FROM familyInPlant WHERE family_id = '${e.familyUserId}' AND plant_id = '${data.plant}'`;
 		})
 		const query = insert_query + delete_query;
-    const exec = conn.query(query, (err, result) => {
-      conn.release();
-      console.log('실행 sql : ', exec.sql);
-      return callback(err, result);
-    });
-	});
+		if(query !== ``) {
+			const exec = conn.query(query, (err, result) => {
+				conn.release();
+				console.log('실행 sql : ', exec.sql);
+				return callback(err, result);
+			});
+		} else {
+			return callback(err, []);
+		}	});
 }
 
 /*
