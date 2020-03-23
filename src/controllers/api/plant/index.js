@@ -22,13 +22,19 @@ router.post('/',
 	passport.authenticate('JWT', { session: false }),
 	checkAuthed,
 	plant.add
-)
+);
 
 router.post('/searchPlant',
 	passport.authenticate('JWT', { session: false }),
 	checkAuthed,
 	plant.searchPlant
-)
+);
+
+router.put('/deactivate/:id',
+	passport.authenticate('JWT', { session: false }),
+	checkAuthed,
+	plant.deactivate
+);
 
 
 module.exports = router;

@@ -20,3 +20,10 @@ exports.searchPlant = (req, res) => {
     res.status(200).send(msg);
   })
 }
+
+exports.deactivate = (req, res) => {
+  Plant.deactivate(req.user, req.params, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}

@@ -78,3 +78,24 @@ module.exports.add = (user, data, callback) => {
     });
 	})
 }
+
+module.exports.deactivate = (user, data, callback) => {
+	const {id} = data;
+  pool.getConnection(function(err, conn) {
+    if(err) {
+      conn.release();
+      throw err;
+    }
+		const query = `UPDATE plant
+		SET \`set\` = 0
+		WHERE user_id = ?
+		AND id = ?`;
+
+    const exec = conn.query(query, [user.id, id], (err, result) => {
+      conn.release();
+      console.warn('실행 sql : ', exec.sql);
+
+      return callback(err, result);
+    });
+  })
+}
