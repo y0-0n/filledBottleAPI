@@ -240,16 +240,16 @@ router.post('/changeState/', checkAuthed, function(req, res) {
 
 router.put('/modify/:id', checkAuthed, function(req, res) {
   let {id} = req.params;
-  let {orderInfo, productInfo} = req.body;
+	let {orderInfo, productInfo} = req.body;
   orderInfo = orderInfo[0];
   let price = 0;
 
   productInfo.map((e, i) => {
     price += e.quantity * e['price_shipping']; // 수량 * 출고 가격
-  });
+	});
+	//유저 일치 확인
   connection.query(`SELECT user_id FROM \`order\` WHERE \`id\`=${id}`, function(err, rows) {
     if(err) throw err;
-
     if(rows[0]['user_id'] !== req.user.id) {
       res.send({message: 'Auth Error'});
       return ;
@@ -260,14 +260,14 @@ router.put('/modify/:id', checkAuthed, function(req, res) {
 
     connection.query('DELETE FROM order_product WHERE \`order_id\`='+id, function (e, r) {
       productInfo.map((e, i) => {
-        connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`quantity\`, \`price\`, \`tax\`) VALUES ('${id}', '${e.productId}', '${e.quantity}', '${e.price}', ${e.tax})`, function(err_, rows_) {
+        connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`plant_id\`, \`quantity\`, \`price\`, \`tax\`) VALUES ('${id}', '${e.productId}', '${e.plantId}', '${e.quantity}', '${e.price}', ${e.tax})`, function(err_, rows_) {
           if(err) throw err_;
-          console.log('product '+i+' : '+rows_);
-        })
+          console.log('product '+i+' : ', rows_);
+				})
       });
     });
 
-    console.log('PUT /order/modify/'+id);
+    console.log('PUT /order/modify/', id);
     res.send(rows);
   });
 });
