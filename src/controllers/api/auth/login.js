@@ -10,8 +10,8 @@ exports.auth = (req, res, done) =>
       res.status(401).json({message: 'fail'});
     } else {
       req.logIn(user, function(err) {
-        if (err) return next(err);
-        done(null, user)
+				if (err) return next(err);
+				done(null, user);
       });  
     }
   },

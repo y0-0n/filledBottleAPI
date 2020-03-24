@@ -4,6 +4,7 @@ const { check } = require('express-validator');
 const user = require('./user');
 const login = require('./login');
 const passport = require('passport');
+const auth = require('./auth');
 
 const preventDupAuth = (req, res, next) => {
   if (req.isAuthenticated()) {
@@ -12,16 +13,6 @@ const preventDupAuth = (req, res, next) => {
     next();
   }
 };
-
-function checkAuthed(req, res, next) {
-  if (req.isAuthenticated()) {
-    next();
-  } else {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.status(401).json({ message: 'Not logged in!' });
-    //res.redirect(301, 'http://cosimo.iptime.org:3000/#/login')
-  }
-}
 
 /**
  * POST /api/auth/emailCheck
@@ -52,13 +43,13 @@ router.post('/login',
 
 router.get('/info',
   passport.authenticate('JWT', { session: false }),
-  checkAuthed,
+  auth.checkAuthed,
   user.getInfo
 );
 
 router.put('/info',
   passport.authenticate('JWT', { session: false }),
-  checkAuthed,
+  auth.checkAuthed,
   user.updateInfo
 );
 

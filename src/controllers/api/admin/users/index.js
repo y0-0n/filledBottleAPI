@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const passport = require('passport');
 const users = require('./users');
+const auth = require('../../auth/auth');
 
 function checkAuthed(req, res, next) {
   if (req.isAuthenticated()) {
@@ -14,25 +15,25 @@ function checkAuthed(req, res, next) {
 
 router.post('/list',
   passport.authenticate('JWT', { session: false }),
-	checkAuthed,
+	auth.checkAdmin,
 	users.getListAdmin
 );
 
 router.get('/total',
   passport.authenticate('JWT', { session: false }),
-	checkAuthed,
+	auth.checkAdmin,
 	users.getTotalAdmin
 );
 
 router.get('/detail/:id',
   passport.authenticate('JWT', { session: false }),
-	checkAuthed,
+	auth.checkAdmin,
 	users.getDetailAdmin
 );
 
 router.get('/productFamily/:id',
   passport.authenticate('JWT', { session: false }),
-	checkAuthed,
+	auth.checkAdmin,
 	users.getProductFamilyAdmin
 );
 

@@ -10,13 +10,14 @@ const JWT_SECRET = config.get('auth.jwt.secret');
 
 const localAuth = (email, password, done) => {
   Users.emailCheck(email, (err, rows) => {
-    if(err) throw err;
+    if(err) return done(err);
     if(rows.length > 0) {
-      let correctPwd = rows[0].password, salt = rows[0].salt, id = rows[0].id;
+      let correctPwd = rows[0].password, {salt, id, role} = rows[0];
       if(correctPwd === auth.hashPassword(password, salt)){
         done(null, {
           email,
-          id
+					id,
+					role
         })
       } else {
         done(null, false, 'Wrong Password');
