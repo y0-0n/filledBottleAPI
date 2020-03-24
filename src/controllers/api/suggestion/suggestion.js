@@ -16,8 +16,8 @@ exports.getTotal = (req, res) => {
   })
 }
 
-exports.getSuggestionById = (req, res) => {
-  Suggestion.getSuggestionById(req.user.id, req.params.id, (err, rows) => {
+exports.getDetail = (req, res) => {
+  Suggestion.getDetail(req.user.id, req.params.id, (err, rows) => {
     if(err) throw err;
     res.status(200).send(rows);
   })
