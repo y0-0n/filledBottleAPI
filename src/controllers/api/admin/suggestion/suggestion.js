@@ -9,15 +9,15 @@ exports.getListAdmin = (req, res) => {
   })
 }
 
-exports.answer = (req, res) => {
-  Suggestion.answer(req.user.id, req.body, (err, rows) => {
+exports.getTotalAdmin = (req, res) => {
+  Suggestion.getTotalAdmin(req.user.id, (err, rows) => {
     if(err) throw err;
     res.status(200).send(rows);
   })
 }
 
-exports.getTotalAdmin = (req, res) => {
-  Suggestion.getTotalAdmin(req.user.id, (err, rows) => {
+exports.answer = (req, res) => {
+  Suggestion.answer(req.user.id, req.body, (err, rows) => {
     if(err) throw err;
     res.status(200).send(rows);
   })

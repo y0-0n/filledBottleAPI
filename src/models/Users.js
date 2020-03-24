@@ -83,3 +83,80 @@ module.exports.updateInfo = (id, data, callback) => {
     });
   });
 }
+
+module.exports.getListAdmin = (id, data, callback) => {
+	const {page} = data;
+	pool.getConnection(function(err, conn) {
+    if(err) {
+      conn.release();
+      throw err;
+    }
+
+		const query = `SELECT id, email, crNumber, name, address, phone, created_date FROM users
+		ORDER BY created_date DESC
+    ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')}`;
+
+    const exec = conn.query(query, id, (err, rows) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+
+      return callback(err, rows);
+    });
+  });
+}
+
+module.exports.getTotalAdmin = (id, callback) => {
+	pool.getConnection(function(err, conn) {
+    if(err) {
+      conn.release();
+      throw err;
+    }
+
+		const query = `SELECT count(*) as total FROM users`;
+
+    const exec = conn.query(query, id, (err, rows) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+
+      return callback(err, rows);
+    });
+  });
+}
+
+module.exports.getDetailAdmin = (id, data, callback) => {
+	pool.getConnection(function(err, conn) {
+    if(err) {
+      conn.release();
+      throw err;
+    }
+
+		const query = `SELECT id, email, crNumber, name, address, phone, created_date FROM users WHERE id= ?`;
+
+    const exec = conn.query(query, [data.id], (err, rows) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+
+      return callback(err, rows);
+    });
+  });
+}
+
+module.exports.getProductFamilyAdmin = (id, data, callback) => {
+	pool.getConnection(function(err, conn) {
+    if(err) {
+      conn.release();
+      throw err;
+    }
+
+		const query = `SELECT PFU.id, PF.name FROM productFamily_user as PFU
+		JOIN productFamily as PF ON PF.id = PFU.family_id
+		WHERE PFU.user_id = ?`;
+
+    const exec = conn.query(query, [data.id], (err, rows) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+
+      return callback(err, rows);
+    });
+  });
+}
