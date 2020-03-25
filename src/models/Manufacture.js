@@ -106,7 +106,7 @@ module.exports.getStockFromManufactureByProduce = (id, callback) => {
       conn.release();
       throw err;
     }
-    const query = `SELECT P.id as product_id, S.quantity, P.name, P.grade, P.weight, P.price_shipping, S.change, PL.name as plantName
+    const query = `SELECT P.id as product_id, S.quantity, P.name, P.grade, P.weight, P.price_shipping, S.change, PL.name as plantName, PL.set as plantSet
     FROM manufacture AS M JOIN stock_manufacture AS SM ON M.id = SM.manufacture_id
 		JOIN stock AS S ON S.id = SM.stock_id
 		JOIN plant as PL ON PL.id = S.plant_id
@@ -129,7 +129,7 @@ module.exports.getStockFromManufactureByConsume = (id, callback) => {
       conn.release();
       throw err;
     }
-    const query = `SELECT P.id as product_id, S.quantity, P.name, P.grade, P.weight, P.price_shipping, S.change, PL.name as plantName
+    const query = `SELECT P.id as product_id, S.quantity, P.name, P.grade, P.weight, P.price_shipping, S.change, PL.name as plantName, PL.set as plantSet
     FROM manufacture AS M JOIN stock_manufacture AS SM ON M.id = SM.manufacture_id
 		JOIN stock AS S ON S.id = SM.stock_id
 		JOIN plant as PL ON PL.id = S.plant_id

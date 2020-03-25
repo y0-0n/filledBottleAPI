@@ -180,7 +180,7 @@ router.get('/detail/:id', checkAuthed, function(req, res){
       res.status(400).send({message: '400 Error'});
       return ;
     }
-		connection.query(`SELECT p.id AS productId, pl.name as plant, pl.id as plantId, op.id AS orderProductId, op.quantity, p.name, op.price, op.tax, op.refund from \`order\` as o
+		connection.query(`SELECT p.id AS productId, pl.name as plant, pl.id as plantId, pl.set as plantSet, op.id AS orderProductId, op.quantity, p.name, op.price, op.tax, op.refund from \`order\` as o
 		JOIN \`order_product\` as op ON o.id = op.order_id
 		JOIN plant as pl ON op.plant_id = pl.id
 		JOIN product as p ON op.product_id = p.id
