@@ -8,6 +8,7 @@ const product = require('./product');
 const plant = require('./plant');
 const customer = require('./customer');
 const admin = require('./admin');
+const geocode = require('./geocode');
 
 router.use('/auth', auth);
 router.use('/customer', customer);
@@ -18,5 +19,6 @@ router.use('/produce', produce);
 router.use('/product', product);
 router.use('/plant', plant);
 router.use('/admin', admin);
+router.use('/geocode', geocode);
 
 module.exports = router;
