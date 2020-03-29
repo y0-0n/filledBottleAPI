@@ -9,6 +9,7 @@ const plant = require('./plant');
 const customer = require('./customer');
 const admin = require('./admin');
 const geocode = require('./geocode');
+const geolocation = require('./geolocation');
 
 router.use('/auth', auth);
 router.use('/customer', customer);
@@ -20,5 +21,6 @@ router.use('/product', product);
 router.use('/plant', plant);
 router.use('/admin', admin);
 router.use('/geocode', geocode);
+router.use('/geolocation', geolocation);
 
 module.exports = router;
