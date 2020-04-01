@@ -55,11 +55,10 @@ router.post('/total/unset/', checkAuthed, function(req, res) {
 });
 
 router.post('/list', checkAuthed, function(req, res){
-  let {page, name, family, category} = req.body;
+	let {page, name, family, category} = req.body;
   connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName
 		FROM product as A JOIN users as B ON A.user_id = B.id
-		LEFT JOIN productFamily_user as FU ON A.family = FU.family_id
-		LEFT JOIN productFamily as F ON F.id = FU.family_id
+		LEFT JOIN productFamily as F ON F.id = A.family
 		WHERE \`set\`=1
 		AND B.id = '${req.user.id}'
 		${family !== 0 ? `AND A.family = '${family}'` : ``}
