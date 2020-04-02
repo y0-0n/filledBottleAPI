@@ -88,7 +88,7 @@ router.get('/:plantId/:productId',
 router.put('/:id',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
-  stock.convertStock
+  stock.modifyStock
 )
 
 module.exports = router;

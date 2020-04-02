@@ -77,10 +77,10 @@ exports.getStockDetail = (req, res) => {
   })
 }
 
-exports.convertStock = (req, res) => {
-  const {id} = req.params;
-  const {quantity} = req.body;
-  Stock.convertStock(id, quantity, req.user, '재고 직접 수정', (err, msg) => {
+exports.modifyStock = (req, res) => {
+  const {id} = req.params;//창고 id
+  const {stockData} = req.body;
+  Stock.modifyStock(id, stockData, req.user, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })

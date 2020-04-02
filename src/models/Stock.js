@@ -22,13 +22,33 @@ module.exports.convertStock = (product_id, quantity, user, memo, callback) => {
       const change = quantity - current;
       const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`change\`, \`memo\`) VALUES (${product_id}, ${quantity}, ${change}, '${memo}')`;
       const exec2 = conn.query(insert_query, (err2, result2) => {
+				conn.release();
         console.log('실행 sql : ', exec2.sql);
         return callback(err2, result2);
       })
     });
   });
 };
-
+module.exports.modifyStock = (plantId, stockData, user, callback) => {
+  pool.getConnection(function(err, conn) {
+    if (err) {
+      conn.release();
+      throw err;
+		}
+		stockData.map((e, i) => {
+			if(e.next !== undefined) {
+				const {product_id, quantity, next} = e;//quantity => prev
+				const change = next - quantity;
+				const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`plant_id\`, \`change\`, \`memo\`) VALUES (${product_id}, ${next}, ${plantId}, ${change}, '재고 실사')`
+				const exec = conn.query(insert_query, (err, result) => {
+					conn.release();
+					console.log('실행 sql : ', exec.sql);
+					return callback(err, result);
+				})
+			}
+		});
+  });
+};
 module.exports.getLastStock = (data, user, callback) => {
 	let {productId, plant} = data; //id = 주문 id
   pool.getConnection(function(err, conn) {
