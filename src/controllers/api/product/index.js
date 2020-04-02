@@ -17,6 +17,7 @@ router.get('/familyId/:productId',
 	checkAuthed,
 	product.getFamilyId
 )
+
 //회원이 취급하는 품목군 리스트 주기
 router.get('/familyList/:categoryId',
   passport.authenticate('JWT', { session: false }),
@@ -59,6 +60,12 @@ router.get('/familyInPlant/:id',
 	passport.authenticate('JWT', { session: false }),
 	checkAuthed,
 	product.familyInPlant
+)
+
+router.get('/excel',
+	passport.authenticate('JWT', { session: false }),
+	checkAuthed,
+	product.excel
 )
 
 
