@@ -2,7 +2,8 @@
     "apps" : [{
         "name"        : "ERP",
         "script"      : "npm start",
-        "watch"       : true,
+				"watch"       : true,
+				"ignore_watch": ["node_modules", "public"],
         "instance_var": "INSTANCE_ID",
         "env": {
             "port": 4000,
