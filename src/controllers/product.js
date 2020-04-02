@@ -109,7 +109,7 @@ router.get('/:id', checkAuthed, function(req, res) {
 
 router.post('/', checkAuthed, upload.single('file'), (req, res) => {
   let {name, price, grade, weight, productFamily} = req.body;
-  let fileName = req.file ? 'product/'+req.file.filename : '318x180.svg';
+  let fileName = req.file ? 'product/'+req.file.filename : 'noimage.jfif';
   connection.query(`INSERT INTO \`product\` (\`name\`, \`grade\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`weight\`, \`safety_stock\`, \`file_name\`, \`user_id\`, \`family\`)
                     VALUES ('${name}', '${grade}', '4', '5', '${price}', '${weight}', '8', '${fileName}', "${req.user.id}", ${productFamily});`, function(err, rows) {
     if(err) throw err;

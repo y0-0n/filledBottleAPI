@@ -60,7 +60,9 @@ exports.modifyFamilyInPlant = (req, res) => {
 exports.excel = (req, res) => {
 	const workbook = excel.readFile(__dirname+'/../../../../public/excel/test.xlsx')
 	const sheet = workbook.Sheets['Sheet1'];
-	const range = excel.utils.decode_range(sheet['!ref']);
+	const rows = excel.utils.sheet_to_json(sheet);
+	console.warn(rows)
+	/*const range = excel.utils.decode_range(sheet['!ref']);
 	let result = [], row, rowNum, colNum;
 	//sheet to arr
 	for(rowNum = range.s.r; rowNum <= range.e.r; rowNum++) {
@@ -76,5 +78,5 @@ exports.excel = (req, res) => {
 		result.push(row);
 	}
 
-	console.warn(result)
+	console.warn(result)*/
 }
