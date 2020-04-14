@@ -3,6 +3,8 @@ const passport = require('passport');
 let cors = require('cors');
 let path = require('path');
 const session = require('express-session');
+const fs = require('fs');
+const https = require('https');
 
 let app = express();
 //routes
@@ -34,6 +36,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/', index);
+app.use('/d', express.static(path.join(__dirname, '../build')));
 app.use('/customer', 
   passport.authenticate('JWT', { session: false }),
   customer
@@ -61,7 +64,7 @@ app.use('/stock',
 app.use('/users', users);
 
 //====================  cors  ==========================================
-var whitelist = ['http://cosimo.iptime.org:3000']
+var whitelist = ['https://localhost:8080']
 
 var corsOptions = {
 
@@ -81,7 +84,17 @@ var corsOptions = {
 
 
 //===============================================================
+const options = {
+	key: fs.readFileSync(__dirname+'/private.pem', 'utf8'),
+	cert: fs.readFileSync(__dirname+'/public.pem', 'utf8')
+}
+console.warn(options)
 
 app.listen(app.get('port'), function () {
   console.log('Express server listening on port ' + app.get('port'));
 });
+
+https.createServer(options, app).listen(4001, function() {
+	console.warn('hey')
+})
+
