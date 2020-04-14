@@ -9,6 +9,7 @@ const plant = require('./plant');
 const customer = require('./customer');
 const admin = require('./admin');
 const geocode = require('./geocode');
+const survey = require('./survey');
 const geolocation = require('./geolocation');
 const kakao = require('./kakao');
 
@@ -22,6 +23,7 @@ router.use('/product', product);
 router.use('/plant', plant);
 router.use('/admin', admin);
 router.use('/geocode', geocode);
+router.use('/survey', survey);
 router.use('/geolocation', geolocation);
 router.use('/kakao', kakao);
 
