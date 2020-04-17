@@ -90,7 +90,7 @@ router.post('/list', checkAuthed, function(req, res){
              AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
              ORDER BY A.orderDate DESC
              ${(page !== 'all' ? `LIMIT ${limit*(page-1)}, ${limit}` : '')}`;
-  //console.log(state, page, state !== 'all' || name !== '')
+  console.log(sql)
   connection.query(sql, function(err, rows) {
     if(err) throw err;
 
