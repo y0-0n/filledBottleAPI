@@ -84,7 +84,7 @@ module.exports.updateInfo = (id, data, callback) => {
   });
 }
 
-module.exports.getListAdmin = (id, data, callback) => {
+module.exports.getListAdmin = (data, callback) => {
 	const {page} = data;
 	pool.getConnection(function(err, conn) {
     if(err) {
@@ -96,7 +96,7 @@ module.exports.getListAdmin = (id, data, callback) => {
 		ORDER BY created_date DESC
     ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')}`;
 
-    const exec = conn.query(query, id, (err, rows) => {
+    const exec = conn.query(query, (err, rows) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
 

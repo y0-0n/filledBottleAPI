@@ -31,6 +31,13 @@ router.get('/detail/:id',
 	users.getDetailAdmin
 );
 
+router.get('/detail/product/:id',
+  passport.authenticate('JWT', { session: false }),
+	auth.checkAdmin,
+	users.getDetailProductAdmin
+);
+
+
 router.get('/productFamily/:id',
   passport.authenticate('JWT', { session: false }),
 	auth.checkAdmin,
