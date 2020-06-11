@@ -68,5 +68,9 @@ router.get('/excel',
 	product.excel
 )
 
+router.get('/list/open/:id',
+	product.getAllList
+)
+
 
 module.exports = router;

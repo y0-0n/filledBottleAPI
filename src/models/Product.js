@@ -44,6 +44,28 @@ module.exports.getList = (user, callback) => {
   })
 }
 
+module.exports.getAllList = (user, callback) => {
+  pool.getConnection(function(err, conn) {
+    if(err) {
+      conn.release();
+      throw err;
+    }
+    const query = `SELECT * from product
+			WHERE \`set\`=1
+			AND mallVisible = 1
+			${user !== "all" ? "AND user_id = ?" : ""}
+			`;
+
+    const exec = conn.query(query, [user.id], (err, result) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+
+      return callback(err, result);
+    });
+  })
+}
+
+
 module.exports.getAllFamily = (data, callback) => {
   pool.getConnection(function(err, conn) {
     if (err) {
