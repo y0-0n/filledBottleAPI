@@ -107,14 +107,24 @@ router.get('/:id', checkAuthed, function(req, res) {
   });
 });
 
-router.post('/', checkAuthed, upload.single('file'), (req, res) => {
-  let {name, price, grade, weight, productFamily} = req.body;
-  let fileName = req.file ? 'product/'+req.file.filename : 'noimage.jfif';
-  connection.query(`INSERT INTO \`product\` (\`name\`, \`grade\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`weight\`, \`safety_stock\`, \`file_name\`, \`user_id\`, \`family\`)
-                    VALUES ('${name}', '${grade}', '4', '5', '${price}', '${weight}', '8', '${fileName}', "${req.user.id}", ${productFamily});`, function(err, rows) {
+router.post('/', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail'}]), (req, res) => {
+	let {name, price, grade, weight, productFamily} = req.body;
+	let fileName = 'noimage.jfif';
+	if(req.files.file)
+		 fileName = 'product/'+req.files.file[0].filename; // 대표 이미지
+	let detailFileName = ''; // 상세 이미지
+	console.warn(req.files)
+	if(req.files.file_detail) {
+		req.files.file_detail.map((e, i) => {
+			detailFileName += 'productDetail/'+e.filename+'|'; // 대표 이미지
+		})
+		detailFileName = detailFileName.slice(0, -1);
+	}
+  connection.query(`INSERT INTO \`product\` (\`name\`, \`grade\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`weight\`, \`safety_stock\`, \`file_name\`, \`detail_file\`, \`user_id\`, \`family\`)
+                    VALUES ('${name}', '${grade}', '4', '5', '${price}', '${weight}', '8', '${fileName}', '${detailFileName}', "${req.user.id}", ${productFamily});`, function(err, rows) {
     if(err) throw err;
 
-    console.log('POST /product : ' + rows);
+    console.log('POST /product : ', rows);
 
     const product_id = rows.insertId;
 		Plant.getList(req.user, (err, msg) => {
@@ -122,7 +132,6 @@ router.post('/', checkAuthed, upload.single('file'), (req, res) => {
 			let sql = '';
 			msg.map((e,i) => {
 				sql+=`INSERT INTO stock (\`product_id\`, \`quantity\`, \`plant_id\`) VALUES ('${product_id}', '${0}', '${e.id}'); `
-				console.warn(sql)
 			})
 			//sql = `INSERT INTO stock (\`product_id\`, \`quantity\`) VALUES ('${product_id}', '${0}');`
 			connection.query(sql, function(err_, rows_) {
