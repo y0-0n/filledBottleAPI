@@ -43,6 +43,13 @@ exports.modifyFamily = (req, res) => {
   })
 }
 
+exports.getStateCount = (req, res) => {
+  Product.getStateCount(req.user, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
 exports.familyInPlant = (req, res) => {
   Product.familyInPlant(req.user, req.params.id, (err, msg) => {
     if(err) throw err;
