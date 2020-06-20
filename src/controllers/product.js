@@ -56,7 +56,7 @@ router.post('/total/unset/', checkAuthed, function(req, res) {
 
 router.post('/list', checkAuthed, function(req, res){
 	let {page, name, family, category} = req.body;
-  connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName
+  connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName, state
 		FROM product as A JOIN users as B ON A.user_id = B.id
 		LEFT JOIN productFamily as F ON F.id = A.family
 		WHERE \`set\`=1
@@ -67,7 +67,7 @@ router.post('/list', checkAuthed, function(req, res){
 		ORDER BY A.date DESC
 		${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')}`, function(err, rows) {
 		if(err) throw err;
-    console.log('POST /product/list : ', rows);
+    // console.log('POST /product/list : ', rows);
     res.send(rows);
   });
 });
@@ -126,20 +126,21 @@ router.post('/', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail
 
     console.log('POST /product : ', rows);
 
-    const product_id = rows.insertId;
-		Plant.getList(req.user, (err, msg) => {
-			if(err) throw err;
-			let sql = '';
-			msg.map((e,i) => {
-				sql+=`INSERT INTO stock (\`product_id\`, \`quantity\`, \`plant_id\`) VALUES ('${product_id}', '${0}', '${e.id}'); `
-			})
-			//sql = `INSERT INTO stock (\`product_id\`, \`quantity\`) VALUES ('${product_id}', '${0}');`
-			connection.query(sql, function(err_, rows_) {
-				if(err_) throw err_;
-				console.log('stock '+rows_);
-				res.send(rows);
-			});
-		});
+		// 품목 등록시 재고 0으로 채우기
+    // const product_id = rows.insertId;
+		// Plant.getList(req.user, (err, msg) => {
+		// 	if(err) throw err;
+		// 	let sql = '';
+		// 	msg.map((e,i) => {
+		// 		sql+=`INSERT INTO stock (\`product_id\`, \`quantity\`, \`plant_id\`) VALUES ('${product_id}', '${0}', '${e.id}'); `
+		// 	})
+		// 	//sql = `INSERT INTO stock (\`product_id\`, \`quantity\`) VALUES ('${product_id}', '${0}');`
+		// 	connection.query(sql, function(err_, rows_) {
+		// 		if(err_) throw err_;
+		// 		console.log('stock '+rows_);
+		// 		res.send(rows);
+		// 	});
+		// });
   })
 });
 
