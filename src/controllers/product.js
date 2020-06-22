@@ -125,7 +125,7 @@ router.post('/', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail
     if(err) throw err;
 
     console.log('POST /product : ', rows);
-
+		res.send(rows);
 		// 품목 등록시 재고 0으로 채우기
     // const product_id = rows.insertId;
 		// Plant.getList(req.user, (err, msg) => {
