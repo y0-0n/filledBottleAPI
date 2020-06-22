@@ -57,7 +57,7 @@ router.post('/total',
 router.post('/list/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
-  stock.getStockList2
+  stock.getStockList
 );
 
 router.post('/list/total',

@@ -8,7 +8,7 @@ exports.getStockQuantity = (req, res) => {
 }
 
 exports.getStockList = (req, res) => {
-  Stock.getStockList(req.user, req.params.page, (err, msg) => {
+  Stock.getStockList(req.user, req.body, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })
@@ -87,7 +87,7 @@ exports.modifyStock = (req, res) => {
 }
 
 exports.createStock = (req, res) => {
-  Stock.createStock(req.user, req.body, '재고 직접 수정', (err, msg) => {
+  Stock.createStock(req.user, req.body, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })

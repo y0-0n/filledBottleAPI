@@ -107,8 +107,8 @@ module.exports.transportStock = (data, user, callback) => {
 }
 
 
-module.exports.createStock = (user, data, memo, callback) => {
-	let {productId, quantity, plant, type, price, current} = data; //id = 주문 id
+module.exports.createStock = (user, data, callback) => {
+	let {productId, quantity, plant, type, name, expiration, date_manufacture} = data; //id = 주문 id
 	console.log(data)
 
   pool.getConnection(function(err, conn) {
@@ -116,7 +116,7 @@ module.exports.createStock = (user, data, memo, callback) => {
       conn.release();
       throw err;
     }
-		const insert_query = `INSERT INTO stock (\`product_id\`, \`plant_id\`, \`quantity\`, \`change\`, \`memo\`) VALUES (${productId}, ${plant}, ${parseInt(current)+parseInt(quantity)}, ${quantity}, '${type}')`;
+		const insert_query = `INSERT INTO stock (\`product_id\`, \`plant_id\`, \`quantity\`, \`name\`, \`date_manufacture\`, \`expiration\`, \`type\`) VALUES (${productId}, ${plant}, ${quantity}, '${name}', '${date_manufacture}', '${expiration}', '${type}')`;
 		const exec = conn.query(insert_query, (err, result) => {
 			conn.release();
 			console.log('실행 sql : ', exec.sql);
@@ -511,6 +511,32 @@ module.exports.getStockList2 = (user, data, callback) => {
 		ORDER BY b.date DESC
 		${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')};`;
 		const exec = conn.query(query, [user.id], (err, result) => {
+			conn.release();
+			console.log('실행 sql : ', exec.sql);
+			return callback(err, result);
+		});
+  });
+}
+
+//재고 관리 모듈 리스트 주기2
+module.exports.getStockList = (user, data, callback) => {
+	console.warn(data)
+	const {page, name, family, plant, useFamilyData} = data;
+	
+  pool.getConnection(function(err, conn) {
+    if (err) {
+      conn.release();
+      throw err;
+		}
+		const query = `
+			SELECT S.*, P.name as productName, PL.name as plantName FROM \`stock\` as S
+			JOIN \`product\` as P ON P.id = S.product_id
+			JOIN \`plant\` as PL ON PL.id = S.plant_id
+			WHERE S.plant_id = ${plant}
+			AND S.name LIKE '%${name}%'
+			
+			${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')};`;
+		const exec = conn.query(query, (err, result) => {
 			conn.release();
 			console.log('실행 sql : ', exec.sql);
 			return callback(err, result);
