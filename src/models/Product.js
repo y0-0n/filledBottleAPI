@@ -149,6 +149,7 @@ module.exports.getStateCount = (user, callback) => {
 		}
 
 		const query = `SELECT COUNT(*) as count, state FROM product
+		WHERE user_id = ?
 		GROUP BY state`;
 
 		const exec = conn.query(query, [user.id], (err, result) => {
