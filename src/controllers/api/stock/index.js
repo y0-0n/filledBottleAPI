@@ -79,7 +79,7 @@ router.post('/sum/',
 );
 
 
-router.get('/:plantId/:productId',
+router.get('/:stockId',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
   stock.getStockDetail

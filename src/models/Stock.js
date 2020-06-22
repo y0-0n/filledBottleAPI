@@ -696,18 +696,18 @@ module.exports.getStockFromManufactureByProduce = (id, callback) => {
 }
 
 module.exports.getStockDetail = (user, data, callback) => {
-	let {productId, plantId} = data;
+	let {stockId} = data;
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
       throw err;
     }
-    const query = `SELECT P.name as name, S.quantity, S.changeDate as date, S.change, S.memo FROM \`stock\` AS S JOIN \`product\` as P ON S.product_id = P.id
-		WHERE P.id = ?
-		AND S.plant_id = ?
+		const query = `SELECT P.name as productName, S.* FROM \`stock\`
+		AS S JOIN \`product\` as P ON S.product_id = P.id
+		WHERE S.id = ?
     AND P.user_id = ?
     ORDER BY S.\`id\` DESC`;
-    const exec = conn.query(query, [productId, plantId, user.id], (err, result) => {
+    const exec = conn.query(query, [stockId, user.id], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
       return callback(err, result);
