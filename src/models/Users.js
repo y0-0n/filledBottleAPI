@@ -16,10 +16,10 @@ module.exports.addUser = (data, callback) => {
       conn.release();
       throw err;
 		}
-		let {email, crNumber, password, name, address, postcode, phone, salt} = data;
+		let {email, crNumber, password, name, address, addressDetail, postcode, phone, salt} = data;
 
-    const query = `INSERT INTO users SET email = ?, crNumber = ?, password = ?, name = ?, address = ?, postcode = ?, phone = ?, salt =  ?`;
-    const exec = conn.query(query, [email, crNumber, password, name, address, postcode, phone, salt], (err, result) => {
+    const query = `INSERT INTO users SET email = ?, crNumber = ?, password = ?, name = ?, address = ?, address_detail = ?, postcode = ?, phone = ?, salt =  ?`;
+    const exec = conn.query(query, [email, crNumber, password, name, address, addressDetail, postcode, phone, salt], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
 
@@ -57,7 +57,7 @@ module.exports.getInfo = (id, callback) => {
       throw err;
     }
 
-    const query = 'SELECT email, name, address, phone, crNumber FROM users WHERE id = ?';
+    const query = 'SELECT email, name, address, phone, crNumber, expiration FROM users WHERE id = ?';
     const exec = conn.query(query, id, (err, rows) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);

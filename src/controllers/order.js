@@ -90,7 +90,6 @@ router.post('/list', checkAuthed, function(req, res){
              AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
              ORDER BY A.orderDate DESC
              ${(page !== 'all' ? `LIMIT ${limit*(page-1)}, ${limit}` : '')}`;
-  console.log(sql)
   connection.query(sql, function(err, rows) {
     if(err) throw err;
 
@@ -150,13 +149,13 @@ router.get('/amount/:year/:month', function(req, res) {
 
 router.post('/', (req, res) => {
   let price = 0; //총액
-  let {sCustomer, sProduct, date, cellphone, telephone, address, comment, orderDate} = req.body;
-  
+  let {sCustomer, sProduct, date, cellphone, telephone, address, addressDetail, postcode, comment, orderDate} = req.body;
+  console.warn(req.body)
   sProduct.map((e, i) => {
     price += e.quantity * e.price; // 수량 * 출고 가격
   })
 
-  connection.query(`INSERT INTO \`order\` (\`customer_id\`, \`date\`, \`price\`, \`telephone\`, \`cellphone\`, \`address\`, \`comment\`, \`orderDate\`, \`user_id\`) VALUES ('${sCustomer}', '${date}', '${price}', '${telephone}', '${cellphone}', '${address}', '${comment}', '${orderDate}', '${req.user.id}')`, function(err, rows) {
+  connection.query(`INSERT INTO \`order\` (\`customer_id\`, \`date\`, \`price\`, \`telephone\`, \`cellphone\`, \`address\`, \`address_detail\`, \`postcode\`, \`comment\`, \`orderDate\`, \`user_id\`) VALUES ('${sCustomer}', '${date}', '${price}', '${telephone}', '${cellphone}', '${address}', '${addressDetail}', '${postcode}', '${comment}', '${orderDate}', '${req.user.id}')`, function(err, rows) {
     if(err) throw err;
     console.log('POST /order : ' + rows);
 
@@ -221,16 +220,16 @@ router.put('/detail/refund/:id', checkAuthed, function(req, res) {
 router.post('/changeState/', checkAuthed, function(req, res) {
   let {id, prev, next} = req.body;
 	if(prev === 'order' && next === 'shipping') {
-		console.log('상품 출하')
+		console.log('상품 출하');
 		Stock.convertStockByOrder(req.user, req.body, (err, msg) => {
 			if(err) throw err;
 		})
 	}
 	if(prev == 'shipping' && next === 'order') {
-		console.log('상품 출하 취소')
-		Stock.convertStockByOrderReverse(req.user, req.body, (err, msg) => {
-			if(err) throw err;
-		})
+		console.log('상품 출하 취소');
+		// Stock.convertStockByOrderReverse(req.user, req.body, (err, msg) => {
+		// 	if(err) throw err;
+		// })
 	}
 
 	if(next == 'complete') {
