@@ -22,14 +22,14 @@ router.post('/total/', checkAuthed, function(req, res) {
 	let {name, family, category} = req.body;
   let sql = `SELECT count(*) as total
 		FROM product as A JOIN users as B ON A.user_id = B.id
-		LEFT JOIN productFamily_user as FU ON A.family = FU.family_id
+		LEFT JOIN productFamily_user as FU ON A.family = FU.family_id and FU.user_id = B.id
 		LEFT JOIN productFamily as F ON F.id = FU.family_id
 		WHERE \`set\`=1
 		AND B.id = '${req.user.id}'
 		${family !== 0 ? `AND A.family = '${family}'` : ``}
 		${name !== '' ? `AND A.name LIKE '%${name}%'` : ``}
 		${category !== 0 ? `AND F.category = '${category}'` : ``}
-		ORDER BY A.date DESC;`
+    ORDER BY A.date DESC;`
   connection.query(sql, function(err, rows) {
     if(err) throw err;
 
@@ -163,9 +163,19 @@ router.put('/deactivate', checkAuthed, function(req, res){
   });
 });
 
-router.put('/modify/:id', checkAuthed, upload.none(), function(req, res) {
-	console.log(`UPDATE product SET \`name\`='${req.body.name}', \`grade\`='${req.body.grade}', \`weight\`='${req.body.weight}', \`price_shipping\`='${req.body.price}', \`family\`=${req.body.productFamily} WHERE \`id\`=${req.params.id};`)
-  connection.query(`UPDATE product SET \`name\`='${req.body.name}', \`grade\`='${req.body.grade}', \`weight\`='${req.body.weight}', \`price_shipping\`='${req.body.price}', \`family\`=${req.body.productFamily} WHERE \`id\`=${req.params.id};`, function(err, rows) {
+router.put('/modify/:id', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail'}]), function(req, res) {
+  const { name, price, productFamily } = req.body;
+  let fileName = 'noimage.jfif';
+	if(req.files.file)
+		 fileName = 'product/'+req.files.file[0].filename; // 대표 이미지
+	let detailFileName = ''; // 상세 이미지
+	if(req.files.file_detail) {
+		req.files.file_detail.map((e, i) => {
+			detailFileName += 'productDetail/'+e.filename+'|'; // 대표 이미지
+		})
+		detailFileName = detailFileName.slice(0, -1);
+	}
+  connection.query(`UPDATE product SET \`name\`='${name}', \`price_shipping\`='${price}', \`family\` ='${productFamily}', \`file_name\`='${fileName}', \`detail_file\`='${detailFileName}' WHERE \`id\`=${req.params.id};`, function(err, rows) {
     if(err) throw err;
 
     console.log('PUT /product/modify/:id : ', rows);
