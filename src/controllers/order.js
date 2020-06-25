@@ -173,13 +173,13 @@ router.post('/', (req, res) => {
 router.get('/detail/:id', checkAuthed, function(req, res){
   let {id} = req.params; // id로 검색
 
-  connection.query(`SELECT date, name, o.address as address, o.telephone as telephone, o.cellphone as cellphone, comment, state, o.user_id from \`order\` as o JOIN \`customer\` as c ON o.customer_id = c.id WHERE o.id=${id}`, function(err, rows) {
+  connection.query(`SELECT o.id as id, date, name, o.address as address, o.telephone as telephone, o.cellphone as cellphone, comment, state, o.user_id from \`order\` as o JOIN \`customer\` as c ON o.customer_id = c.id WHERE o.id=${id}`, function(err, rows) {
     if(err) throw err;
     if(rows.length === 0 || rows[0]['user_id'] !== req.user.id) {
       res.status(400).send({message: '400 Error'});
       return ;
     }
-		connection.query(`SELECT p.id AS productId, pl.name as plant, pl.id as plantId, pl.set as plantSet, op.id AS orderProductId, op.quantity, p.name, op.price, op.tax, op.refund from \`order\` as o
+		connection.query(`SELECT p.id AS productId, pl.name as plant, pl.id as plantId, pl.set as plantSet, op.id AS orderProductId, op.stock_id AS stockId, op.quantity, p.name, op.price, op.tax, op.refund from \`order\` as o
 		JOIN \`order_product\` as op ON o.id = op.order_id
 		JOIN plant as pl ON op.plant_id = pl.id
 		JOIN product as p ON op.product_id = p.id
@@ -218,7 +218,7 @@ router.put('/detail/refund/:id', checkAuthed, function(req, res) {
 })
 
 router.post('/changeState/', checkAuthed, function(req, res) {
-  let {id, prev, next} = req.body;
+  let {prev, next} = req.body;
 	if(prev === 'order' && next === 'shipping') {
 		console.log('상품 출하');
 		Stock.convertStockByOrder(req.user, req.body, (err, msg) => {
@@ -240,11 +240,11 @@ router.post('/changeState/', checkAuthed, function(req, res) {
 		//수금 취소
 	}
 
-  connection.query(`UPDATE \`order\` SET \`state\`='${next}' WHERE \`id\`=${id}`, function(err, rows) {
-    if(err) throw err;
-    console.log(`PUT /order/changeState/`, rows);
-    res.send(rows);
-  });
+  // connection.query(`UPDATE \`order\` SET \`state\`='${next}' WHERE \`id\`=${id}`, function(err, rows) {
+  //   if(err) throw err;
+  //   console.log(`PUT /order/changeState/`, rows);
+  //   res.send(rows);
+  // });
 });
 
 router.put('/modify/:id', checkAuthed, function(req, res) {
