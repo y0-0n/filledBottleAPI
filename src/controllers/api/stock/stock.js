@@ -14,6 +14,16 @@ exports.getStockList = (req, res) => {
   })
 }
 
+exports.getStockProduct = (req, res) => {
+  const { params } = req;
+  const data = { ...params }
+  Stock.getStockProduct(req.user, data, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+
 exports.getStockHistoryTotal = (req, res) => {
   Stock.getStockHistoryTotal(req.user, req.body, (err, msg) => {
     if(err) throw err;

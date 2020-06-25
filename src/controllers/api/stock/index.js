@@ -60,6 +60,13 @@ router.post('/list/',
   stock.getStockList
 );
 
+//주문 등록시 재고 가져오기
+router.get('/product/:id',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  stock.getStockProduct
+);
+
 router.post('/list/total',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,

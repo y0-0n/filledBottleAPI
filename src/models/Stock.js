@@ -202,40 +202,41 @@ module.exports.convertStockByOrder = (user, data, callback) => {
 		}
 		const order_query = `SELECT * FROM order_product WHERE order_id = ?`
 		const exec = conn.query(order_query, [id], (err, result) => {
-			console.log('실행 sql : ', exec.sql);
-			let {length} = result;
+      console.log('실행 sql : ', exec.sql);
+      console.warn(result)
+			// let {length} = result;
 
-			let ret = [];
-			result.forEach(e => {
-				const select_query = `SELECT S.* FROM stock as S JOIN product as P ON S.product_id = P.id
-				WHERE P.user_id = ?
-				AND P.\`set\` = 1
-				AND P.id = ${e.product_id}
-				AND S.plant_id = ${e.plant_id}
-				ORDER BY S.id DESC
-				LIMIT 1`;
-        const exec = conn.query(select_query, [user.id], (err2, result2) => {
-					console.log('실행 sql : ', exec.sql);
-					console.log('r2: ',result2)
-					const op_id = result2[0].id;
-          const current = result2[0].quantity
-          const change = -e.quantity;
-          const insert_query = `INSERT INTO stock (\`product_id\`, \`plant_id\`, \`quantity\`, \`change\`, \`memo\`)
-                                VALUES (${e.product_id}, ${e.plant_id}, ${parseInt(current)+parseInt(change)}, ${change}, '출고로 인한 재고 수정')`;
-          const exec2 = conn.query(insert_query, (err3, result3) => {
-						console.log('실행 sql : ', exec2.sql);
-						const update_query = `UPDATE order_product SET \`stock_id\`=${result3.insertId} WHERE \`id\` = ${op_id}`
-						const exec3 = conn.query(update_query, (err4, result4) => {
-							console.log('실행 sql : ', exec3.sql);
-						});
-						ret.push(result3);
-            if((--length) == 0){
-              conn.release();
-              return callback(false, ret);
-            }
-          })
-        });
-			})
+			// let ret = [];
+			// result.forEach(e => {
+			// 	const select_query = `SELECT S.* FROM stock as S JOIN product as P ON S.product_id = P.id
+			// 	WHERE P.user_id = ?
+			// 	AND P.\`set\` = 1
+			// 	AND P.id = ${e.product_id}
+			// 	AND S.plant_id = ${e.plant_id}
+			// 	ORDER BY S.id DESC
+			// 	LIMIT 1`;
+      //   const exec = conn.query(select_query, [user.id], (err2, result2) => {
+			// 		console.log('실행 sql : ', exec.sql);
+			// 		console.log('r2: ',result2)
+			// 		const op_id = result2[0].id;
+      //     const current = result2[0].quantity
+      //     const change = -e.quantity;
+      //     const insert_query = `INSERT INTO stock (\`product_id\`, \`plant_id\`, \`quantity\`, \`change\`, \`memo\`)
+      //                           VALUES (${e.product_id}, ${e.plant_id}, ${parseInt(current)+parseInt(change)}, ${change}, '출고로 인한 재고 수정')`;
+      //     const exec2 = conn.query(insert_query, (err3, result3) => {
+			// 			console.log('실행 sql : ', exec2.sql);
+			// 			const update_query = `UPDATE order_product SET \`stock_id\`=${result3.insertId} WHERE \`id\` = ${op_id}`
+			// 			const exec3 = conn.query(update_query, (err4, result4) => {
+			// 				console.log('실행 sql : ', exec3.sql);
+			// 			});
+			// 			ret.push(result3);
+      //       if((--length) == 0){
+      //         conn.release();
+      //         return callback(false, ret);
+      //       }
+      //     })
+      //   });
+			// })
 		});
 	});
 };
@@ -520,8 +521,7 @@ module.exports.getStockList2 = (user, data, callback) => {
 
 //재고 관리 모듈 리스트 주기2
 module.exports.getStockList = (user, data, callback) => {
-	console.warn(data)
-	const {page, name, family, plant, useFamilyData} = data;
+	const {pageNumbers, name, family, plant} = data;
 	
   pool.getConnection(function(err, conn) {
     if (err) {
@@ -533,10 +533,31 @@ module.exports.getStockList = (user, data, callback) => {
 			JOIN \`product\` as P ON P.id = S.product_id
 			JOIN \`plant\` as PL ON PL.id = S.plant_id
 			WHERE S.plant_id = ${plant}
+			/*AND P.family = ${family}*/
 			AND S.name LIKE '%${name}%'
 			
-			${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')};`;
+			${(pageNumbers !== 'all' ? `LIMIT ${15*(pageNumbers-1)}, 15` : '')};`;
 		const exec = conn.query(query, (err, result) => {
+			conn.release();
+			console.log('실행 sql : ', exec.sql);
+			return callback(err, result);
+		});
+  });
+}
+
+//Product Id를 받아와서 해당 Product의 재고 기록들을 주기
+module.exports.getStockProduct = (user, data, callback) => {
+	
+  pool.getConnection(function(err, conn) {
+    if (err) {
+      conn.release();
+      throw err;
+		}
+    const query = `SELECT S.*, P.name as plantName FROM stock as S
+      JOIN plant as P ON S.plant_id = P.id
+      WHERE product_id = ?
+    `;
+		const exec = conn.query(query, [data.id], (err, result) => {
 			conn.release();
 			console.log('실행 sql : ', exec.sql);
 			return callback(err, result);
@@ -546,17 +567,12 @@ module.exports.getStockList = (user, data, callback) => {
 
 //재고 관리 모듈 리스트 총 개수 주기
 module.exports.getStockTotal = (user, data, callback) => {
-	const {name, family, plant, useFamilyData} = data;
+	const {name, family, plant} = data;
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
       throw err;
 		}
-		let familyInPlant = ``;
-		useFamilyData.map((e, i) => {
-				familyInPlant += `'${e.family}' ,`;
-		});
-		familyInPlant = familyInPlant.slice(0, -1);
     const query = `SELECT count(*) as total FROM
 		(SELECT product_id, MAX(S.id) as id
 			FROM \`en\`.\`stock\` as S JOIN plant as P ON S.plant_id = P.id
@@ -567,8 +583,7 @@ module.exports.getStockTotal = (user, data, callback) => {
 			JOIN plant as PL ON PL.id = S.plant_id
 			WHERE P.user_id = ?
 			${name !== '' ? `AND P.name = '${name}'` : ``}
-			${family !== 0 ? `AND P.family = '${family}'` : ``}
-			${useFamilyData.length !== 0 ? `AND P.family IN (${familyInPlant})` : `AND P.family = 0`}
+			/* ${family !== 0 ? `AND P.family = '${family}'` : ``} */
 			${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}
 			AND P.\`set\` = 1
 		) AS b
