@@ -533,7 +533,7 @@ module.exports.getStockList = (user, data, callback) => {
 			JOIN \`product\` as P ON P.id = S.product_id
 			JOIN \`plant\` as PL ON PL.id = S.plant_id
 			WHERE S.plant_id = ${plant}
-			/*AND P.family = ${family}*/
+			${family !== 0 ? `AND P.family = '${family}'` : ``}
 			AND S.name LIKE '%${name}%'
 			
 			${(pageNumbers !== 'all' ? `LIMIT ${15*(pageNumbers-1)}, 15` : '')};`;
@@ -573,21 +573,13 @@ module.exports.getStockTotal = (user, data, callback) => {
       conn.release();
       throw err;
 		}
-    const query = `SELECT count(*) as total FROM
-		(SELECT product_id, MAX(S.id) as id
-			FROM \`en\`.\`stock\` as S JOIN plant as P ON S.plant_id = P.id
-			GROUP BY product_id, plant_id
-		) AS a JOIN
-		(SELECT S.quantity, S.id as id, P.weight, P.name, P.grade, S.product_id, S.changeDate, P.date, P.file_name, PL.name as plantName
-			FROM \`en\`.\`stock\` AS S JOIN \`en\`.\`product\` AS P ON S.product_id = P.id
-			JOIN plant as PL ON PL.id = S.plant_id
-			WHERE P.user_id = ?
-			${name !== '' ? `AND P.name = '${name}'` : ``}
-			/* ${family !== 0 ? `AND P.family = '${family}'` : ``} */
-			${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}
-			AND P.\`set\` = 1
-		) AS b
-		ON a.product_id = b.product_id AND a.id = b.id;`;
+		const query = `SELECT count(*) FROM \`stock\` as S
+			JOIN \`product\` as P ON P.id = S.product_id
+			JOIN \`plant\` as PL ON PL.id = S.plant_id
+			WHERE S.plant_id = ${plant}
+			${family !== 0 ? `AND P.family = '${family}'` : ``}
+			AND S.name LIKE '%${name}%'`;
+      
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
