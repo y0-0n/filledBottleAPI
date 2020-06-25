@@ -193,17 +193,35 @@ module.exports.convertStockByOrderReverse = (user, data, callback) => {
 };
 
 //주문 모듈을 통한 재고 변경
-module.exports.convertStockByOrder = (user, data, callback) => {
-	const {id} = data; //id = 주문 id
-  pool.getConnection(function(err, conn) {
+module.exports.convertStockByOrder = function (user, data, callback) {
+  pool.getConnection(async function(err, conn) {
     if (err) {
       conn.release();
       throw err;
-		}
-		const order_query = `SELECT * FROM order_product WHERE order_id = ?`
-		const exec = conn.query(order_query, [id], (err, result) => {
-      console.log('실행 sql : ', exec.sql);
-      console.warn(result)
+    }
+
+    for (const item of data.productInfo) {
+      async function updateStock(item) {
+        const update_query = `UPDATE stock SET quantity = quantity - ${item.quantity} WHERE id = ${item.stockId}`;
+        const exec = await conn.query(update_query, (err, result) => {
+          if (err) {
+            conn.release();
+            throw err;
+          }
+        });
+        console.log('실행 sql : ', exec.sql);
+      }
+      await updateStock(item);
+    }
+
+    conn.release();
+    callback(false, {a: 'Done'});
+
+		// const order_query = `SELECT * FROM order_product WHERE order_id = ?`
+		// const exec = conn.query(order_query, [id], (err, result) => {
+    //   console.log('실행 sql : ', exec.sql);
+    //   console.warn(result)
+
 			// let {length} = result;
 
 			// let ret = [];
@@ -237,7 +255,7 @@ module.exports.convertStockByOrder = (user, data, callback) => {
       //     })
       //   });
 			// })
-		});
+		// });
 	});
 };
 
