@@ -150,8 +150,8 @@ router.get('/amount/:year/:month', function(req, res) {
 router.post('/', (req, res) => {
   let price = 0; //총액
   let {sCustomer, sProduct, date, cellphone, telephone, address, addressDetail, postcode, comment, orderDate} = req.body;
-  console.warn(req.body)
-  sProduct.map((e, i) => {
+	
+	sProduct.map((e, i) => {
     price += e.quantity * e.price; // 수량 * 출고 가격
   })
 
@@ -251,12 +251,14 @@ router.post('/changeState/', checkAuthed, function(req, res) {
 router.put('/modify/:id', checkAuthed, function(req, res) {
   let {id} = req.params;
 	let {orderInfo, productInfo} = req.body;
+	console.warn(req.body)
   orderInfo = orderInfo[0];
   let price = 0;
 
   productInfo.map((e, i) => {
     price += e.quantity * e['price_shipping']; // 수량 * 출고 가격
 	});
+
 	//유저 일치 확인
   connection.query(`SELECT user_id FROM \`order\` WHERE \`id\`=${id}`, function(err, rows) {
     if(err) throw err;
@@ -264,8 +266,9 @@ router.put('/modify/:id', checkAuthed, function(req, res) {
       res.send({message: 'Auth Error'});
       return ;
     }
-  })
-  connection.query(`UPDATE \`order\` SET \`cellphone\`='${orderInfo.cellphone}', \`telephone\`='${orderInfo.telephone}', \`address\`='${orderInfo.address}', \`comment\`='${orderInfo.comment}', \`price\`=${price} WHERE \`id\`=${id}`, function(err, rows) {
+	})
+	
+  connection.query(`UPDATE \`order\` SET \`cellphone\`='${orderInfo.cellphone}', \`telephone\`='${orderInfo.telephone}', \`address\`='${orderInfo.address}', \`comment\`='${orderInfo.comment}', \`address\` = '${orderInfo.address}', \`address_detail\` = '${orderInfo.addressDetail}', \`postcode\` = '${orderInfo.postcode}', \`price\`=${price} WHERE \`id\`=${id}`, function(err, rows) {
     if(err) throw err;
 
     connection.query('DELETE FROM order_product WHERE \`order_id\`='+id, function (e, r) {

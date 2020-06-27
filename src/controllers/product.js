@@ -108,20 +108,20 @@ router.get('/:id', checkAuthed, function(req, res) {
 });
 
 router.post('/', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail'}]), (req, res) => {
-	let {name, price, grade, weight, productFamily} = req.body;
+  let {name, price, grade, weight, productFamily, discount_price, state, vat} = req.body;
 	let fileName = 'noimage.jfif';
 	if(req.files.file)
 		 fileName = 'product/'+req.files.file[0].filename; // 대표 이미지
 	let detailFileName = ''; // 상세 이미지
-	console.warn(req.files)
+	// console.warn(req.files)
 	if(req.files.file_detail) {
 		req.files.file_detail.map((e, i) => {
 			detailFileName += 'productDetail/'+e.filename+'|'; // 대표 이미지
 		})
 		detailFileName = detailFileName.slice(0, -1);
 	}
-  connection.query(`INSERT INTO \`product\` (\`name\`, \`grade\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`weight\`, \`safety_stock\`, \`file_name\`, \`detail_file\`, \`user_id\`, \`family\`)
-                    VALUES ('${name}', '${grade}', '4', '5', '${price}', '${weight}', '8', '${fileName}', '${detailFileName}', "${req.user.id}", ${productFamily});`, function(err, rows) {
+  connection.query(`INSERT INTO \`product\` (\`name\`, \`grade\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`discount_price\`, \`weight\`, \`safety_stock\`, \`file_name\`, \`detail_file\`, \`user_id\`, \`family\`, \`state\`, \`tax\`)
+                    VALUES ('${name}', '${grade}', '4', '5', '${price}', '${discount_price}', '${weight}', '8', '${fileName}', '${detailFileName}', "${req.user.id}", ${productFamily}, ${state}, ${vat});`, function(err, rows) {
     if(err) throw err;
 
     console.log('POST /product : ', rows);
