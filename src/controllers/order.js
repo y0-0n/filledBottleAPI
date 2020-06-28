@@ -219,7 +219,7 @@ router.put('/detail/refund/:id', checkAuthed, function(req, res) {
 })
 
 router.post('/changeState/', checkAuthed, function(req, res) {
-  let {prev, next} = req.body;
+  let {prev, next, orderInfo} = req.body;
 	if(prev === 'order' && next === 'shipping') {
 		console.log('상품 출하');
 		Stock.convertStockByOrder(req.user, req.body, (err, msg) => {
@@ -242,11 +242,11 @@ router.post('/changeState/', checkAuthed, function(req, res) {
 		//수금 취소
 	}
 
-  // connection.query(`UPDATE \`order\` SET \`state\`='${next}' WHERE \`id\`=${id}`, function(err, rows) {
-  //   if(err) throw err;
-  //   console.log(`PUT /order/changeState/`, rows);
-  //   res.send(rows);
-  // });
+  connection.query(`UPDATE \`order\` SET \`state\`='${next}' WHERE \`id\`=${orderInfo[0].id}`, function(err, rows) {
+    if(err) throw err;
+    console.log(`PUT /order/changeState/`, rows);
+    res.status(200).send(rows);
+  });
 });
 
 router.put('/modify/:id', checkAuthed, function(req, res) {
