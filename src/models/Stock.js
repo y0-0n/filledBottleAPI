@@ -116,7 +116,7 @@ module.exports.createStock = (user, data, callback) => {
       conn.release();
       throw err;
     }
-		const insert_query = `INSERT INTO stock (\`product_id\`, \`plant_id\`, \`quantity\`, \`name\`, \`date_manufacture\`, \`expiration\`, \`type\`) VALUES (${productId}, ${plant}, ${quantity}, '${name}', '${date_manufacture}', '${expiration}', '${type}')`;
+		const insert_query = `INSERT INTO stock (\`product_id\`, \`plant_id\`, \`quantity\`, \`initial_quantity\`, \`name\`, \`date_manufacture\`, \`expiration\`, \`type\`) VALUES (${productId}, ${plant}, ${quantity}, '${quantity}', '${name}', '${date_manufacture}', '${expiration}', '${type}')`;
 		const exec = conn.query(insert_query, (err, result) => {
 			conn.release();
 			console.log('실행 sql : ', exec.sql);
@@ -537,7 +537,7 @@ module.exports.getStockList2 = (user, data, callback) => {
   });
 }
 
-//재고 관리 모듈 리스트 주기2
+//재고 관리 모듈 리스트 주기 (사용중)
 module.exports.getStockList = (user, data, callback) => {
 	const {pageNumbers, name, family, plant} = data;
 	
@@ -562,6 +562,31 @@ module.exports.getStockList = (user, data, callback) => {
 		});
   });
 }
+
+//재고 상세에서 주문 리스트 전달
+module.exports.getStockOrder = (user, data, callback) => {
+	const {id} = data;
+	
+  pool.getConnection(function(err, conn) {
+    if (err) {
+      conn.release();
+      throw err;
+    }
+    const query=`
+      SELECT O.date as date, OP.* FROM \`order_product\` as OP
+      JOIN \`order\` as O ON OP.order_id = O.id
+      WHERE (O.state = 'shipping' OR O.state = 'complete')
+      AND O.user_id = '${user.id}'
+      AND OP.stock_id = '${id}'`
+
+    const exec = conn.query(query, (err, result) => {
+			conn.release();
+			console.log('실행 sql : ', exec.sql);
+			return callback(err, result);
+		});
+  });
+}
+
 
 //Product Id를 받아와서 해당 Product의 재고 기록들을 주기
 module.exports.getStockProduct = (user, data, callback) => {

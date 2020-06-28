@@ -18,6 +18,12 @@ router.get('/',
   stock.getStockQuantity
 );
 
+router.get('/order/:id',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  stock.getStockOrder
+);
+
 router.post('/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
