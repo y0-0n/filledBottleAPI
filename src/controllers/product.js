@@ -168,18 +168,19 @@ router.put('/deactivate', checkAuthed, function(req, res){
 });
 
 router.put('/modify/:id', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail'}]), function(req, res) {
-  const { name, price, productFamily, discount_price } = req.body;
+  const { name, price, productFamily, discount_price, state } = req.body;
   let fileName = 'noimage.jfif';
+  // console.warn(req.body)
 	if(req.files.file)
-		 fileName = 'product/'+req.files.file[0].filename; // 대표 이미지
+    fileName = 'product/'+req.files.file[0].filename; // 대표 이미지
 	let detailFileName = ''; // 상세 이미지
 	if(req.files.file_detail) {
 		req.files.file_detail.map((e, i) => {
 			detailFileName += 'productDetail/'+e.filename+'|'; // 대표 이미지
 		})
 		detailFileName = detailFileName.slice(0, -1);
-	}
-  connection.query(`UPDATE product SET \`name\`='${name}', \`price_shipping\`='${price}', \`discount_price\`='${discount_price}', \`family\` ='${productFamily}', \`file_name\`='${fileName}', \`detail_file\`='${detailFileName}' WHERE \`id\`=${req.params.id};`, function(err, rows) {
+  }
+  connection.query(`UPDATE product SET \`name\`='${name}', \`price_shipping\`='${price}', \`discount_price\`='${discount_price}', \`family\` ='${productFamily}', \`state\` = '${state}', \`file_name\`='${fileName}', \`detail_file\`='${detailFileName}' WHERE \`id\`=${req.params.id};`, function(err, rows) {
     if(err) throw err;
 
     console.log('PUT /product/modify/:id : ', rows);
