@@ -274,7 +274,7 @@ router.put('/modify/:id', checkAuthed, function(req, res) {
 
     connection.query('DELETE FROM order_product WHERE \`order_id\`='+id, function (e, r) {
       productInfo.map((e, i) => {
-        connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`plant_id\`, \`quantity\`, \`price\`, \`tax\`) VALUES ('${id}', '${e.productId}', '${e.plantId}', '${e.quantity}', '${e.price}', ${e.tax})`, function(err_, rows_) {
+        connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`plant_id\`, \`stock_id\`, \`quantity\`, \`price\`, \`tax\`) VALUES ('${id}', '${e.productId}', '${e.plantId}', '${e.stockId}', '${e.quantity}', '${e.price}', ${e.tax})`, function(err_, rows_) {
           if(err) throw err_;
           console.log('product '+i+' : ', rows_);
 				})
