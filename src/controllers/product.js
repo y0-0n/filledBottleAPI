@@ -56,16 +56,19 @@ router.post('/total/unset/', checkAuthed, function(req, res) {
 
 router.post('/list', checkAuthed, function(req, res){
 	let {page, name, family, category} = req.body;
-  connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName, state
+  connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName, state, IFNULL(sum(S.quantity), 0) as stock
 		FROM product as A JOIN users as B ON A.user_id = B.id
-		LEFT JOIN productFamily as F ON F.id = A.family
+    LEFT JOIN productFamily as F ON F.id = A.family
+    LEFT JOIN stock as S ON A.id = S.product_id
 		WHERE \`set\`=1
 		AND B.id = '${req.user.id}'
 		${family !== 0 ? `AND A.family = '${family}'` : ``}
 		${name !== '' ? `AND A.name LIKE '%${name}%'` : ``}
-		${category !== 0 ? `AND F.category = '${category}'` : ``}
-		ORDER BY A.date DESC
-		${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')}`, function(err, rows) {
+    ${category !== 0 ? `AND F.category = '${category}'` : ``}
+    GROUP BY A.id
+    ORDER BY A.date DESC
+    ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')}
+    ;`, function(err, rows) {
 		if(err) throw err;
     // console.log('POST /product/list : ', rows);
     res.send(rows);
@@ -97,9 +100,10 @@ router.post('/list/unset/', checkAuthed, function(req, res){
 router.get('/:id', checkAuthed, function(req, res) {
   let id = req.params.id; // id로 검색
 
-  connection.query(`SELECT P.*, F.\`name\` as familyName
-                    FROM product as P LEFT JOIN productFamily as F ON P.family = F.id
-                    WHERE P.id = ${id}`, function(err, rows) {
+  connection.query(`SELECT P.*, F.\`name\` as familyName, FC.\`name\` as categoryName, FC.\`id\` as categoryId
+    FROM product as P LEFT JOIN productFamily as F ON P.family = F.id
+    LEFT JOIN familyCategory as FC ON FC.id = F.category
+    WHERE P.id = ${id}`, function(err, rows) {
     if(err) throw err;
 
     console.log('GET /product/'+id+' : ' + rows);
@@ -164,7 +168,7 @@ router.put('/deactivate', checkAuthed, function(req, res){
 });
 
 router.put('/modify/:id', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail'}]), function(req, res) {
-  const { name, price, productFamily } = req.body;
+  const { name, price, productFamily, discount_price } = req.body;
   let fileName = 'noimage.jfif';
 	if(req.files.file)
 		 fileName = 'product/'+req.files.file[0].filename; // 대표 이미지
@@ -175,7 +179,7 @@ router.put('/modify/:id', checkAuthed, upload.fields([{name: 'file'}, {name: 'fi
 		})
 		detailFileName = detailFileName.slice(0, -1);
 	}
-  connection.query(`UPDATE product SET \`name\`='${name}', \`price_shipping\`='${price}', \`family\` ='${productFamily}', \`file_name\`='${fileName}', \`detail_file\`='${detailFileName}' WHERE \`id\`=${req.params.id};`, function(err, rows) {
+  connection.query(`UPDATE product SET \`name\`='${name}', \`price_shipping\`='${price}', \`discount_price\`='${discount_price}', \`family\` ='${productFamily}', \`file_name\`='${fileName}', \`detail_file\`='${detailFileName}' WHERE \`id\`=${req.params.id};`, function(err, rows) {
     if(err) throw err;
 
     console.log('PUT /product/modify/:id : ', rows);
