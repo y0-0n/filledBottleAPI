@@ -268,7 +268,7 @@ router.put('/modify/:id', checkAuthed, function(req, res) {
       return ;
     }
 	})
-	
+
   connection.query(`UPDATE \`order\` SET \`cellphone\`='${orderInfo.cellphone}', \`telephone\`='${orderInfo.telephone}', \`address\`='${orderInfo.address}', \`comment\`='${orderInfo.comment}', \`address\` = '${orderInfo.address}', \`address_detail\` = '${orderInfo.addressDetail}', \`postcode\` = '${orderInfo.postcode}', \`price\`=${price} WHERE \`id\`=${id}`, function(err, rows) {
     if(err) throw err;
 

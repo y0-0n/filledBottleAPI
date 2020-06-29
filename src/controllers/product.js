@@ -76,7 +76,7 @@ router.post('/list', checkAuthed, function(req, res){
 });
 
 router.post('/list/unset/', checkAuthed, function(req, res){
-  let {page, name, family, category} = req.body;
+  let {page, name, family, category, state} = req.body;
 	console.warn(req.body)
 
   connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName
@@ -88,6 +88,7 @@ router.post('/list/unset/', checkAuthed, function(req, res){
                     AND B.id = '${req.user.id}'
 										${name !== '' ? `AND A.name = '${name}'` : ``}
 										${category !== 0 ? `AND F.category = '${category}'` : ``}
+										${state !== 0 ? `AND A.state = '${state}'` : ``}
 										${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}
 										`, function(err, rows) {
     if(err) throw err;
@@ -179,7 +180,8 @@ router.put('/modify/:id', checkAuthed, upload.fields([{name: 'file'}, {name: 'fi
 			detailFileName += 'productDetail/'+e.filename+'|'; // 대표 이미지
 		})
 		detailFileName = detailFileName.slice(0, -1);
-  }
+	}
+	console.warn(req.files);
   connection.query(`UPDATE product SET \`name\`='${name}', \`price_shipping\`='${price}', \`discount_price\`='${discount_price}', \`family\` ='${productFamily}', \`state\` = '${state}', \`file_name\`='${fileName}', \`detail_file\`='${detailFileName}' WHERE \`id\`=${req.params.id};`, function(err, rows) {
     if(err) throw err;
 

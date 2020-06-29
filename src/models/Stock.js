@@ -549,9 +549,10 @@ module.exports.getStockList = (user, data, callback) => {
 		const query = `SELECT S.*, P.name as productName, PL.name as plantName FROM \`stock\` as S
 			JOIN \`product\` as P ON P.id = S.product_id
 			JOIN \`plant\` as PL ON PL.id = S.plant_id
-			WHERE S.plant_id = ${plant}
+			WHERE S.name LIKE '%${name}%'
+			${plant !== 'all' ? `AND S.plant_id = ${plant}` : ``}
 			${family !== 0 ? `AND P.family = '${family}'` : ``}
-			AND S.name LIKE '%${name}%'
+			
 			
 			${(pageNumbers !== 'all' ? `LIMIT ${15*(pageNumbers-1)}, 15` : '')};`;
 		const exec = conn.query(query, (err, result) => {
