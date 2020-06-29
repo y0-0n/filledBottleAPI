@@ -546,8 +546,7 @@ module.exports.getStockList = (user, data, callback) => {
       conn.release();
       throw err;
 		}
-		const query = `
-			SELECT S.*, P.name as productName, PL.name as plantName FROM \`stock\` as S
+		const query = `SELECT S.*, P.name as productName, PL.name as plantName FROM \`stock\` as S
 			JOIN \`product\` as P ON P.id = S.product_id
 			JOIN \`plant\` as PL ON PL.id = S.plant_id
 			WHERE S.plant_id = ${plant}
@@ -616,12 +615,13 @@ module.exports.getStockTotal = (user, data, callback) => {
       conn.release();
       throw err;
 		}
-		const query = `SELECT count(*) FROM \`stock\` as S
+		const query = `SELECT count(*) as total FROM \`stock\` as S
 			JOIN \`product\` as P ON P.id = S.product_id
 			JOIN \`plant\` as PL ON PL.id = S.plant_id
 			WHERE S.plant_id = ${plant}
 			${family !== 0 ? `AND P.family = '${family}'` : ``}
-			AND S.name LIKE '%${name}%'`;
+			AND S.name LIKE '%${name}%'
+			`;
       
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
