@@ -19,21 +19,20 @@ function checkAuthed(req, res, next) {
 }
 
 router.post('/total/', checkAuthed, function(req, res) {
-	let {name, family, category} = req.body;
+	let {name, family, category, state} = req.body;
   let sql = `SELECT count(*) as total
 		FROM product as A JOIN users as B ON A.user_id = B.id
-		LEFT JOIN productFamily_user as FU ON A.family = FU.family_id and FU.user_id = B.id
-		LEFT JOIN productFamily as F ON F.id = FU.family_id
+		LEFT JOIN productFamily as F ON F.id = A.family
 		WHERE \`set\`=1
 		AND B.id = '${req.user.id}'
 		${family !== 0 ? `AND A.family = '${family}'` : ``}
 		${name !== '' ? `AND A.name LIKE '%${name}%'` : ``}
 		${category !== 0 ? `AND F.category = '${category}'` : ``}
-    ORDER BY A.date DESC;`
+		${state !== 0 ? `AND A.state = '${state}'` : ``}
+		;`
   connection.query(sql, function(err, rows) {
     if(err) throw err;
-
-    console.log('GET /product/total/:state : ' + rows);
+    console.log('GET /product/total/:state : ', rows);
     res.send(rows);
   });
 });
@@ -55,7 +54,7 @@ router.post('/total/unset/', checkAuthed, function(req, res) {
 });
 
 router.post('/list', checkAuthed, function(req, res){
-	let {page, name, family, category} = req.body;
+	let {page, name, family, category, state} = req.body;
   connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName, state, IFNULL(sum(S.quantity), 0) as stock
 		FROM product as A JOIN users as B ON A.user_id = B.id
     LEFT JOIN productFamily as F ON F.id = A.family
@@ -64,7 +63,8 @@ router.post('/list', checkAuthed, function(req, res){
 		AND B.id = '${req.user.id}'
 		${family !== 0 ? `AND A.family = '${family}'` : ``}
 		${name !== '' ? `AND A.name LIKE '%${name}%'` : ``}
-    ${category !== 0 ? `AND F.category = '${category}'` : ``}
+		${category !== 0 ? `AND F.category = '${category}'` : ``}
+		${state !== 0 ? `AND A.state = '${state}'` : ``}
     GROUP BY A.id
     ORDER BY A.date DESC
     ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')}
