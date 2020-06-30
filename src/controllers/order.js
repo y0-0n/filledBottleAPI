@@ -202,20 +202,23 @@ router.get('/detail/:id', checkAuthed, function(req, res){
   });*/
 });
 
-router.put('/detail/refund/:id', checkAuthed, function(req, res) {
-  let {id} = req.params;
-
-  connection.query(`UPDATE \`order_product\` SET \`refund\`=
-    CASE
-      WHEN refund=1 THEN 0
-      ELSE 1
-    END
-    WHERE id = ${id}`, function(err, rows){
-    if(err) throw err;
-
-    console.log(`PUT /orderDetail/refund/${id}`);
-    res.send(rows);
-  })
+router.post('/detail/refund/', checkAuthed, async function(req, res) {
+  let {orderId, productId, plantId, stockId, refundQuantity, tax, price, quantity} = req.body.data;
+  let newPrice = price * refundQuantity / quantity;
+  try {
+    await connection.beginTransaction();
+    const del = await connection.query(`DELETE FROM order_product WHERE \`order_id\`='${orderId}' and \`product_id\`='${productId}' and \`plant_id\`='${plantId}' and \`stock_id\`='${stockId}' and \`tax\`='${tax}' and \`refund\` = '1';`);
+    const ins = await connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`plant_id\`, \`stock_id\`, \`quantity\`, \`price\`, \`tax\`, \`refund\`) VALUES ('${orderId}', '${productId}', '${plantId}', '${stockId}', '${refundQuantity}', '${newPrice}', ${tax}, 1);`);
+    await connection.commit();
+  } catch (err) {
+    console.warn(err);
+    connection.rollback();
+    return res.status(500).json(err);
+  } finally {
+    // connection.release();
+    res.header("Access-Control-Allow-Origin", "*");
+    res.status(200).json({message: "success"});
+  }
 })
 
 router.post('/changeState/', checkAuthed, function(req, res) {
