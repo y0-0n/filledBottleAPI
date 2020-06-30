@@ -591,15 +591,16 @@ module.exports.getStockOrder = (user, data, callback) => {
 }
 
 //재고 상세에서 입출고 리스트 전달
-module.exports.getStockModify = (user, data, callback) => {
-	const {id} = data;
+module.exports.getStockModify = (user, id, callback) => {
 	
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
       throw err;
     }
-    const query=``;
+    const query=`SELECT quantity, changeDate as date FROM \`stock_modify\`
+      WHERE \`user_id\` = ${user.id}
+      AND \`stock_id\` = ${id}`;
 
     const exec = conn.query(query, (err, result) => {
 			conn.release();

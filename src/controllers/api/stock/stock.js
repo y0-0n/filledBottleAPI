@@ -103,6 +103,15 @@ exports.modifyStock = (req, res) => {
   })
 }
 
+exports.getStockModify = (req, res) => {
+  const {id} = req.params;
+  Stock.getStockModify(req.user, id, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+
 exports.createStock = (req, res) => {
   Stock.createStock(req.user, req.body, (err, msg) => {
     if(err) throw err;
