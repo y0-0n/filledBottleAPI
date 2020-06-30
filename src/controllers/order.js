@@ -252,7 +252,7 @@ router.post('/changeState/', checkAuthed, function(req, res) {
 router.put('/modify/:id', checkAuthed, function(req, res) {
   let {id} = req.params;
 	let {orderInfo, productInfo} = req.body;
-	console.warn(req.body)
+	// console.warn(req.body)
   orderInfo = orderInfo[0];
   let price = 0;
 

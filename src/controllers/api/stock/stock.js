@@ -96,9 +96,8 @@ exports.getStockOrder = (req, res) => {
 
 
 exports.modifyStock = (req, res) => {
-  const {id} = req.params;//창고 id
   const {stockData} = req.body;
-  Stock.modifyStock(id, stockData, req.user, (err, msg) => {
+  Stock.modifyStock(stockData, req.user, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })

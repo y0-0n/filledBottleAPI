@@ -98,7 +98,7 @@ router.get('/:stockId',
   stock.getStockDetail
 );
 
-router.put('/:id',
+router.put('/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
   stock.modifyStock

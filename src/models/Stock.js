@@ -29,20 +29,23 @@ module.exports.convertStock = (product_id, quantity, user, memo, callback) => {
     });
   });
 };
-module.exports.modifyStock = (plantId, stockData, user, callback) => {
+module.exports.modifyStock = (stockData, user, callback) => {
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
       throw err;
 		}
 		stockData.map((e, i) => {
-			if(e.next !== undefined) {
-				const {product_id, quantity, next} = e;//quantity => prev
-				const change = next - quantity;
-				const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`plant_id\`, \`change\`, \`memo\`) VALUES (${product_id}, ${next}, ${plantId}, ${change}, '재고 실사')`
+			if(e.next !== undefined && e.next !== 0) {
+        const {next, id, quantity} = e;//quantity => prev, next => next
+        const insert_query = `INSERT INTO \`stock_modify\` (\`user_id\`, \`stock_id\`, \`quantity\`) VALUES (${user.id}, ${id}, ${next-quantity})`
 				const exec = conn.query(insert_query, (err, result) => {
+          console.log('실행 sql : ', exec.sql);
+        });
+				const update_query = `UPDATE \`stock\` SET \`quantity\`='${next}' WHERE \`id\`='${id}'`
+				const exec2 = conn.query(update_query, (err, result) => {
 					conn.release();
-					console.log('실행 sql : ', exec.sql);
+					console.log('실행 sql : ', exec2.sql);
 					return callback(err, result);
 				})
 			}
@@ -587,6 +590,24 @@ module.exports.getStockOrder = (user, data, callback) => {
   });
 }
 
+//재고 상세에서 입출고 리스트 전달
+module.exports.getStockModify = (user, data, callback) => {
+	const {id} = data;
+	
+  pool.getConnection(function(err, conn) {
+    if (err) {
+      conn.release();
+      throw err;
+    }
+    const query=``;
+
+    const exec = conn.query(query, (err, result) => {
+			conn.release();
+			console.log('실행 sql : ', exec.sql);
+			return callback(err, result);
+		});
+  });
+}
 
 //Product Id를 받아와서 해당 Product의 재고 기록들을 주기
 module.exports.getStockProduct = (user, data, callback) => {
