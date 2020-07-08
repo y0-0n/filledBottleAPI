@@ -173,7 +173,7 @@ router.post('/', (req, res) => {
 router.get('/detail/:id', checkAuthed, function(req, res){
   let {id} = req.params; // id로 검색
 
-  connection.query(`SELECT o.id as id, date, name, o.address as address, o.address_detail as addressDetail, o.postcode as postcode, o.telephone as telephone, o.cellphone as cellphone, comment, state, o.user_id from \`order\` as o JOIN \`customer\` as c ON o.customer_id = c.id WHERE o.id=${id}`, function(err, rows) {
+  connection.query(`SELECT o.id as id, date, name, o.address as address, o.address_detail as addressDetail, o.postcode as postcode, o.telephone as telephone, o.cellphone as cellphone, comment, state, o.user_id, c.crNumber as crNumber from \`order\` as o JOIN \`customer\` as c ON o.customer_id = c.id WHERE o.id=${id}`, function(err, rows) {
     if(err) throw err;
     if(rows.length === 0 || rows[0]['user_id'] !== req.user.id) {
       res.status(400).send({message: '400 Error'});
@@ -215,7 +215,7 @@ router.post('/detail/refund/', checkAuthed, async function(req, res) {
     connection.rollback();
     return res.status(500).json(err);
   } finally {
-    // connection.release();
+    connection.release();
     res.header("Access-Control-Allow-Origin", "*");
     res.status(200).json({message: "success"});
   }
