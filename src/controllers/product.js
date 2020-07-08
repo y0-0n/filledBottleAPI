@@ -32,7 +32,7 @@ router.post('/total/', checkAuthed, function(req, res) {
 		;`
   connection.query(sql, function(err, rows) {
     if(err) throw err;
-    console.log('GET /product/total/:state : ', rows);
+    console.log('POST /product/total/:state : ', rows);
     res.send(rows);
   });
 });
