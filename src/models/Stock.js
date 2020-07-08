@@ -114,17 +114,39 @@ module.exports.createStock = (user, data, callback) => {
 	let {productId, quantity, plant, type, name, expiration, date_manufacture} = data; //id = 주문 id
 	console.log(data)
 
-  pool.getConnection(function(err, conn) {
+  pool.getConnection(async function(err, conn) {
     if (err) {
       conn.release();
       throw err;
     }
-		const insert_query = `INSERT INTO stock (\`product_id\`, \`plant_id\`, \`quantity\`, \`initial_quantity\`, \`name\`, \`date_manufacture\`, \`expiration\`, \`type\`) VALUES (${productId}, ${plant}, ${quantity}, '${quantity}', '${name}', '${date_manufacture}', '${expiration}', '${type}')`;
-		const exec = conn.query(insert_query, (err, result) => {
-			conn.release();
-			console.log('실행 sql : ', exec.sql);
-			return callback(err, result);
-		})
+    let result;
+    try {
+      await conn.beginTransaction();
+      // const del = await connection.query(`DELETE FROM order_product WHERE \`order_id\`='${orderId}' and \`product_id\`='${productId}' and \`plant_id\`='${plantId}' and \`stock_id\`='${stockId}' and \`tax\`='${tax}' and \`refund\` = '1';`);
+      function a() {
+        return new Promise(resolve => {
+          conn.query(`SELECT count(*) as total FROM stock WHERE product_id = ${productId} and plant_id = ${plant};`,
+            (err, rows) => resolve(rows));
+        });
+      }
+      result = await a();
+      // const del = await connection.query(`DELETE FROM order_product WHERE \`order_id\`='${orderId}' and \`product_id\`='${productId}' and \`plant_id\`='${plantId}' and \`stock_id\`='${stockId}' and \`tax\`='${tax}' and \`refund\` = '1';`);
+      const ins = await conn.query(`INSERT INTO stock (\`product_id\`, \`plant_id\`, \`quantity\`, \`initial_quantity\`, \`name\`, \`date_manufacture\`, \`expiration\`, \`type\`) VALUES (${productId}, ${plant}, ${quantity}, '${quantity}', '${name + " (" +(parseInt(result[0].total)+1)+")"}', '${date_manufacture}', '${expiration}', '${type}')`);
+      await conn.commit();
+    } catch (err) {
+      conn.rollback();
+      return callback(err, null);
+    } finally {
+      conn.release();
+      // console.log('실행 sql : ', exec.sql);
+      return callback(null, result);
+    }
+		// const insert_query = `INSERT INTO stock (\`product_id\`, \`plant_id\`, \`quantity\`, \`initial_quantity\`, \`name\`, \`date_manufacture\`, \`expiration\`, \`type\`) VALUES (${productId}, ${plant}, ${quantity}, '${quantity}', '${name}', '${date_manufacture}', '${expiration}', '${type}')`;
+		// const exec = conn.query(insert_query, (err, result) => {
+		// 	conn.release();
+		// 	console.log('실행 sql : ', exec.sql);
+		// 	return callback(err, result);
+		// })
 	});
 };
 
@@ -555,8 +577,6 @@ module.exports.getStockList = (user, data, callback) => {
 			WHERE S.name LIKE '%${name}%'
 			${plant !== 'all' ? `AND S.plant_id = ${plant}` : ``}
 			${family !== 0 ? `AND P.family = '${family}'` : ``}
-			
-			
 			${(pageNumbers !== 'all' ? `LIMIT ${15*(pageNumbers-1)}, 15` : '')};`;
 		const exec = conn.query(query, (err, result) => {
 			conn.release();
@@ -576,7 +596,7 @@ module.exports.getStockOrder = (user, data, callback) => {
       throw err;
     }
     const query=`
-      SELECT O.date as date, OP.* FROM \`order_product\` as OP
+      SELECT O.shippingDate as date, OP.* FROM \`order_product\` as OP
       JOIN \`order\` as O ON OP.order_id = O.id
       WHERE (O.state = 'shipping' OR O.state = 'complete')
       AND O.user_id = '${user.id}'
