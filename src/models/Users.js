@@ -73,8 +73,7 @@ module.exports.updateInfo = (id, data, callback) => {
       conn.release();
       throw err;
     }
-
-    const query = `UPDATE users SET name = '${data.name}', address = '${data.address}', phone = '${data.phone}' WHERE id = ?`;
+    const query = `UPDATE users SET name = '${data.name}', address = '${data.address}', address_detail = '${data.addressDetail}', postcode = '${data.postcode}', phone = '${data.phone}', crNumber = '${data.crNumber}' WHERE id = ?`;
     const exec = conn.query(query, id, (err, rows) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
