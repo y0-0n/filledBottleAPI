@@ -47,10 +47,19 @@ router.get('/info',
   user.getInfo
 );
 
+router.get('/info/open/:id',
+  user.getInfoOpen
+);
+
 router.put('/info',
   passport.authenticate('JWT', { session: false }),
   auth.checkAuthed,
   user.updateInfo
 );
+
+router.get('/open/list/:productFamily',
+  user.getListByFamily
+);
+
 
 module.exports = router;

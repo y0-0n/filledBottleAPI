@@ -67,6 +67,23 @@ module.exports.getInfo = (id, callback) => {
   });
 }
 
+module.exports.getInfoOpen = (id, callback) => {
+  pool.getConnection(function(err, conn) {
+    if(err) {
+      conn.release();
+      throw err;
+    }
+
+    const query = 'SELECT email, name, address,address_detail as addressDetail, postcode, phone, crNumber, expiration FROM users WHERE id = ?';
+    const exec = conn.query(query, id, (err, rows) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+
+      return callback(err, rows);
+    });
+  });
+}
+
 module.exports.updateInfo = (id, data, callback) => {
   pool.getConnection(function(err, conn) {
     if(err) {
@@ -113,6 +130,23 @@ module.exports.getTotalAdmin = (id, callback) => {
 
 		const query = `SELECT count(*) as total FROM users`;
 
+    const exec = conn.query(query, id, (err, rows) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+
+      return callback(err, rows);
+    });
+  });
+}
+
+module.exports.getListByFamily = (id, callback) => {
+  pool.getConnection(function(err, conn) {
+    if(err) {
+      conn.release();
+      throw err;
+    }
+
+    const query = 'SELECT * FROM users as U ';
     const exec = conn.query(query, id, (err, rows) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
