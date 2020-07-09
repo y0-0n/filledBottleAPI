@@ -77,7 +77,7 @@ router.post('/list', checkAuthed, function(req, res){
 
 router.post('/list/unset/', checkAuthed, function(req, res){
   let {page, name, family, category, state} = req.body;
-	console.warn(req.body)
+	// console.warn(req.body)
 
   connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName
 										FROM product as A JOIN users as B ON A.user_id = B.id
@@ -100,7 +100,10 @@ router.post('/list/unset/', checkAuthed, function(req, res){
 
 router.get('/:id', checkAuthed, function(req, res) {
   let id = req.params.id; // id로 검색
-
+  console.warn(`SELECT P.*, F.\`name\` as familyName, FC.\`name\` as categoryName, FC.\`id\` as categoryId
+  FROM product as P LEFT JOIN productFamily as F ON P.family = F.id
+  LEFT JOIN familyCategory as FC ON FC.id = F.category
+  WHERE P.id = ${id}`)
   connection.query(`SELECT P.*, F.\`name\` as familyName, FC.\`name\` as categoryName, FC.\`id\` as categoryId
     FROM product as P LEFT JOIN productFamily as F ON P.family = F.id
     LEFT JOIN familyCategory as FC ON FC.id = F.category
@@ -113,7 +116,7 @@ router.get('/:id', checkAuthed, function(req, res) {
 });
 
 router.post('/', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail'}]), (req, res) => {
-  let {name, price, grade, weight, productFamily, discount_price, state, vat} = req.body;
+  let {name, price, grade, weight, productFamily, discount_price, state, vat, shippingDate} = req.body;
 	let fileName = 'noimage.jfif';
 	if(req.files.file)
 		 fileName = 'product/'+req.files.file[0].filename; // 대표 이미지
@@ -125,8 +128,8 @@ router.post('/', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail
 		})
 		detailFileName = detailFileName.slice(0, -1);
 	}
-  connection.query(`INSERT INTO \`product\` (\`name\`, \`grade\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`discount_price\`, \`weight\`, \`safety_stock\`, \`file_name\`, \`detail_file\`, \`user_id\`, \`family\`, \`state\`, \`tax\`)
-                    VALUES ('${name}', '${grade}', '4', '5', '${price}', '${discount_price}', '${weight}', '8', '${fileName}', '${detailFileName}', "${req.user.id}", ${productFamily}, ${state}, ${vat});`, function(err, rows) {
+  connection.query(`INSERT INTO \`product\` (\`name\`, \`grade\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`discount_price\`, \`weight\`, \`safety_stock\`, \`file_name\`, \`detail_file\`, \`user_id\`, \`family\`, \`state\`, \`tax\`, \`shippingDate\`)
+                    VALUES ('${name}', '${grade}', '4', '5', '${price}', '${discount_price}', '${weight}', '8', '${fileName}', '${detailFileName}', "${req.user.id}", ${productFamily}, ${state}, ${vat}, '${shippingDate}');`, function(err, rows) {
     if(err) throw err;
 
     console.log('POST /product : ', rows);
@@ -169,7 +172,7 @@ router.put('/deactivate', checkAuthed, function(req, res){
 });
 
 router.put('/modify/:id', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail'}]), function(req, res) {
-  const { name, price, productFamily, discount_price, state } = req.body;
+  const { name, price, productFamily, discount_price, state, shippingDate } = req.body;
   let fileName = 'noimage.jfif';
   // console.warn(req.body)
 	if(req.files.file)
@@ -181,8 +184,8 @@ router.put('/modify/:id', checkAuthed, upload.fields([{name: 'file'}, {name: 'fi
 		})
 		detailFileName = detailFileName.slice(0, -1);
 	}
-	console.warn(req.files);
-  connection.query(`UPDATE product SET \`name\`='${name}', \`price_shipping\`='${price}', \`discount_price\`='${discount_price}', \`family\` ='${productFamily}', \`state\` = '${state}', \`file_name\`='${fileName}', \`detail_file\`='${detailFileName}' WHERE \`id\`=${req.params.id};`, function(err, rows) {
+	// console.warn(req.files);
+  connection.query(`UPDATE product SET \`name\`='${name}', \`price_shipping\`='${price}', \`discount_price\`='${discount_price}', \`family\` ='${productFamily}', \`state\` = '${state}', \`file_name\`='${fileName}', \`detail_file\`='${detailFileName}', \`shippingDate\` ='${shippingDate}' WHERE \`id\`=${req.params.id};`, function(err, rows) {
     if(err) throw err;
 
     console.log('PUT /product/modify/:id : ', rows);
