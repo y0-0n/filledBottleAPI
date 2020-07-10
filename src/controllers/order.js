@@ -57,7 +57,7 @@ router.post('/list/refund/', checkAuthed, function(req, res){
 	if(!limit) {
     limit = 15
   }
-  let sql = `SELECT O.id, O.state, O.date, O.price, O.received, C.name, O.orderDate, C.set
+  let sql = `SELECT O.id, O.state, O.date, O.price, O.received, C.name, O.createAt, C.set
 						 from \`order\` AS O JOIN \`customer\` AS C ON O.customer_id = C.id
 						 JOIN \`users\` as U ON O.user_id = U.id
 						 JOIN \`order_product\` as OP ON O.id = OP.order_id
@@ -65,7 +65,7 @@ router.post('/list/refund/', checkAuthed, function(req, res){
              ${(name !== '' ? `AND C.name = '${name}'`: '')}
 						 AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
 						 GROUP BY O.id
-             ORDER BY O.orderDate DESC
+             ORDER BY O.createAt DESC
              ${(page !== 'all' ? `LIMIT ${limit*(page-1)}, ${limit}` : '')}`;
   //console.log(state, page, state !== 'all' || name !== '')
   connection.query(sql, function(err, rows) {
@@ -82,13 +82,13 @@ router.post('/list', checkAuthed, function(req, res){
     limit = 15
   }
   let name = keyword, state = process_;
-  let sql = `SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.orderDate, B.set
+  let sql = `SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.createAt, B.set
              from \`order\` AS A JOIN \`customer\` AS B JOIN \`users\` as C ON A.customer_id = B.id AND A.user_id = C.id
              WHERE C.id='${req.user.id}'
              ${(state !== 'all' ? `AND A.state = '${state}'` : '')}
              ${(name !== '' ? `AND B.name = '${name}'`: '')}
              AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
-             ORDER BY A.orderDate DESC
+             ORDER BY A.createAt DESC
              ${(page !== 'all' ? `LIMIT ${limit*(page-1)}, ${limit}` : '')}`;
   connection.query(sql, function(err, rows) {
     if(err) throw err;
@@ -149,13 +149,13 @@ router.get('/amount/:year/:month', function(req, res) {
 
 router.post('/', (req, res) => {
   let price = 0; //총액
-  let {sCustomer, sProduct, date, cellphone, telephone, address, addressDetail, postcode, comment, orderDate} = req.body;
+  let {sCustomer, sProduct, date, cellphone, telephone, address, addressDetail, postcode, comment} = req.body;
 	
 	sProduct.map((e, i) => {
     price += e.quantity * e.price; // 수량 * 출고 가격
   })
 
-  connection.query(`INSERT INTO \`order\` (\`customer_id\`, \`date\`, \`price\`, \`telephone\`, \`cellphone\`, \`address\`, \`address_detail\`, \`postcode\`, \`comment\`, \`orderDate\`, \`user_id\`, \`sales\`) VALUES ('${sCustomer}', '${date}', '${price}', '${telephone}', '${cellphone}', '${address}', '${addressDetail}', '${postcode}', '${comment}', '${orderDate}', '${req.user.id}', '${price}')`, function(err, rows) {
+  connection.query(`INSERT INTO \`order\` (\`customer_id\`, \`date\`, \`price\`, \`telephone\`, \`cellphone\`, \`address\`, \`address_detail\`, \`postcode\`, \`comment\`, \`user_id\`, \`sales\`) VALUES ('${sCustomer}', '${date}', '${price}', '${telephone}', '${cellphone}', '${address}', '${addressDetail}', '${postcode}', '${comment}', '${req.user.id}', '${price}')`, function(err, rows) {
     if(err) throw err;
     console.log('POST /order : ' + rows);
 
