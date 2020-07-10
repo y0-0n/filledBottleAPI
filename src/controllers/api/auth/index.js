@@ -57,7 +57,7 @@ router.put('/info',
   user.updateInfo
 );
 
-router.get('/open/list/:productFamily',
+router.get('/list/open/:productFamily',
   user.getListByFamily
 );
 

@@ -16,7 +16,7 @@ exports.updateInfo = (req, res) => {
 }
 
 exports.getListByFamily = (req, res) => {
-  Users.getListByFamily(req.user.id, req.params.productFamily, (err, rows) => {
+  Users.getListByFamily(req.params.productFamily, (err, rows) => {
     if(err) throw err;
     res.status(200).send(rows);
   })

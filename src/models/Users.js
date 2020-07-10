@@ -146,7 +146,10 @@ module.exports.getListByFamily = (id, callback) => {
       throw err;
     }
 
-    const query = 'SELECT * FROM users as U ';
+    const query = `SELECT U.id, U.name, GROUP_CONCAT(PF.name) as family FROM en.users as U
+    JOIN en.productFamily_user as PFU ON U.id = PFU.user_id
+    JOIN en.productFamily as PF ON PF.id = PFU.family_id
+    GROUP BY U.id;`;
     const exec = conn.query(query, id, (err, rows) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
