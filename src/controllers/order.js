@@ -155,7 +155,7 @@ router.post('/', (req, res) => {
     price += e.quantity * e.price; // 수량 * 출고 가격
   })
 
-  connection.query(`INSERT INTO \`order\` (\`customer_id\`, \`date\`, \`price\`, \`telephone\`, \`cellphone\`, \`address\`, \`address_detail\`, \`postcode\`, \`comment\`, \`orderDate\`, \`user_id\`) VALUES ('${sCustomer}', '${date}', '${price}', '${telephone}', '${cellphone}', '${address}', '${addressDetail}', '${postcode}', '${comment}', '${orderDate}', '${req.user.id}')`, function(err, rows) {
+  connection.query(`INSERT INTO \`order\` (\`customer_id\`, \`date\`, \`price\`, \`telephone\`, \`cellphone\`, \`address\`, \`address_detail\`, \`postcode\`, \`comment\`, \`orderDate\`, \`user_id\`, \`sales\`) VALUES ('${sCustomer}', '${date}', '${price}', '${telephone}', '${cellphone}', '${address}', '${addressDetail}', '${postcode}', '${comment}', '${orderDate}', '${req.user.id}', '${price}')`, function(err, rows) {
     if(err) throw err;
     console.log('POST /order : ' + rows);
 
@@ -204,18 +204,27 @@ router.get('/detail/:id', checkAuthed, function(req, res){
 
 router.post('/detail/refund/', checkAuthed, async function(req, res) {
   let {orderId, productId, plantId, stockId, refundQuantity, tax, price, quantity} = req.body.data;
-  let newPrice = price * refundQuantity / quantity;
+  let refundPrice = price * refundQuantity / quantity;
   try {
     await connection.beginTransaction();
+    function a() {
+      return new Promise(resolve => {
+        connection.query(`SELECT price FROM order_product WHERE \`order_id\`='${orderId}' and \`product_id\`='${productId}' and \`plant_id\`='${plantId}' and \`stock_id\`='${stockId}' and \`tax\`='${tax}' and \`refund\` = '1';`,
+          (err, rows) => resolve(rows));
+      });
+    }
+    const resultSel = await a();
+    const oldRefundPrice = resultSel[0].price;
     const del = await connection.query(`DELETE FROM order_product WHERE \`order_id\`='${orderId}' and \`product_id\`='${productId}' and \`plant_id\`='${plantId}' and \`stock_id\`='${stockId}' and \`tax\`='${tax}' and \`refund\` = '1';`);
-    const ins = await connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`plant_id\`, \`stock_id\`, \`quantity\`, \`price\`, \`tax\`, \`refund\`) VALUES ('${orderId}', '${productId}', '${plantId}', '${stockId}', '${refundQuantity}', '${newPrice}', ${tax}, 1);`);
+    const ins = await connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`plant_id\`, \`stock_id\`, \`quantity\`, \`price\`, \`tax\`, \`refund\`) VALUES ('${orderId}', '${productId}', '${plantId}', '${stockId}', '${refundQuantity}', '${refundPrice}', ${tax}, 1);`);
+    const upd = await connection.query(`UPDATE \`order\` SET \`sales\`=\`sales\`-${refundPrice}+${oldRefundPrice} WHERE \`id\`=${orderId}`);
     await connection.commit();
   } catch (err) {
     console.warn(err);
     connection.rollback();
     return res.status(500).json(err);
   } finally {
-    connection.release();
+    // connection.release();
     res.header("Access-Control-Allow-Origin", "*");
     res.status(200).json({message: "success"});
   }
