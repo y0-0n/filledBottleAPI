@@ -131,6 +131,21 @@ router.get('/income/:year/:month', function(req, res) {
   })
 })
 
+router.get('/receive/:year/:month', function(req, res) {
+  connection.query(`SELECT SUM(OP.price) as sum
+    FROM \`order\` as O JOIN order_product as OP ON O.id = OP.order_id
+		WHERE ${req.params.month} = MONTH(O.date)
+		AND ${req.params.year} = YEAR(O.date)
+    AND O.state = 'complete'
+    AND O.user_id = ${req.user.id}
+    `, function(err, rows) {
+    if(err) throw err;
+        
+    console.log('GET /order/income : ' + rows);
+    res.send(rows);
+  })
+})
+
 router.get('/amount/:year/:month', function(req, res) {
   connection.query(`SELECT count(*) as amount
     FROM \`order\` as O
@@ -214,7 +229,9 @@ router.post('/detail/refund/', checkAuthed, async function(req, res) {
       });
     }
     const resultSel = await a();
-    const oldRefundPrice = resultSel[0].price;
+    let oldRefundPrice = 0;
+    if (resultSel.length > 0)
+      oldRefundPrice = resultSel[0].price;
     const del = await connection.query(`DELETE FROM order_product WHERE \`order_id\`='${orderId}' and \`product_id\`='${productId}' and \`plant_id\`='${plantId}' and \`stock_id\`='${stockId}' and \`tax\`='${tax}' and \`refund\` = '1';`);
     const ins = await connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`plant_id\`, \`stock_id\`, \`quantity\`, \`price\`, \`tax\`, \`refund\`) VALUES ('${orderId}', '${productId}', '${plantId}', '${stockId}', '${refundQuantity}', '${refundPrice}', ${tax}, 1);`);
     const upd = await connection.query(`UPDATE \`order\` SET \`sales\`=\`sales\`-${refundPrice}+${oldRefundPrice} WHERE \`id\`=${orderId}`);
