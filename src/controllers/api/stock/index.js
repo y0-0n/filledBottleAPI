@@ -18,6 +18,19 @@ router.get('/',
   stock.getStockQuantity
 );
 
+router.get('/order/:id',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  stock.getStockOrder
+);
+
+router.get('/modify/:id',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  stock.getStockModify
+);
+
+
 router.post('/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
@@ -92,7 +105,7 @@ router.get('/:stockId',
   stock.getStockDetail
 );
 
-router.put('/:id',
+router.put('/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
   stock.modifyStock

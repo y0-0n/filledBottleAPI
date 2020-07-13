@@ -87,14 +87,30 @@ exports.getStockDetail = (req, res) => {
   })
 }
 
-exports.modifyStock = (req, res) => {
-  const {id} = req.params;//창고 id
-  const {stockData} = req.body;
-  Stock.modifyStock(id, stockData, req.user, (err, msg) => {
+exports.getStockOrder = (req, res) => {
+  Stock.getStockOrder(req.user, req.params, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })
 }
+
+
+exports.modifyStock = (req, res) => {
+  const {stockData} = req.body;
+  Stock.modifyStock(stockData, req.user, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+exports.getStockModify = (req, res) => {
+  const {id} = req.params;
+  Stock.getStockModify(req.user, id, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
 
 exports.createStock = (req, res) => {
   Stock.createStock(req.user, req.body, (err, msg) => {

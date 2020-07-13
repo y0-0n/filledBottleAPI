@@ -57,7 +57,7 @@ router.post('/list/refund/', checkAuthed, function(req, res){
 	if(!limit) {
     limit = 15
   }
-  let sql = `SELECT O.id, O.state, O.date, O.price, O.received, C.name, O.orderDate, C.set
+  let sql = `SELECT O.id, O.state, O.date, O.price, O.received, C.name, O.createAt, C.set
 						 from \`order\` AS O JOIN \`customer\` AS C ON O.customer_id = C.id
 						 JOIN \`users\` as U ON O.user_id = U.id
 						 JOIN \`order_product\` as OP ON O.id = OP.order_id
@@ -65,7 +65,7 @@ router.post('/list/refund/', checkAuthed, function(req, res){
              ${(name !== '' ? `AND C.name = '${name}'`: '')}
 						 AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
 						 GROUP BY O.id
-             ORDER BY O.orderDate DESC
+             ORDER BY O.createAt DESC
              ${(page !== 'all' ? `LIMIT ${limit*(page-1)}, ${limit}` : '')}`;
   //console.log(state, page, state !== 'all' || name !== '')
   connection.query(sql, function(err, rows) {
@@ -82,13 +82,13 @@ router.post('/list', checkAuthed, function(req, res){
     limit = 15
   }
   let name = keyword, state = process_;
-  let sql = `SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.orderDate, B.set
+  let sql = `SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.createAt, B.set
              from \`order\` AS A JOIN \`customer\` AS B JOIN \`users\` as C ON A.customer_id = B.id AND A.user_id = C.id
              WHERE C.id='${req.user.id}'
              ${(state !== 'all' ? `AND A.state = '${state}'` : '')}
              ${(name !== '' ? `AND B.name = '${name}'`: '')}
              AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
-             ORDER BY A.orderDate DESC
+             ORDER BY A.createAt DESC
              ${(page !== 'all' ? `LIMIT ${limit*(page-1)}, ${limit}` : '')}`;
   connection.query(sql, function(err, rows) {
     if(err) throw err;
@@ -131,6 +131,21 @@ router.get('/income/:year/:month', function(req, res) {
   })
 })
 
+router.get('/receive/:year/:month', function(req, res) {
+  connection.query(`SELECT SUM(OP.price) as sum
+    FROM \`order\` as O JOIN order_product as OP ON O.id = OP.order_id
+		WHERE ${req.params.month} = MONTH(O.date)
+		AND ${req.params.year} = YEAR(O.date)
+    AND O.state = 'complete'
+    AND O.user_id = ${req.user.id}
+    `, function(err, rows) {
+    if(err) throw err;
+        
+    console.log('GET /order/income : ' + rows);
+    res.send(rows);
+  })
+})
+
 router.get('/amount/:year/:month', function(req, res) {
   connection.query(`SELECT count(*) as amount
     FROM \`order\` as O
@@ -149,13 +164,13 @@ router.get('/amount/:year/:month', function(req, res) {
 
 router.post('/', (req, res) => {
   let price = 0; //총액
-  let {sCustomer, sProduct, date, cellphone, telephone, address, addressDetail, postcode, comment, orderDate} = req.body;
-  console.warn(req.body)
-  sProduct.map((e, i) => {
+  let {sCustomer, sProduct, date, cellphone, telephone, address, addressDetail, postcode, comment} = req.body;
+	
+	sProduct.map((e, i) => {
     price += e.quantity * e.price; // 수량 * 출고 가격
   })
 
-  connection.query(`INSERT INTO \`order\` (\`customer_id\`, \`date\`, \`price\`, \`telephone\`, \`cellphone\`, \`address\`, \`address_detail\`, \`postcode\`, \`comment\`, \`orderDate\`, \`user_id\`) VALUES ('${sCustomer}', '${date}', '${price}', '${telephone}', '${cellphone}', '${address}', '${addressDetail}', '${postcode}', '${comment}', '${orderDate}', '${req.user.id}')`, function(err, rows) {
+  connection.query(`INSERT INTO \`order\` (\`customer_id\`, \`date\`, \`price\`, \`telephone\`, \`cellphone\`, \`address\`, \`address_detail\`, \`postcode\`, \`comment\`, \`user_id\`, \`sales\`) VALUES ('${sCustomer}', '${date}', '${price}', '${telephone}', '${cellphone}', '${address}', '${addressDetail}', '${postcode}', '${comment}', '${req.user.id}', '${price}')`, function(err, rows) {
     if(err) throw err;
     console.log('POST /order : ' + rows);
 
@@ -173,16 +188,17 @@ router.post('/', (req, res) => {
 router.get('/detail/:id', checkAuthed, function(req, res){
   let {id} = req.params; // id로 검색
 
-  connection.query(`SELECT o.id as id, date, name, o.address as address, o.telephone as telephone, o.cellphone as cellphone, comment, state, o.user_id from \`order\` as o JOIN \`customer\` as c ON o.customer_id = c.id WHERE o.id=${id}`, function(err, rows) {
+  connection.query(`SELECT o.id as id, date, name, o.address as address, o.address_detail as addressDetail, o.postcode as postcode, o.telephone as telephone, o.cellphone as cellphone, comment, state, o.user_id, c.crNumber as crNumber from \`order\` as o JOIN \`customer\` as c ON o.customer_id = c.id WHERE o.id=${id}`, function(err, rows) {
     if(err) throw err;
     if(rows.length === 0 || rows[0]['user_id'] !== req.user.id) {
       res.status(400).send({message: '400 Error'});
       return ;
     }
-		connection.query(`SELECT p.id AS productId, pl.name as plant, pl.id as plantId, pl.set as plantSet, op.id AS orderProductId, op.stock_id AS stockId, op.quantity, p.name, op.price, op.tax, op.refund from \`order\` as o
+		connection.query(`SELECT p.id AS productId, pl.name as plant, pl.id as plantId, pl.set as plantSet, op.id AS orderProductId, op.stock_id AS stockId, op.quantity, p.name, op.price, op.tax, op.refund, s.name as stockName from \`order\` as o
 		JOIN \`order_product\` as op ON o.id = op.order_id
 		JOIN plant as pl ON op.plant_id = pl.id
-		JOIN product as p ON op.product_id = p.id
+    JOIN product as p ON op.product_id = p.id
+    JOIN stock as s ON s.id = op.stock_id
 		WHERE o.id=${id}`, function(err, rows2) {
       if(err) throw err;
 
@@ -201,28 +217,43 @@ router.get('/detail/:id', checkAuthed, function(req, res){
   });*/
 });
 
-router.put('/detail/refund/:id', checkAuthed, function(req, res) {
-  let {id} = req.params;
-
-  connection.query(`UPDATE \`order_product\` SET \`refund\`=
-    CASE
-      WHEN refund=1 THEN 0
-      ELSE 1
-    END
-    WHERE id = ${id}`, function(err, rows){
-    if(err) throw err;
-
-    console.log(`PUT /orderDetail/refund/${id}`);
-    res.send(rows);
-  })
+router.post('/detail/refund/', checkAuthed, async function(req, res) {
+  let {orderId, productId, plantId, stockId, refundQuantity, tax, price, quantity} = req.body.data;
+  let refundPrice = price * refundQuantity / quantity;
+  try {
+    await connection.beginTransaction();
+    function a() {
+      return new Promise(resolve => {
+        connection.query(`SELECT price FROM order_product WHERE \`order_id\`='${orderId}' and \`product_id\`='${productId}' and \`plant_id\`='${plantId}' and \`stock_id\`='${stockId}' and \`tax\`='${tax}' and \`refund\` = '1';`,
+          (err, rows) => resolve(rows));
+      });
+    }
+    const resultSel = await a();
+    let oldRefundPrice = 0;
+    if (resultSel.length > 0)
+      oldRefundPrice = resultSel[0].price;
+    const del = await connection.query(`DELETE FROM order_product WHERE \`order_id\`='${orderId}' and \`product_id\`='${productId}' and \`plant_id\`='${plantId}' and \`stock_id\`='${stockId}' and \`tax\`='${tax}' and \`refund\` = '1';`);
+    const ins = await connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`plant_id\`, \`stock_id\`, \`quantity\`, \`price\`, \`tax\`, \`refund\`) VALUES ('${orderId}', '${productId}', '${plantId}', '${stockId}', '${refundQuantity}', '${refundPrice}', ${tax}, 1);`);
+    const upd = await connection.query(`UPDATE \`order\` SET \`sales\`=\`sales\`-${refundPrice}+${oldRefundPrice} WHERE \`id\`=${orderId}`);
+    await connection.commit();
+  } catch (err) {
+    console.warn(err);
+    connection.rollback();
+    return res.status(500).json(err);
+  } finally {
+    // connection.release();
+    res.header("Access-Control-Allow-Origin", "*");
+    res.status(200).json({message: "success"});
+  }
 })
 
 router.post('/changeState/', checkAuthed, function(req, res) {
-  let {prev, next} = req.body;
+  let {prev, next, orderInfo} = req.body;
 	if(prev === 'order' && next === 'shipping') {
 		console.log('상품 출하');
 		Stock.convertStockByOrder(req.user, req.body, (err, msg) => {
-			if(err) throw err;
+      if(err) throw err;
+      // res.status(200).send(msg);
 		})
 	}
 	if(prev == 'shipping' && next === 'order') {
@@ -240,22 +271,24 @@ router.post('/changeState/', checkAuthed, function(req, res) {
 		//수금 취소
 	}
 
-  // connection.query(`UPDATE \`order\` SET \`state\`='${next}' WHERE \`id\`=${id}`, function(err, rows) {
-  //   if(err) throw err;
-  //   console.log(`PUT /order/changeState/`, rows);
-  //   res.send(rows);
-  // });
+  connection.query(`UPDATE \`order\` SET \`state\`='${next}' WHERE \`id\`=${orderInfo[0].id}`, function(err, rows) {
+    if(err) throw err;
+    console.log(`PUT /order/changeState/`, rows);
+    res.status(200).send(rows);
+  });
 });
 
 router.put('/modify/:id', checkAuthed, function(req, res) {
   let {id} = req.params;
 	let {orderInfo, productInfo} = req.body;
+	// console.warn(req.body)
   orderInfo = orderInfo[0];
   let price = 0;
 
   productInfo.map((e, i) => {
     price += e.quantity * e['price_shipping']; // 수량 * 출고 가격
 	});
+
 	//유저 일치 확인
   connection.query(`SELECT user_id FROM \`order\` WHERE \`id\`=${id}`, function(err, rows) {
     if(err) throw err;
@@ -263,13 +296,14 @@ router.put('/modify/:id', checkAuthed, function(req, res) {
       res.send({message: 'Auth Error'});
       return ;
     }
-  })
-  connection.query(`UPDATE \`order\` SET \`cellphone\`='${orderInfo.cellphone}', \`telephone\`='${orderInfo.telephone}', \`address\`='${orderInfo.address}', \`comment\`='${orderInfo.comment}', \`price\`=${price} WHERE \`id\`=${id}`, function(err, rows) {
+	})
+
+  connection.query(`UPDATE \`order\` SET \`cellphone\`='${orderInfo.cellphone}', \`telephone\`='${orderInfo.telephone}', \`address\`='${orderInfo.address}', \`comment\`='${orderInfo.comment}', \`address\` = '${orderInfo.address}', \`address_detail\` = '${orderInfo.addressDetail}', \`postcode\` = '${orderInfo.postcode}', \`price\`=${price} WHERE \`id\`=${id}`, function(err, rows) {
     if(err) throw err;
 
     connection.query('DELETE FROM order_product WHERE \`order_id\`='+id, function (e, r) {
       productInfo.map((e, i) => {
-        connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`plant_id\`, \`quantity\`, \`price\`, \`tax\`) VALUES ('${id}', '${e.productId}', '${e.plantId}', '${e.quantity}', '${e.price}', ${e.tax})`, function(err_, rows_) {
+        connection.query(`INSERT INTO order_product (\`order_id\`, \`product_id\`, \`plant_id\`, \`stock_id\`, \`quantity\`, \`price\`, \`tax\`) VALUES ('${id}', '${e.productId}', '${e.plantId}', '${e.stockId}', '${e.quantity}', '${e.price}', ${e.tax})`, function(err_, rows_) {
           if(err) throw err_;
           console.log('product '+i+' : ', rows_);
 				})
