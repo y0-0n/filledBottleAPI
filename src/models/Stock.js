@@ -228,19 +228,13 @@ module.exports.convertStockByOrder = function (user, data, callback) {
     for (const item of data.productInfo) {
       async function updateStock(item) {
         const update_query = `UPDATE stock SET quantity = quantity - ${item.quantity} WHERE id = ${item.stockId}`;
-        const exec = await conn.query(update_query, (err, result) => {
-          if (err) {
-            conn.release();
-            throw err;
-          }
+        const exec = conn.query(update_query, (err, result) => {
+          console.log('실행 sql : ', exec.sql);
         });
-        console.log('실행 sql : ', exec.sql);
       }
       await updateStock(item);
     }
-
-    conn.release();
-    callback(false, {a: 'Done'});
+    console.warn('End')
 
 		// const order_query = `SELECT * FROM order_product WHERE order_id = ?`
 		// const exec = conn.query(order_query, [id], (err, result) => {
