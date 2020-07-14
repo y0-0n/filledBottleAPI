@@ -1,6 +1,6 @@
 module.exports = {
   pool: {
-    host     : 'localhost',
+    host     : '58.142.201.22',
     user     : 'l5vd5',
     password : 'dbsqud23',
     port     : 3306,
@@ -10,7 +10,7 @@ module.exports = {
 		multipleStatements: true,
   },
   conn: {
-    host     : 'localhost',
+    host     : '58.142.201.22',
     user     : 'l5vd5',
     password : 'dbsqud23',
     port     : 3306,
