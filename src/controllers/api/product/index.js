@@ -32,14 +32,10 @@ router.get('/familyList/:categoryId',
 );
 
 router.get('/allFamily/:categoryId',
-  passport.authenticate('JWT', { session: false }),
-  checkAuthed,
   product.getAllFamily
 );
 
 router.get('/familyCategory',
-  passport.authenticate('JWT', { session: false }),
-  checkAuthed,
   product.getFamilyCategory
 );
 
