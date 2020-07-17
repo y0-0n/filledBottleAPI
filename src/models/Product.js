@@ -44,7 +44,7 @@ module.exports.getList = (user, callback) => {
   })
 }
 
-module.exports.getAllList = (user, callback) => {
+module.exports.getOpenList = (user, callback) => {
   pool.getConnection(function(err, conn) {
     if(err) {
       conn.release();
@@ -52,11 +52,11 @@ module.exports.getAllList = (user, callback) => {
     }
     const query = `SELECT * from product
 			WHERE \`set\`=1
-			AND mallVisible = 1
+			AND state = 1
 			${user !== "all" ? "AND user_id = ?" : ""}
 			`;
 
-    const exec = conn.query(query, [user.id], (err, result) => {
+    const exec = conn.query(query, [user], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
 
@@ -65,6 +65,23 @@ module.exports.getAllList = (user, callback) => {
   })
 }
 
+module.exports.getOpenDetail = (productId, callback) => {
+  pool.getConnection(function(err, conn) {
+    if(err) {
+      conn.release();
+      throw err;
+    }
+    const query = `SELECT * from product
+			WHERE id=${productId}`;
+
+    const exec = conn.query(query, (err, result) => {
+      conn.release();
+      console.log('실행 sql : ', exec.sql);
+
+      return callback(err, result);
+    });
+  })
+}
 
 module.exports.getAllFamily = (data, callback) => {
   pool.getConnection(function(err, conn) {
@@ -118,18 +135,19 @@ module.exports.getUserFamilyCategory = (user, callback) => {
 
 //회원이 취급하는 품목군 리스트 주기
 module.exports.getFamilyList = (user, data, callback) => {
-	const {categoryId} = data
+  const {categoryId} = data;
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
       throw err;
     }
+    // TODO: categoryId가 숫자에서 문자로 바뀌던 문제
     const query = `SELECT F.name, F.id, FU.id as familyUserId
 		FROM productFamily as F JOIN productFamily_user as FU ON F.id = FU.family_id
 		JOIN familyCategory as FC ON FC.id = F.category
 		JOIN users as U ON FU.user_id = U.id
 		WHERE U.id = ?
-		${categoryId !== 'all' ? `AND F.category = ${categoryId}`: ``};
+		${categoryId !== '0' ? `AND F.category = ${categoryId}`: ``};
 		`;
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
@@ -137,6 +155,27 @@ module.exports.getFamilyList = (user, data, callback) => {
       return callback(err, result);
     });
   });
+}
+
+//회원이 취급하는 품목군 리스트 주기
+module.exports.getStateCount = (user, callback) => {
+	pool.getConnection(function(err, conn) {
+		if (err) {
+			conn.release();
+			throw err;
+		}
+
+		const query = `SELECT COUNT(*) as count, state FROM product
+    WHERE user_id = ?
+    AND \`set\` = 1
+		GROUP BY state`;
+
+		const exec = conn.query(query, [user.id], (err, result) => {
+			conn.release();
+			console.log("실행 sql : ", exec.sql);
+			return callback(err, result);
+		})
+	})
 }
 
 //창고에서 취급하는 품목군 주기

@@ -43,6 +43,13 @@ exports.modifyFamily = (req, res) => {
   })
 }
 
+exports.getStateCount = (req, res) => {
+  Product.getStateCount(req.user, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
 exports.familyInPlant = (req, res) => {
   Product.familyInPlant(req.user, req.params.id, (err, msg) => {
     if(err) throw err;
@@ -82,9 +89,18 @@ exports.excel = (req, res) => {
 }
 
 // 쇼핑몰 페이지에서 품목 보기 (로그인 하지 않아도 열람 가능)
-// 전체 회원의 물건을 보거나 특정 회원의 물건 보기
-exports.getAllList = (req, res) => {
-	Product.getAllList(req.params.id, (err, msg) => {
+// 특정 회원의 물건 보기
+exports.getOpenList = (req, res) => {
+	Product.getOpenList(req.params.id, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+// 쇼핑몰 페이지에서 품목상세 보기 (로그인 하지 않아도 열람 가능)
+// 특정 회원의 물건 보기
+exports.getOpenDetail = (req, res) => {
+	Product.getOpenDetail(req.params.id, (err, msg) => {
     if(err) throw err;
     res.status(200).send(msg);
   })

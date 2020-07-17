@@ -19,21 +19,20 @@ function checkAuthed(req, res, next) {
 }
 
 router.post('/total/', checkAuthed, function(req, res) {
-	let {name, family, category} = req.body;
+	let {name, family, category, state} = req.body;
   let sql = `SELECT count(*) as total
 		FROM product as A JOIN users as B ON A.user_id = B.id
-		LEFT JOIN productFamily_user as FU ON A.family = FU.family_id
-		LEFT JOIN productFamily as F ON F.id = FU.family_id
+		LEFT JOIN productFamily as F ON F.id = A.family
 		WHERE \`set\`=1
 		AND B.id = '${req.user.id}'
 		${family !== 0 ? `AND A.family = '${family}'` : ``}
 		${name !== '' ? `AND A.name LIKE '%${name}%'` : ``}
 		${category !== 0 ? `AND F.category = '${category}'` : ``}
-		ORDER BY A.date DESC;`
+		${state !== 0 ? `AND A.state = '${state}'` : ``}
+		;`
   connection.query(sql, function(err, rows) {
     if(err) throw err;
-
-    console.log('GET /product/total/:state : ' + rows);
+    console.log('POST /product/total/:state : ', rows);
     res.send(rows);
   });
 });
@@ -55,26 +54,30 @@ router.post('/total/unset/', checkAuthed, function(req, res) {
 });
 
 router.post('/list', checkAuthed, function(req, res){
-	let {page, name, family, category} = req.body;
-  connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName
+	let {page, name, family, category, state} = req.body;
+  connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName, state, IFNULL(sum(S.quantity), 0) as stock
 		FROM product as A JOIN users as B ON A.user_id = B.id
-		LEFT JOIN productFamily as F ON F.id = A.family
+    LEFT JOIN productFamily as F ON F.id = A.family
+    LEFT JOIN stock as S ON A.id = S.product_id
 		WHERE \`set\`=1
 		AND B.id = '${req.user.id}'
 		${family !== 0 ? `AND A.family = '${family}'` : ``}
 		${name !== '' ? `AND A.name LIKE '%${name}%'` : ``}
 		${category !== 0 ? `AND F.category = '${category}'` : ``}
-		ORDER BY A.date DESC
-		${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')}`, function(err, rows) {
+		${state !== 0 ? `AND A.state = '${state}'` : ``}
+    GROUP BY A.id
+    ORDER BY A.date DESC
+    ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')}
+    ;`, function(err, rows) {
 		if(err) throw err;
-    console.log('POST /product/list : ', rows);
+    // console.log('POST /product/list : ', rows);
     res.send(rows);
   });
 });
 
 router.post('/list/unset/', checkAuthed, function(req, res){
-  let {page, name, family, category} = req.body;
-	console.warn(req.body)
+  let {page, name, family, category, state} = req.body;
+	// console.warn(req.body)
 
   connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName
 										FROM product as A JOIN users as B ON A.user_id = B.id
@@ -85,6 +88,7 @@ router.post('/list/unset/', checkAuthed, function(req, res){
                     AND B.id = '${req.user.id}'
 										${name !== '' ? `AND A.name = '${name}'` : ``}
 										${category !== 0 ? `AND F.category = '${category}'` : ``}
+										${state !== 0 ? `AND A.state = '${state}'` : ``}
 										${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}
 										`, function(err, rows) {
     if(err) throw err;
@@ -96,10 +100,14 @@ router.post('/list/unset/', checkAuthed, function(req, res){
 
 router.get('/:id', checkAuthed, function(req, res) {
   let id = req.params.id; // id로 검색
-
-  connection.query(`SELECT P.*, F.\`name\` as familyName
-                    FROM product as P LEFT JOIN productFamily as F ON P.family = F.id
-                    WHERE P.id = ${id}`, function(err, rows) {
+  console.warn(`SELECT P.*, F.\`name\` as familyName, FC.\`name\` as categoryName, FC.\`id\` as categoryId
+  FROM product as P LEFT JOIN productFamily as F ON P.family = F.id
+  LEFT JOIN familyCategory as FC ON FC.id = F.category
+  WHERE P.id = ${id}`)
+  connection.query(`SELECT P.*, F.\`name\` as familyName, FC.\`name\` as categoryName, FC.\`id\` as categoryId
+    FROM product as P LEFT JOIN productFamily as F ON P.family = F.id
+    LEFT JOIN familyCategory as FC ON FC.id = F.category
+    WHERE P.id = ${id}`, function(err, rows) {
     if(err) throw err;
 
     console.log('GET /product/'+id+' : ' + rows);
@@ -108,38 +116,39 @@ router.get('/:id', checkAuthed, function(req, res) {
 });
 
 router.post('/', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail'}]), (req, res) => {
-	let {name, price, grade, weight, productFamily} = req.body;
+  let {name, price, grade, weight, productFamily, discount_price, state, vat, shippingDate} = req.body;
 	let fileName = 'noimage.jfif';
 	if(req.files.file)
 		 fileName = 'product/'+req.files.file[0].filename; // 대표 이미지
 	let detailFileName = ''; // 상세 이미지
-	console.warn(req.files)
+	// console.warn(req.files)
 	if(req.files.file_detail) {
 		req.files.file_detail.map((e, i) => {
 			detailFileName += 'productDetail/'+e.filename+'|'; // 대표 이미지
 		})
 		detailFileName = detailFileName.slice(0, -1);
 	}
-  connection.query(`INSERT INTO \`product\` (\`name\`, \`grade\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`weight\`, \`safety_stock\`, \`file_name\`, \`detail_file\`, \`user_id\`, \`family\`)
-                    VALUES ('${name}', '${grade}', '4', '5', '${price}', '${weight}', '8', '${fileName}', '${detailFileName}', "${req.user.id}", ${productFamily});`, function(err, rows) {
+  connection.query(`INSERT INTO \`product\` (\`name\`, \`grade\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`discount_price\`, \`weight\`, \`safety_stock\`, \`file_name\`, \`detail_file\`, \`user_id\`, \`family\`, \`state\`, \`tax\`, \`shippingDate\`)
+                    VALUES ('${name}', '${grade}', '4', '5', '${price}', '${discount_price}', '${weight}', '8', '${fileName}', '${detailFileName}', "${req.user.id}", ${productFamily}, ${state}, ${vat}, '${shippingDate}');`, function(err, rows) {
     if(err) throw err;
 
     console.log('POST /product : ', rows);
-
-    const product_id = rows.insertId;
-		Plant.getList(req.user, (err, msg) => {
-			if(err) throw err;
-			let sql = '';
-			msg.map((e,i) => {
-				sql+=`INSERT INTO stock (\`product_id\`, \`quantity\`, \`plant_id\`) VALUES ('${product_id}', '${0}', '${e.id}'); `
-			})
-			//sql = `INSERT INTO stock (\`product_id\`, \`quantity\`) VALUES ('${product_id}', '${0}');`
-			connection.query(sql, function(err_, rows_) {
-				if(err_) throw err_;
-				console.log('stock '+rows_);
-				res.send(rows);
-			});
-		});
+		res.send(rows);
+		// 품목 등록시 재고 0으로 채우기
+    // const product_id = rows.insertId;
+		// Plant.getList(req.user, (err, msg) => {
+		// 	if(err) throw err;
+		// 	let sql = '';
+		// 	msg.map((e,i) => {
+		// 		sql+=`INSERT INTO stock (\`product_id\`, \`quantity\`, \`plant_id\`) VALUES ('${product_id}', '${0}', '${e.id}'); `
+		// 	})
+		// 	//sql = `INSERT INTO stock (\`product_id\`, \`quantity\`) VALUES ('${product_id}', '${0}');`
+		// 	connection.query(sql, function(err_, rows_) {
+		// 		if(err_) throw err_;
+		// 		console.log('stock '+rows_);
+		// 		res.send(rows);
+		// 	});
+		// });
   })
 });
 
@@ -162,9 +171,21 @@ router.put('/deactivate', checkAuthed, function(req, res){
   });
 });
 
-router.put('/modify/:id', checkAuthed, upload.none(), function(req, res) {
-	console.log(`UPDATE product SET \`name\`='${req.body.name}', \`grade\`='${req.body.grade}', \`weight\`='${req.body.weight}', \`price_shipping\`='${req.body.price}', \`family\`=${req.body.productFamily} WHERE \`id\`=${req.params.id};`)
-  connection.query(`UPDATE product SET \`name\`='${req.body.name}', \`grade\`='${req.body.grade}', \`weight\`='${req.body.weight}', \`price_shipping\`='${req.body.price}', \`family\`=${req.body.productFamily} WHERE \`id\`=${req.params.id};`, function(err, rows) {
+router.put('/modify/:id', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail'}]), function(req, res) {
+  const { name, price, productFamily, discount_price, state, shippingDate } = req.body;
+  let fileName = 'noimage.jfif';
+  // console.warn(req.body)
+	if(req.files.file)
+    fileName = 'product/'+req.files.file[0].filename; // 대표 이미지
+	let detailFileName = ''; // 상세 이미지
+	if(req.files.file_detail) {
+		req.files.file_detail.map((e, i) => {
+			detailFileName += 'productDetail/'+e.filename+'|'; // 대표 이미지
+		})
+		detailFileName = detailFileName.slice(0, -1);
+	}
+	// console.warn(req.files);
+  connection.query(`UPDATE product SET \`name\`='${name}', \`price_shipping\`='${price}', \`discount_price\`='${discount_price}', \`family\` ='${productFamily}', \`state\` = '${state}', \`file_name\`='${fileName}', \`detail_file\`='${detailFileName}', \`shippingDate\` ='${shippingDate}' WHERE \`id\`=${req.params.id};`, function(err, rows) {
     if(err) throw err;
 
     console.log('PUT /product/modify/:id : ', rows);

@@ -18,6 +18,12 @@ router.get('/familyId/:productId',
 	product.getFamilyId
 )
 
+router.get('/stateCount',
+	passport.authenticate('JWT', { session: false}),
+	checkAuthed,
+	product.getStateCount
+)
+
 //회원이 취급하는 품목군 리스트 주기
 router.get('/familyList/:categoryId',
   passport.authenticate('JWT', { session: false }),
@@ -69,8 +75,11 @@ router.get('/excel',
 )
 
 router.get('/list/open/:id',
-	product.getAllList
+	product.getOpenList
 )
 
+router.get('/detail/open/:id',
+	product.getOpenDetail
+)
 
 module.exports = router;

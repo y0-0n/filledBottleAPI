@@ -3,8 +3,6 @@ const passport = require('passport');
 const auth = require("../api/auth/auth");
 
 router.get('/',
-  passport.authenticate('JWT', { session: false }),
-  auth.checkAuthed,
   (req, res) => {
 		const CLIENT_ID = 'u8482r04pp';
 		const CLIENT_SECRET = 'dCM0upCu5ZoYVKjinbLMgaF98o9vgOhOiM9dsAbX';
@@ -24,5 +22,7 @@ router.get('/',
 		})
 	}
 );
+
+
 
 module.exports = router;

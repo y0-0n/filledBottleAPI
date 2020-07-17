@@ -18,6 +18,19 @@ router.get('/',
   stock.getStockQuantity
 );
 
+router.get('/order/:id',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  stock.getStockOrder
+);
+
+router.get('/modify/:id',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  stock.getStockModify
+);
+
+
 router.post('/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
@@ -57,7 +70,14 @@ router.post('/total',
 router.post('/list/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
-  stock.getStockList2
+  stock.getStockList
+);
+
+//주문 등록시 재고 가져오기
+router.get('/product/:id',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  stock.getStockProduct
 );
 
 router.post('/list/total',
@@ -79,13 +99,13 @@ router.post('/sum/',
 );
 
 
-router.get('/:plantId/:productId',
+router.get('/:stockId',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
   stock.getStockDetail
 );
 
-router.put('/:id',
+router.put('/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
   stock.modifyStock
