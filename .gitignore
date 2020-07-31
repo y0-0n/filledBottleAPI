@@ -33,4 +33,4 @@ package-lock.json
 src/private.pem
 src/public.pem
 
-models/
+/models

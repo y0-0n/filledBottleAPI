@@ -74,7 +74,7 @@ module.exports.getInfoOpen = (id, callback) => {
       throw err;
     }
 
-    const query = 'SELECT email, name, address,address_detail as addressDetail, postcode, phone, crNumber, expiration FROM users WHERE id = ?';
+    const query = 'SELECT email, name, address, address_detail as addressDetail, postcode, phone, crNumber, expiration FROM users WHERE id = ?';
     const exec = conn.query(query, id, (err, rows) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
