@@ -55,7 +55,7 @@ router.post('/total/unset/', checkAuthed, function(req, res) {
 
 router.post('/list', checkAuthed, function(req, res){
 	let {page, name, family, category, state} = req.body;
-  connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName, state, IFNULL(sum(S.quantity), 0) as stock
+  connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, gap, F.\`name\` as familyName, state, IFNULL(sum(S.quantity), 0) as stock
 		FROM product as A JOIN users as B ON A.user_id = B.id
     LEFT JOIN productFamily as F ON F.id = A.family
     LEFT JOIN stock as S ON A.id = S.product_id
@@ -104,7 +104,7 @@ router.get('/:id', checkAuthed, function(req, res) {
   FROM product as P LEFT JOIN productFamily as F ON P.family = F.id
   LEFT JOIN familyCategory as FC ON FC.id = F.category
   WHERE P.id = ${id}`)
-  connection.query(`SELECT P.*, F.\`name\` as familyName, FC.\`name\` as categoryName, FC.\`id\` as categoryId
+  connection.query(`SELECT P.*, F.\`name\` as familyName, FC.\`name\` as categoryName, FC.\`id\` as categoryId, gap
     FROM product as P LEFT JOIN productFamily as F ON P.family = F.id
     LEFT JOIN familyCategory as FC ON FC.id = F.category
     WHERE P.id = ${id}`, function(err, rows) {
@@ -127,9 +127,11 @@ router.post('/', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail
 			detailFileName += 'productDetail/'+e.filename+'|'; // 대표 이미지
 		})
 		detailFileName = detailFileName.slice(0, -1);
-	}
-  connection.query(`INSERT INTO \`product\` (\`name\`, \`grade\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`discount_price\`, \`weight\`, \`safety_stock\`, \`file_name\`, \`detail_file\`, \`user_id\`, \`family\`, \`state\`, \`tax\`, \`shippingDate\`, \`additional\`)
-                    VALUES ('${name}', '${grade}', '4', '5', '${price}', '${discount_price}', '${weight}', '8', '${fileName}', '${detailFileName}', "${req.user.id}", ${productFamily}, ${state}, ${vat}, '${shippingDate}', '${additional}');`, function(err, rows) {
+  }
+  weight=0 //영헌: api 변경에 따른 임시 dummy data
+  let gap=null //영헌: api 변경에 따른 임시 dummy data
+  connection.query(`INSERT INTO \`product\` (\`name\`, \`grade\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`discount_price\`, \`weight\`, \`safety_stock\`, \`file_name\`, \`detail_file\`, \`user_id\`, \`family\`, \`state\`, \`tax\`, \`shippingDate\`, \`additional\`, \`gap\`)
+                    VALUES ('${name}', '${grade}', '4', '5', '${price}', '${discount_price}', '${weight}', '8', '${fileName}', '${detailFileName}', "${req.user.id}", ${productFamily}, ${state}, ${vat}, '${shippingDate}', '${additional}', '${gap}');`, function(err, rows) {
     if(err) throw err;
 
     console.log('POST /product : ', rows);
@@ -183,9 +185,10 @@ router.put('/modify/:id', checkAuthed, upload.fields([{name: 'file'}, {name: 'fi
 			detailFileName += 'productDetail/'+e.filename+'|'; // 대표 이미지
 		})
 		detailFileName = detailFileName.slice(0, -1);
-	}
+  }
+  let gap=null //영헌: api 변경에 따른 임시 dummy data
 	// console.warn(req.files);
-  connection.query(`UPDATE product SET \`name\`='${name}', \`price_shipping\`='${price}', \`discount_price\`='${discount_price}', \`family\` ='${productFamily}', \`state\` = '${state}', \`file_name\`='${fileName}', \`detail_file\`='${detailFileName}', \`shippingDate\` ='${shippingDate}', \`additional\`='${additional}' WHERE \`id\`=${req.params.id};`, function(err, rows) {
+  connection.query(`UPDATE product SET \`name\`='${name}', \`price_shipping\`='${price}', \`discount_price\`='${discount_price}', \`family\` ='${productFamily}', \`state\` = '${state}', \`file_name\`='${fileName}', \`detail_file\`='${detailFileName}', \`shippingDate\` ='${shippingDate}', \`additional\`='${additional}',  \`gap\`='${gap}' WHERE \`id\`=${req.params.id};`, function(err, rows) {
     if(err) throw err;
 
     console.log('PUT /product/modify/:id : ', rows);
