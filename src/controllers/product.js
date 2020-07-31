@@ -127,9 +127,11 @@ router.post('/', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail
 			detailFileName += 'productDetail/'+e.filename+'|'; // 대표 이미지
 		})
 		detailFileName = detailFileName.slice(0, -1);
-	}
-  connection.query(`INSERT INTO \`product\` (\`name\`, \`grade\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`discount_price\`, \`weight\`, \`safety_stock\`, \`file_name\`, \`detail_file\`, \`user_id\`, \`family\`, \`state\`, \`tax\`, \`shippingDate\`, \`additional\`)
-                    VALUES ('${name}', '${grade}', '4', '5', '${price}', '${discount_price}', '${weight}', '8', '${fileName}', '${detailFileName}', "${req.user.id}", ${productFamily}, ${state}, ${vat}, '${shippingDate}', '${additional}');`, function(err, rows) {
+  }
+  weight = 0;
+  shippingDate = '1999-09-09';
+  connection.query(`INSERT INTO \`product\` (\`name\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`discount_price\`, \`weight\`, \`safety_stock\`, \`file_name\`, \`detail_file\`, \`user_id\`, \`family\`, \`state\`, \`tax\`, \`shippingDate\`, \`additional\`)
+                    VALUES ('${name}', '4', '5', '${price}', '${discount_price}', '${weight}', '8', '${fileName}', '${detailFileName}', "${req.user.id}", ${productFamily}, ${state}, ${vat}, '${shippingDate}', '${additional}');`, function(err, rows) {
     if(err) throw err;
 
     console.log('POST /product : ', rows);
