@@ -120,11 +120,10 @@ module.exports.getUserFamilyCategory = (user, callback) => {
       conn.release();
       throw err;
     }
-    const query = `SELECT FC.* FROM familyCategory AS FC
-		JOIN productFamily AS PF ON FC.id = PF.category
-		JOIN productFamily_user AS PFU ON PFU.family_id = PF.id
-		WHERE PFU.user_id = ?
-		GROUP BY FC.id`;
+    const query = `SELECT DISTINCT FC.name as name, FC.id as id FROM product AS P
+    JOIN productFamily as F ON P.family = F.id
+    JOIN familyCategory AS FC ON FC.id = F.category
+    WHERE user_id = ?`;
     const exec = conn.query(query, [user.id], (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
@@ -142,11 +141,9 @@ module.exports.getFamilyList = (user, data, callback) => {
       throw err;
     }
     // TODO: categoryId가 숫자에서 문자로 바뀌던 문제
-    const query = `SELECT F.name, F.id, FU.id as familyUserId
-		FROM productFamily as F JOIN productFamily_user as FU ON F.id = FU.family_id
-		JOIN familyCategory as FC ON FC.id = F.category
-		JOIN users as U ON FU.user_id = U.id
-		WHERE U.id = ?
+    const query = `SELECT DISTINCT F.name as name, F.id as id FROM product AS P
+    JOIN productFamily as F ON P.family = F.id
+    WHERE user_id = ?
 		${categoryId !== '0' ? `AND F.category = ${categoryId}`: ``};
 		`;
     const exec = conn.query(query, [user.id], (err, result) => {
