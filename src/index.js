@@ -23,7 +23,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use( cors() );
 app.use('/static', express.static(path.join(__dirname+'/../public')));
-
 app.use(session({
   secret: 'ChangeItLaterToRandom',
   resave: false,
@@ -62,6 +61,10 @@ app.use('/stock',
 );
 
 app.use('/users', users);
+
+app.use( (err, req, res, next) => {
+  res.status(400).json({err})
+});
 
 //====================  cors  ==========================================
 var whitelist = ['https://localhost:8080']

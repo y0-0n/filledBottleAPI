@@ -3,7 +3,22 @@
 const pool = require('../../config/dbpool').pool;
 const Product = require('./Product');
 
-module.exports.getList = (user, callback) => {
+module.exports.getList = async (user, callback) => {
+  try{
+    const query = `SELECT * from plant
+      WHERE user_id = ?
+      AND \`set\`=1`;
+    const [rows, field] = await pool.query(query, [user.id]);
+    console.log('getList');    
+    //console.log('실행 sql : ', exec.sql);
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('getList error',error);
+  }
+}
+
+module.exports.getList1 = (user, callback) => {
   pool.getConnection(function(err, conn) {
     if(err) {
       conn.release();
@@ -22,7 +37,23 @@ module.exports.getList = (user, callback) => {
   })
 }
 
-module.exports.searchPlant = (user, data, callback) => {
+module.exports.searchPlant = async (user, data, callback) => {
+	try{
+    const {productFamily} = data;
+    const query = `SELECT * from plant
+      WHERE user_id = ?
+      AND \`set\`=1`;
+    const [rows, field] = await pool.query(query, [user.id]);
+    console.log('searchPlant');    
+    //console.log('실행 sql : ', exec.sql);
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('searchPlant error',error);
+  }
+}
+
+module.exports.searchPlant1 = (user, data, callback) => {
 	const {productFamily} = data;
   pool.getConnection(function(err, conn) {
     if(err) {
@@ -79,7 +110,24 @@ module.exports.add = (user, data, callback) => {
 	})
 }
 
-module.exports.deactivate = (user, data, callback) => {
+module.exports.deactivate = async (user, data, callback) => {
+  try{
+    const {id} = data;
+    const query = `UPDATE plant
+      SET \`set\` = 0
+      WHERE user_id = ?
+      AND id = ?`;
+    const [rows, field] = await pool.query(query, [user.id,id]);
+    console.log('deactivate');    
+    //console.log('실행 sql : ', exec.sql);
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('deactivate error',error);
+  }
+}
+
+module.exports.deactivate1 = (user, data, callback) => {
 	const {id} = data;
   pool.getConnection(function(err, conn) {
     if(err) {

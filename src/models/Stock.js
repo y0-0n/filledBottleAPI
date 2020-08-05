@@ -3,6 +3,34 @@
 const pool = require('../../config/dbpool').pool;
 const async = require('async');
 
+// module.exports.convertStock = async (product_id, quantity, user, memo, callback) => {
+//   try{
+//     const select_query = `SELECT S.* FROM stock as S JOIN product as P ON S.product_id = P.id
+//       WHERE P.user_id = ?
+//       AND P.\`set\` = 1
+//       AND P.id = ?
+//       ORDER BY S.id DESC
+//       LIMIT 1
+//       `;
+//     const [rows_select, field_select] = await pool.query(select_query,[user.id,product_id]);
+//     console.log('getProductResult');    
+//     try {
+//       const current = rows_select[0].quantity
+//       const change = quantity - current;
+//       const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`change\`, \`memo\`) VALUES (${product_id}, ${quantity}, ${change}, '${memo}')`;
+//       const [rows_insert, field_insert] = await pool.query(insert_query,[user.id,product_id]);
+//       return callback(null, rows_insert);
+//     }
+//     catch(error) {
+//       console.log('convertStock insert error',error);
+//       return;
+//     }
+//   }
+//   catch(error) {
+//     console.log('convertStock select error',error);
+//     return;
+//   }
+// };
 module.exports.convertStock = (product_id, quantity, user, memo, callback) => {
   pool.getConnection(function(err, conn) {
     if (err) {
