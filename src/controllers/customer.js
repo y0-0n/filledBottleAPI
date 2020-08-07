@@ -50,7 +50,7 @@ router.post('/total/unset/', checkAuthed, function(req, res) {
 router.post('/list', checkAuthed, function(req, res){
   let {page, keyword} = req.body;
   const name = keyword;
-  connection.query(`SELECT A.id as id, A.\`name\` as \`name\`, A.telephone as telephone, A.cellphone as cellphone, A.\`set\` as \`set\`, A.address as address, A.address_detail as addressDetail, A.postcode as postcode, A.manager as manager, A.file_name 
+  connection.query(`SELECT A.id as id, A.\`name\` as \`name\`, A.telephone as telephone, A.cellphone as cellphone, A.\`set\` as \`set\`, A.address as address, A.address_detail as addressDetail, A.postcode as postcode
                     FROM customer as A JOIN users as B ON A.user_id = B.id
                     WHERE \`set\`=1
                     AND B.id = '${req.user.id}'
@@ -96,8 +96,8 @@ router.get('/:id', checkAuthed, function(req, res){
 router.post('/', checkAuthed, upload.none(), (req, res) => {
 	let {name, delegate, telephone, cellphone, keyword, set, transfer, postcode, address, addressDetail, manager, crNumber} = req.body;
   console.warn(req.body)
-  connection.query(`INSERT INTO customer (\`name\`, \`delegate\`, \`telephone\`, \`cellphone\`, \`keyword\`, \`set\`, \`transfer\`, \`address\`, \`address_detail\`, \`postcode\`, \`manager\`, \`user_id\`, \`crNumber\`)
-                  VALUES ('${name}', '${delegate}', '${telephone}', '${cellphone}', '${1}', '${1}', '${2}', '${address}', '${addressDetail}', '${postcode}', '${manager}', '${req.user.id}', '${crNumber}')`, function(err, rows) {
+  connection.query(`INSERT INTO customer (\`name\`, \`telephone\`, \`cellphone\`, \`set\`, \`address\`, \`address_detail\`, \`postcode\`, \`user_id\`, \`crNumber\`)
+                  VALUES ('${name}', '${telephone}', '${cellphone}', '${1}',  '${address}', '${addressDetail}', '${postcode}', '${req.user.id}', '${crNumber}')`, function(err, rows) {
     if(err) throw err;
     
     console.log('POST /customer : ' + rows);
