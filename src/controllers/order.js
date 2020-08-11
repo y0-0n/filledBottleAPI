@@ -98,6 +98,21 @@ router.post('/list', checkAuthed, function(req, res){
   });
 });
 
+router.get('/todayShipping', checkAuthed, function(req, res){
+  let sql = `SELECT O.id, O.\`date\`, C.name, O.price
+             FROM \`order\` as O JOIN \`customer\` as C ON O.customer_id = C.id
+             WHERE O.user_id='${req.user.id}'
+             AND state='order'
+             AND DATE(\`date\`) = DATE(CURRENT_TIMESTAMP)
+             ORDER BY createAt DESC`;
+  connection.query(sql, function(err, rows) {
+    if(err) throw err;
+
+    console.log('GET /order/todatyShipping:', rows);
+    res.send(rows);
+  });
+});
+
 router.get('/order_product', function(req, res) {
   connection.query('SELECT * from order_product', function(err, rows) {
     if(err) throw err;

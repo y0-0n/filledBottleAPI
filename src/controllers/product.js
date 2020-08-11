@@ -110,13 +110,14 @@ router.get('/:id', checkAuthed, function(req, res) {
     WHERE P.id = ${id}`, function(err, rows) {
     if(err) throw err;
 
-    console.log('GET /product/'+id+' : ' + rows);
+    console.log('GET /product/'+id+' : ', rows);
     res.send(rows);
   });
 });
 
 router.post('/', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail'}]), (req, res) => {
-  let {name, price, grade, weight, productFamily, discount_price, state, vat, shippingDate} = req.body;
+  // console.warn(req.body)
+  let {name, price, weight, weightUnit, productFamily, discount_price, state, vat, shippingDate, shippingEndDate, gap, additional} = req.body;
 	let fileName = 'noimage.jfif';
 	if(req.files.file)
 		 fileName = 'product/'+req.files.file[0].filename; // 대표 이미지
@@ -125,11 +126,12 @@ router.post('/', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail
 	if(req.files.file_detail) {
 		req.files.file_detail.map((e, i) => {
 			detailFileName += 'productDetail/'+e.filename+'|'; // 대표 이미지
-		})
+		});
 		detailFileName = detailFileName.slice(0, -1);
-	}
-  connection.query(`INSERT INTO \`product\` (\`name\`, \`grade\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`discount_price\`, \`weight\`, \`safety_stock\`, \`file_name\`, \`detail_file\`, \`user_id\`, \`family\`, \`state\`, \`tax\`, \`shippingDate\`)
-                    VALUES ('${name}', '${grade}', '4', '5', '${price}', '${discount_price}', '${weight}', '8', '${fileName}', '${detailFileName}', "${req.user.id}", ${productFamily}, ${state}, ${vat}, '${shippingDate}');`, function(err, rows) {
+  }
+  weightUnit = 'kg';
+  connection.query(`INSERT INTO \`product\` (\`name\`, \`price_shipping\`, \`discount_price\`, \`weight\`, \`weight_unit\`, \`file_name\`, \`detail_file\`, \`user_id\`, \`family\`, \`state\`, \`tax\`, \`shippingDate\`, \`shippingEndDate\`, \`additional\`, \`gap\`)
+                    VALUES ('${name}', '${price}', '${discount_price}', '${weight}', '${weightUnit}', '${fileName}', '${detailFileName}', ${req.user.id}, ${productFamily}, ${state}, ${vat}, '${shippingDate}', '${shippingEndDate}', '${additional}', '${gap}');`, function(err, rows) {
     if(err) throw err;
 
     console.log('POST /product : ', rows);
@@ -172,7 +174,7 @@ router.put('/deactivate', checkAuthed, function(req, res){
 });
 
 router.put('/modify/:id', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail'}]), function(req, res) {
-  const { name, price, productFamily, discount_price, state, shippingDate } = req.body;
+  const { name, price, productFamily, discount_price, state, shippingDate, additional } = req.body;
   let fileName = 'noimage.jfif';
   // console.warn(req.body)
 	if(req.files.file)
@@ -185,7 +187,7 @@ router.put('/modify/:id', checkAuthed, upload.fields([{name: 'file'}, {name: 'fi
 		detailFileName = detailFileName.slice(0, -1);
 	}
 	// console.warn(req.files);
-  connection.query(`UPDATE product SET \`name\`='${name}', \`price_shipping\`='${price}', \`discount_price\`='${discount_price}', \`family\` ='${productFamily}', \`state\` = '${state}', \`file_name\`='${fileName}', \`detail_file\`='${detailFileName}', \`shippingDate\` ='${shippingDate}' WHERE \`id\`=${req.params.id};`, function(err, rows) {
+  connection.query(`UPDATE product SET \`name\`='${name}', \`price_shipping\`='${price}', \`discount_price\`='${discount_price}', \`family\` ='${productFamily}', \`state\` = '${state}', \`file_name\`='${fileName}', \`detail_file\`='${detailFileName}', \`shippingDate\` ='${shippingDate}', \`additional\`='${additional}' WHERE \`id\`=${req.params.id};`, function(err, rows) {
     if(err) throw err;
 
     console.log('PUT /product/modify/:id : ', rows);

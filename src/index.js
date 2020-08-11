@@ -84,16 +84,16 @@ var corsOptions = {
 
 
 //===============================================================
-const options = {
-	key: fs.readFileSync(__dirname+'/private.pem', 'utf8'),
-	cert: fs.readFileSync(__dirname+'/public.pem', 'utf8')
-}
+// const options = {
+// 	key: fs.readFileSync(__dirname+'/private.pem', 'utf8'),
+// 	cert: fs.readFileSync(__dirname+'/public.pem', 'utf8')
+// }
 
 app.listen(app.get('port'), function () {
   console.log('Express server listening on port ' + app.get('port'));
 });
 
-https.createServer(options, app).listen(4001, function() {
-  console.log('Express server listening on port ' + 4001);
-})
+// https.createServer(options, app).listen(4001, function() {
+//   console.log('Express server listening on port ' + 4001);
+// })
 
