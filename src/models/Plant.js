@@ -78,30 +78,30 @@ module.exports.searchPlant1 = (user, data, callback) => {
 
 module.exports.add = async (user, data, callback) => {
   try{
-    const query_outer = `INSERT INTO plant
+    const query = `INSERT INTO plant
 		(\`user_id\`, \`name\`) VALUES (?, '${data.plantName}');
 		`;
-    const [rows_outer, field_outer] = await pool.query(query_outer, [user.id]);
+    const [rows, field] = await pool.query(query_outer, [user.id]);
     console.log('add');    
     //console.log('실행 sql : ', exec.sql);
-    Product.getList(user, async (err, msg) => {
-      try{
-        if(msg.length > 0) {
-          let sql = '';
-          msg.map((e,i) => {
-            sql+=`INSERT INTO stock (\`product_id\`, \`quantity\`, \`plant_id\`) VALUES ('${e.id}', '${0}', '${rows_outer.insertId}'); `
-          })
-          //sql = `INSERT INTO stock (\`product_id\`, \`quantity\`) VALUES ('${product_id}', '${0}');`
-          const [rows_inner, field_inner] = await pool.query(sql, [user.id]);
-          console.log('add inner', sql);
-          return callback(null, rows_inner);
-        }
-      }
-      catch(error){
-        console.log('add inner',error)
-      }
-    });
-    return callback(null, rows_outer);
+    // Product.getList(user, async (err, msg) => {
+    //   try{
+    //     if(msg.length > 0) {
+    //       let sql = '';
+    //       msg.map((e,i) => {
+    //         sql+=`INSERT INTO stock (\`product_id\`, \`quantity\`, \`plant_id\`) VALUES ('${e.id}', '${0}', '${rows_outer.insertId}'); `
+    //       })
+    //       //sql = `INSERT INTO stock (\`product_id\`, \`quantity\`) VALUES ('${product_id}', '${0}');`
+    //       const [rows_inner, field_inner] = await pool.query(sql, [user.id]);
+    //       console.log('add inner', sql);
+    //       return callback(null, rows_inner);
+    //     }
+    //   }
+    //   catch(error){
+    //     console.log('add inner',error)
+    //   }
+    // });
+    return callback(null, rows);
   }
   catch(error) {
     console.log('add error',error);
