@@ -146,10 +146,13 @@ module.exports.getTotalAdmin = async (id, callback) => {
 
 module.exports.getListByFamily = async(id, callback) => {
   try{
-    const query = `SELECT U.id, U.name, GROUP_CONCAT(PF.name) as family FROM en.users as U
-    JOIN en.productFamily_user as PFU ON U.id = PFU.user_id
-    JOIN en.productFamily as PF ON PF.id = PFU.family_id
-    GROUP BY U.id;`;
+    const query = `SELECT U.id, U.name,
+    (SELECT GROUP_CONCAT(DISTINCT PF.name) FROM product AS P
+    JOIN productFamily as PF ON P.family = PF.id
+    WHERE user_id = U.id
+    ) as family
+    FROM en.users as U
+    WHERE U.mall_visible = 1;`;
     const [rows, field] = await pool.query(query, id);
     console.log('getListByFamily')
     //console.log('실행 sql emailcheck: ', exec.sql);

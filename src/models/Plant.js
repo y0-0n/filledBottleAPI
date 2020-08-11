@@ -120,24 +120,24 @@ module.exports.add1 = (user, data, callback) => {
 		`;
 
     const exec = conn.query(query, [user.id], (err, result) => {
-			//conn.release();
+			conn.release();
 			console.log('실행 sql : ', exec.sql);
-			Product.getList(user, (err, msg) => {
-				if(err) throw err;
-				if(msg.length > 0) {
-					let sql = '';
-					msg.map((e,i) => {
-						sql+=`INSERT INTO stock (\`product_id\`, \`quantity\`, \`plant_id\`) VALUES ('${e.id}', '${0}', '${result.insertId}'); `
-					})
-					//sql = `INSERT INTO stock (\`product_id\`, \`quantity\`) VALUES ('${product_id}', '${0}');`
-					conn.query(sql, function(err_, rows_) {
-						conn.release();
-						console.log(sql);
-						if(err_) throw err_;
-						console.log('stock '+rows_);
-					});
-				}
-			});
+			// Product.getList(user, (err, msg) => {
+			// 	if(err) throw err;
+			// 	if(msg.length > 0) {
+			// 		let sql = '';
+			// 		msg.map((e,i) => {
+			// 			sql+=`INSERT INTO stock (\`product_id\`, \`quantity\`, \`plant_id\`) VALUES ('${e.id}', '${0}', '${result.insertId}'); `
+			// 		})
+			// 		//sql = `INSERT INTO stock (\`product_id\`, \`quantity\`) VALUES ('${product_id}', '${0}');`
+			// 		conn.query(sql, function(err_, rows_) {
+			// 			conn.release();
+			// 			console.log(sql);
+			// 			if(err_) throw err_;
+			// 			console.log('stock '+rows_);
+			// 		});
+			// 	}
+			// });
       return callback(err, result);
     });
 	})

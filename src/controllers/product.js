@@ -116,7 +116,8 @@ router.get('/:id', checkAuthed, function(req, res) {
 });
 
 router.post('/', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail'}]), (req, res) => {
-  let {name, price, grade, weight, productFamily, discount_price, state, vat, shippingDate, additional} = req.body;
+  // console.warn(req.body)
+  let {name, price, weight, weightUnit, productFamily, discount_price, state, vat, shippingDate, shippingEndDate, gap, additional} = req.body;
 	let fileName = 'noimage.jfif';
 	if(req.files.file)
 		 fileName = 'product/'+req.files.file[0].filename; // 대표 이미지
@@ -125,13 +126,12 @@ router.post('/', checkAuthed, upload.fields([{name: 'file'}, {name: 'file_detail
 	if(req.files.file_detail) {
 		req.files.file_detail.map((e, i) => {
 			detailFileName += 'productDetail/'+e.filename+'|'; // 대표 이미지
-		})
+		});
 		detailFileName = detailFileName.slice(0, -1);
   }
-  weight = 0;
-  shippingDate = '1999-09-09';
-  connection.query(`INSERT INTO \`product\` (\`name\`, \`barcode\`, \`price_receiving\`, \`price_shipping\`, \`discount_price\`, \`weight\`, \`safety_stock\`, \`file_name\`, \`detail_file\`, \`user_id\`, \`family\`, \`state\`, \`tax\`, \`shippingDate\`, \`additional\`)
-                    VALUES ('${name}', '4', '5', '${price}', '${discount_price}', '${weight}', '8', '${fileName}', '${detailFileName}', "${req.user.id}", ${productFamily}, ${state}, ${vat}, '${shippingDate}', '${additional}');`, function(err, rows) {
+  weightUnit = 'kg';
+  connection.query(`INSERT INTO \`product\` (\`name\`, \`price_shipping\`, \`discount_price\`, \`weight\`, \`weight_unit\`, \`file_name\`, \`detail_file\`, \`user_id\`, \`family\`, \`state\`, \`tax\`, \`shippingDate\`, \`shippingEndDate\`, \`additional\`, \`gap\`)
+                    VALUES ('${name}', '${price}', '${discount_price}', '${weight}', '${weightUnit}', '${fileName}', '${detailFileName}', ${req.user.id}, ${productFamily}, ${state}, ${vat}, '${shippingDate}', '${shippingEndDate}', '${additional}', '${gap}');`, function(err, rows) {
     if(err) throw err;
 
     console.log('POST /product : ', rows);

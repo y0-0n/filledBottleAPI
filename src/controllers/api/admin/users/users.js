@@ -1,5 +1,5 @@
 const Users = require('../../../../models/Users');
-const models = require('../../../../../models');
+// const models = require('../../../../../models');
 exports.getListAdmin = (req, res) => {
   Users.getListAdmin(req.body, (err, rows) => {
     if(err) throw err;
