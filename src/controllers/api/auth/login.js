@@ -10,7 +10,7 @@ exports.auth = (req, res, done) =>
       res.status(401).json({message: 'fail'});
     } else {
       req.logIn(user, function(err) {
-				if (err) return next(err);
+				if (err) return done(err);
 				done(null, user);
       });  
     }
@@ -21,4 +21,3 @@ exports.authResponse = (req, res) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.json(jwt.sign(req.user));
 };
-  
