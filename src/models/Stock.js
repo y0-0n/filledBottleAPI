@@ -3,35 +3,36 @@
 const pool = require('../../config/dbpool').pool;
 const async = require('async');
 
-// module.exports.convertStock = async (product_id, quantity, user, memo, callback) => {
-//   try{
-//     const select_query = `SELECT S.* FROM stock as S JOIN product as P ON S.product_id = P.id
-//       WHERE P.user_id = ?
-//       AND P.\`set\` = 1
-//       AND P.id = ?
-//       ORDER BY S.id DESC
-//       LIMIT 1
-//       `;
-//     const [rows_select, field_select] = await pool.query(select_query,[user.id,product_id]);
-//     console.log('getProductResult');    
-//     try {
-//       const current = rows_select[0].quantity
-//       const change = quantity - current;
-//       const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`change\`, \`memo\`) VALUES (${product_id}, ${quantity}, ${change}, '${memo}')`;
-//       const [rows_insert, field_insert] = await pool.query(insert_query,[user.id,product_id]);
-//       return callback(null, rows_insert);
-//     }
-//     catch(error) {
-//       console.log('convertStock insert error',error);
-//       return;
-//     }
-//   }
-//   catch(error) {
-//     console.log('convertStock select error',error);
-//     return;
-//   }
-// };
-module.exports.convertStock = (product_id, quantity, user, memo, callback) => {
+module.exports.convertStock = async (product_id, quantity, user, memo, callback) => {
+  try{
+    const select_query = `SELECT S.* FROM stock as S JOIN product as P ON S.product_id = P.id
+      WHERE P.user_id = ?
+      AND P.\`set\` = 1
+      AND P.id = ?
+      ORDER BY S.id DESC
+      LIMIT 1
+      `;
+    const [rows_select, field_select] = await pool.query(select_query,[user.id,product_id]);
+    console.log('convertStock select');    
+    try {
+      const current = rows_select[0].quantity
+      const change = quantity - current;
+      const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`change\`, \`memo\`) VALUES (${product_id}, ${quantity}, ${change}, '${memo}')`;
+      const [rows_insert, field_insert] = await pool.query(insert_query,[user.id,product_id]);
+      return callback(null, rows_insert);
+    }
+    catch(error) {
+      console.log('convertStock insert error',error);
+      return;
+    }
+  }
+  catch(error) {
+    console.log('convertStock select error',error);
+    return;
+  }
+};
+
+module.exports.convertStock1 = (product_id, quantity, user, memo, callback) => {
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
@@ -57,7 +58,38 @@ module.exports.convertStock = (product_id, quantity, user, memo, callback) => {
     });
   });
 };
+
 module.exports.modifyStock = (stockData, user, callback) => {
+  try{
+    stockData.map(async (e, i) => {
+      if(e.next !== undefined && e.next !== 0) {
+        const {next, id, quantity} = e;//quantity => prev, next => next
+        try{
+          const insert_query = `INSERT INTO \`stock_modify\` (\`user_id\`, \`stock_id\`, \`quantity\`) VALUES (${user.id}, ${id}, ${next-quantity})`;
+          await pool.query(insert_query);
+          console.log('modifyStock insert');
+        }
+        catch(error){
+          console.log('modifyStock insert error');
+        }
+        try{
+          const update_query = `UPDATE \`stock\` SET \`quantity\`='${next}' WHERE \`id\`='${id}'`;
+          console.log('modifyStock update');
+          const [rows_update, field_update] = await pool.query(update_query);
+          return callback(null, rows_update);
+        }
+        catch(error){
+          console.log('modifyStock update error')
+        }
+      }
+    });
+  }
+  catch(error) {
+
+  }
+};
+
+module.exports.modifyStock1 = (stockData, user, callback) => {
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
@@ -80,7 +112,30 @@ module.exports.modifyStock = (stockData, user, callback) => {
 		});
   });
 };
-module.exports.getLastStock = (data, user, callback) => {
+
+module.exports.getLastStock = async (data, user, callback) => {
+  try{
+    let {productId, plant} = data; //id = 주문 id
+    select_query = `SELECT S.* FROM stock as S JOIN product as P ON S.product_id = P.id
+    WHERE P.user_id = ?
+		AND P.\`set\` = 1
+		AND S.plant_id = ${plant}
+    AND P.id = ?
+    ORDER BY S.id DESC
+    LIMIT 1
+		`;
+    const [rows, field] = await pool.query(select_query, [user.id, productId]);
+    console.log('getLastStock');    
+    //console.log('실행 sql : ', exec.sql);
+    const current = rows.length > 0 ? rows[0].quantity : 0;
+    return callback(null, {current});
+  }
+  catch(error) {
+    console.log('getLastStock error',error);
+  }
+}
+
+module.exports.getLastStock1 = (data, user, callback) => {
 	let {productId, plant} = data; //id = 주문 id
   pool.getConnection(function(err, conn) {
     if (err) {
@@ -105,7 +160,35 @@ module.exports.getLastStock = (data, user, callback) => {
 	});
 }
 
-module.exports.transportStock = (data, user, callback) => {
+module.exports.transportStock = async (data, user, callback) => {
+  let {productId, start, dest, quantity, current1, current2} = data; //id = 주문 id
+  if(start === dest) {
+    return callback(null, {msg: 'same plant'});
+  }
+  try{   
+    const insert_query = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`plant_id\`, \`change\`, \`memo\`)
+			VALUES (${productId}, ${current1-quantity}, ${start}, ${-quantity}, '창고 이동');`;
+    await pool.query(insert_query);
+    console.log('transportStock insert1');    
+    //console.log('실행 sql : ', exec.sql);
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('transportStock insert1 error',error);
+  }
+  try{   
+    const insert_query2 = `INSERT INTO stock (\`product_id\`, \`quantity\`, \`plant_id\`, \`change\`, \`memo\`)
+			VALUES (${productId}, ${parseInt(current2)+parseInt(quantity)}, ${dest}, ${quantity}, '창고 이동');`;
+    await pool.query(insert_query2);
+    console.log('transportStock insert2');    
+    //console.log('실행 sql : ', exec.sql);
+    return callback(err, {});
+  }
+  catch(error) {
+    console.log('transportStock insert2 error',error);
+  }
+}
+module.exports.transportStock1 = (data, user, callback) => {
 	let {productId, start, dest, quantity, current1, current2} = data; //id = 주문 id
 	if(start === dest) {
 		return callback(null, {msg: 'same plant'});
@@ -137,8 +220,27 @@ module.exports.transportStock = (data, user, callback) => {
 	});
 }
 
+module.exports.createStock = async (user, data, callback) => { //영헌) productId 받는 부분 확인해볼 것
+	let {productId, quantity, plant, type, name, expiration, date_manufacture} = data; //id = 주문 id
+	console.log('createStock data: ',data);
+  try{
+    const select_query = `SELECT count(*) as total FROM stock WHERE product_id = ${productId} and plant_id = ${plant};`
+    const [rows_select, fields_select] = await pool.query(select_query);
 
-module.exports.createStock = (user, data, callback) => {
+    const insert_query = 
+      `INSERT INTO stock 
+      (\`product_id\`, \`plant_id\`, \`quantity\`, \`initial_quantity\`, \`name\`, \`date_manufacture\`, \`expiration\`, \`type\`) 
+      VALUES (${productId}, ${plant}, ${quantity}, '${quantity}', '${name + " (" +(parseInt(rows_select[0].total)+1)+")"}', '${date_manufacture}', '${expiration}', '${type}')`;
+    const [rows_insert, fields_insert] = await pool.query(insert_query);
+    console.log('createStock');    
+    return callback(null, rows_insert);
+  }
+  catch(error) {
+    console.log('createStock error',error);
+  }
+};
+
+module.exports.createStock1 = (user, data, callback) => {
 	let {productId, quantity, plant, type, name, expiration, date_manufacture} = data; //id = 주문 id
 	console.log(data)
 
@@ -147,7 +249,7 @@ module.exports.createStock = (user, data, callback) => {
       conn.release();
       throw err;
     }
-    let result;
+    ç
     try {
       await conn.beginTransaction();
       // const del = await connection.query(`DELETE FROM order_product WHERE \`order_id\`='${orderId}' and \`product_id\`='${productId}' and \`plant_id\`='${plantId}' and \`stock_id\`='${stockId}' and \`tax\`='${tax}' and \`refund\` = '1';`);
@@ -585,7 +687,26 @@ module.exports.getStockList2 = (user, data, callback) => {
 }
 
 //재고 관리 모듈 리스트 주기 (사용중)
-module.exports.getStockList = (user, data, callback) => {
+module.exports.getStockList = async (user, data, callback) => {
+	const {pageNumbers, name, family, plant} = data;
+	try{
+    const query = `SELECT S.*, P.name as productName, PL.name as plantName, P.file_name as file_name FROM \`stock\` as S
+			JOIN \`product\` as P ON P.id = S.product_id
+			JOIN \`plant\` as PL ON PL.id = S.plant_id
+			WHERE S.name LIKE '%${name}%'
+			${plant !== 'all' ? `AND S.plant_id = ${plant}` : ``}
+			${family !== 0 ? `AND P.family = '${family}'` : ``}
+			${(pageNumbers !== 'all' ? `LIMIT ${15*(pageNumbers-1)}, 15` : '')};`;
+    const [rows, fields] = await pool.query(query);
+    console.log('getStockList')
+    return callback(null, rows);
+  }
+  catch(error){
+    console.log('getStockList error', error)
+  }
+}
+
+module.exports.getStockList_old = (user, data, callback) => {
 	const {pageNumbers, name, family, plant} = data;
 	
   pool.getConnection(function(err, conn) {
@@ -607,9 +728,28 @@ module.exports.getStockList = (user, data, callback) => {
 		});
   });
 }
+//재고 상세에서 주문 리스트 전달
+module.exports.getStockOrder = async (user, data, callback) => {
+	const {id} = data;
+	
+  try{
+    const query=`
+    SELECT O.shippingDate as date, OP.* FROM \`order_product\` as OP
+    JOIN \`order\` as O ON OP.order_id = O.id
+    WHERE (O.state = 'shipping' OR O.state = 'complete')
+    AND O.user_id = '${user.id}'
+    AND OP.stock_id = '${id}'`;
+    const [rows, fields] = await pool.query(query);
+    console.log('getStockOrder')
+    return callback(null, rows);
+  }
+  catch(error){
+    console.log('getStockOrder error')
+  }
+}
 
 //재고 상세에서 주문 리스트 전달
-module.exports.getStockOrder = (user, data, callback) => {
+module.exports.getStockOrder1 = (user, data, callback) => {
 	const {id} = data;
 	
   pool.getConnection(function(err, conn) {
@@ -633,7 +773,21 @@ module.exports.getStockOrder = (user, data, callback) => {
 }
 
 //재고 상세에서 입출고 리스트 전달
-module.exports.getStockModify = (user, id, callback) => {
+module.exports.getStockModify = async (user, id, callback) => {
+	try{
+    const query=`SELECT quantity, changeDate as date FROM \`stock_modify\`
+      WHERE \`user_id\` = ${user.id}
+      AND \`stock_id\` = ${id}`;
+    const [rows, fields] = await pool.query(query);
+    console.log('getStockModify')
+    return callback(null, rows);
+  }
+  catch(error){
+    console.log('getStockModify error')
+  }
+}
+
+module.exports.getStockModify1 = (user, id, callback) => {
 	
   pool.getConnection(function(err, conn) {
     if (err) {
@@ -653,7 +807,22 @@ module.exports.getStockModify = (user, id, callback) => {
 }
 
 //Product Id를 받아와서 해당 Product의 재고 기록들을 주기
-module.exports.getStockProduct = (user, data, callback) => {
+module.exports.getStockProduct = async (user, data, callback) => {
+	try{
+    const query = `SELECT S.*, P.name as plantName FROM stock as S
+      JOIN plant as P ON S.plant_id = P.id
+      WHERE product_id = ?
+    `;
+    const [rows, fields] = await pool.query(query, [data.id]);
+    console.log('getStockProduct')
+    return callback(null, rows);
+  }
+  catch(error){
+    console.log('getStockProduct error')
+  }
+}
+
+module.exports.getStockProduct1 = (user, data, callback) => {
 	
   pool.getConnection(function(err, conn) {
     if (err) {
@@ -673,7 +842,26 @@ module.exports.getStockProduct = (user, data, callback) => {
 }
 
 //재고 관리 모듈 리스트 총 개수 주기
-module.exports.getStockTotal = (user, data, callback) => {
+module.exports.getStockTotal = async (user, data, callback) => {
+  const {name, family, plant} = data;
+  try{
+    const query = `SELECT count(*) as total FROM \`stock\` as S
+			JOIN \`product\` as P ON P.id = S.product_id
+			JOIN \`plant\` as PL ON PL.id = S.plant_id
+			WHERE S.plant_id = ${plant}
+			${family !== 0 ? `AND P.family = '${family}'` : ``}
+			AND S.name LIKE '%${name}%'
+			`;
+    const [rows, fields] = await pool.query(query, [user.id]);
+    console.log('getStockTotal')
+    return callback(null, rows);
+  }
+  catch(error){
+    console.log('getStockTotal error')
+  }
+}
+
+module.exports.getStockTotal1 = (user, data, callback) => {
 	const {name, family, plant} = data;
   pool.getConnection(function(err, conn) {
     if (err) {
@@ -697,7 +885,41 @@ module.exports.getStockTotal = (user, data, callback) => {
 }
 
 //재고 관리 모듈 재고 실사에서 페이지네이션 없이 리스트 전달
-module.exports.getStockList3 = (user, data, callback) => {
+module.exports.getStockList3 = async (user, data, callback) => { //영헌) 모호한 현 이름 대신 getStockListNoPagenation?, 확인 결과 현재 안쓰이고 있음
+  const {name, family, plant, useFamilyData} = data;
+  try{
+    let familyInPlant = ``;
+		useFamilyData.map((e, i) => {
+			familyInPlant += `'${e.family}' ,`;
+		});
+		familyInPlant = familyInPlant.slice(0, -1);
+    const query = `SELECT b.* FROM
+      (SELECT product_id, MAX(S.id) as id
+        FROM \`en\`.\`stock\` as S JOIN plant as P ON S.plant_id = P.id
+        GROUP BY product_id, plant_id
+      ) AS a JOIN
+      (SELECT S.quantity, S.id as id, P.weight, P.name, P.grade, S.product_id, S.changeDate, P.date, P.file_name, PL.name as plantName
+        FROM \`en\`.\`stock\` AS S JOIN \`en\`.\`product\` AS P ON S.product_id = P.id
+        JOIN plant as PL ON PL.id = S.plant_id
+        WHERE P.user_id = ?
+        ${name !== '' ? `AND P.name = '${name}'` : ``}
+        ${family !== 0 ? `AND P.family = '${family}'` : ``}
+        ${plant !== 'all' ? `AND PL.id = '${plant}'` : ``}
+        ${useFamilyData.length !== 0 ? `AND P.family IN (${familyInPlant})` : `AND P.family = 0`}
+        AND P.\`set\` = 1
+      ) AS b
+      ON a.product_id = b.product_id AND a.id = b.id
+      ORDER BY b.date DESC;`;
+    const [rows, fields] = await pool.query(query, [user.id]);
+    console.log('getStockTotal3')
+    return callback(null, rows);
+  }
+  catch(error){
+    console.log('getStockTotal3 error')
+  }
+}
+
+module.exports.getStockList3_old = (user, data, callback) => {
 	const {name, family, plant, useFamilyData} = data;
   pool.getConnection(function(err, conn) {
     if (err) {
@@ -735,7 +957,39 @@ module.exports.getStockList3 = (user, data, callback) => {
 }
 
 //품목 관리 모듈에 재고 리스트 주기
-module.exports.getStockSum = (user, data, callback) => {
+module.exports.getStockSum = async (user, data, callback) => {
+  const {page, name, family, category} = data;
+  try{
+    const query = `SELECT b.product_id, SUM(b.quantity) as quantity FROM
+    (SELECT product_id, MAX(S.id) as id
+			FROM \`en\`.\`stock\` as S LEFT JOIN plant as P ON S.plant_id = P.id
+			GROUP BY product_id, plant_id
+    ) AS a JOIN
+    (SELECT S.quantity, S.id as id, P.weight, P.name, P.grade, S.product_id, S.changeDate, P.date, P.file_name, PL.name as plantName
+			FROM \`en\`.\`stock\` AS S JOIN \`en\`.\`product\` AS P ON S.product_id = P.id
+			LEFT JOIN plant as PL ON PL.id = S.plant_id
+			LEFT JOIN productFamily_user as FU ON P.family = FU.family_id
+			LEFT JOIN productFamily as F ON F.id = FU.family_id	
+			WHERE P.user_id = ?
+			${name !== '' ? `AND P.name = '${name}'` : ``}
+			${family !== 0 ? `AND P.family = '${family}'` : ``}
+			${category !== 0 ? `AND F.category = '${category}'` : ``}
+			AND P.\`set\` = 1
+    ) AS b
+		ON a.product_id = b.product_id AND a.id = b.id
+		GROUP BY a.product_id
+		ORDER BY b.date DESC
+    ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')};`;
+    const [rows, fields] = await pool.query(query, [user.id]);
+    console.log('getStockOption')
+    return callback(null, rows);
+  }
+  catch(error){
+    console.log('getStockOption error')
+  }
+}
+
+module.exports.getStockSum1 = (user, data, callback) => {
 	const {page, name, family, category} = data;
   pool.getConnection(function(err, conn) {
     if (err) {
@@ -770,7 +1024,7 @@ module.exports.getStockSum = (user, data, callback) => {
   });
 }
 
-module.exports.getStockFromManufactureByConsume = (id, callback) => {
+module.exports.getStockFromManufactureByConsume = (id, callback) => { //영헌) 안쓰임
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
@@ -790,7 +1044,7 @@ module.exports.getStockFromManufactureByConsume = (id, callback) => {
   });
 }
 
-module.exports.getStockFromManufactureByProduce = (id, callback) => {
+module.exports.getStockFromManufactureByProduce = (id, callback) => { //영헌) 안쓰임
   pool.getConnection(function(err, conn) {
     if (err) {
       conn.release();
@@ -810,7 +1064,24 @@ module.exports.getStockFromManufactureByProduce = (id, callback) => {
   });
 }
 
-module.exports.getStockDetail = (user, data, callback) => {
+module.exports.getStockDetail = async (user, data, callback) => {
+  let {stockId} = data;
+  try{
+    const query = `SELECT P.name as productName, S.* FROM \`stock\`
+      AS S JOIN \`product\` as P ON S.product_id = P.id
+      WHERE S.id = ?
+      AND P.user_id = ?
+      ORDER BY S.\`id\` DESC`;
+    const [rows, fields] = await pool.query(query, [stockId, user.id]);
+    console.log('getStockDetail')
+    return callback(null, rows);
+  }
+  catch(error){
+    console.log('getStockDetail error')
+  }
+}
+
+module.exports.getStockDetail1 = (user, data, callback) => {
 	let {stockId} = data;
   pool.getConnection(function(err, conn) {
     if (err) {
