@@ -9,14 +9,15 @@ const Users = require('../models/Users');
 const JWT_SECRET = config.get('auth.jwt.secret');
 
 const localAuth = (email, password, done) => {
-  Users.emailCheck(email, (err, rows) => {
+  Users.getAuthInfo(email, (err, rows) => {
     if(err) return done(err);
     if(rows.length > 0) {
-      let correctPwd = rows[0].password, {salt, id, role} = rows[0];
+      let correctPwd = rows[0].password, {salt, user_id, company_id, role} = rows[0];
       if(correctPwd === auth.hashPassword(password, salt)){
         done(null, {
           email,
-					id,
+          user_id,
+          company_id,
 					role
         })
       } else {
@@ -47,7 +48,7 @@ passport.use('JWT', new JWTStrategy({
   jwtFromRequest: extractJWT.fromAuthHeaderAsBearerToken(),
   secretOrKey: JWT_SECRET,
 }, (jwtUser, done) => {
-  Users.emailCheck(jwtUser.email, (err, rows) => {
+  Users.getAuthInfo(jwtUser.email, (err, rows) => {
     if(err) throw err;
     if(rows.length > 0) {
       done(null, jwtUser);

@@ -2,7 +2,7 @@
 const Users = require('../../../models/Users');
 
 exports.getInfo = (req, res) => {
-  Users.getInfo(req.user.id, (err, rows) => {
+  Users.getInfo(req.user, (err, rows) => {
     if(err) throw err;
     res.status(200).send(rows);
   })

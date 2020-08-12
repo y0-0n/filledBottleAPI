@@ -8,7 +8,8 @@ module.exports = {
   sign(user) {
     const token = jwt.sign(
       {
-        id: user.id,
+        user_id: user.user_id,
+        company_id: user.company_id,
 				email: user.email,
 				role: user.role
       },
