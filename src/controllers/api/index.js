@@ -14,6 +14,7 @@ const geolocation = require('./geolocation');
 const kakao = require('./kakao');
 const cafe24 = require('./cafe24');
 const result = require('./result');
+const company = require('./company');
 
 router.use('/auth', auth);
 router.use('/customer', customer);
@@ -30,5 +31,6 @@ router.use('/geolocation', geolocation);
 router.use('/cafe24', cafe24);
 router.use('/kakao', kakao);
 router.use('/result', result);
+router.use('/company', company);
 
 module.exports = router;

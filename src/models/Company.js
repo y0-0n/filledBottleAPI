@@ -26,12 +26,12 @@ module.exports.addCompany = async (data, callback) => {
 };
 
 
-module.exports.getInfo = async (id, callback) => {
+module.exports.getInfo = async (companyId, callback) => {
   try{
-    const query = 'SELECT name, address, address_detail as addressDetail, postcode, phone, crNumber, expiration, accountName, accountNumber FROM company WHERE id = ?';
+    const query = `SELECT name, address, address_detail as addressDetail, postcode, phone, crNumber, expiration, accountName, accountNumber FROM company WHERE id = ${companyId}`;
   
-    const [rows, field] = await pool.query(query,id);
-    console.log('getInfo')
+    const [rows, field] = await pool.query(query);
+    console.log('getInfo');
     //console.log('실행 sql emailcheck: ', exec.sql);
     return callback(null, rows);
   }
