@@ -45,13 +45,13 @@ router.get('/userFamilyCategory',
   product.getUserFamilyCategory
 );
 
-router.post('/modifyFamily',
+router.post('/modifyFamily', //영헌)현재 안쓰이는듯
 	passport.authenticate('JWT', { session: false }),
 	checkAuthed,
 	product.modifyFamily
 )
 
-router.post('/modifyFamilyInPlant',
+router.post('/modifyFamilyInPlant', //영헌)현재 안쓰이는듯
 	passport.authenticate('JWT', { session: false }),
 	checkAuthed,
 	product.modifyFamilyInPlant

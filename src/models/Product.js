@@ -19,29 +19,6 @@ module.exports.getFamilyId = async (user, data, callback) => {
   }
 }
 
-module.exports.getFamilyId1 = (user, data, callback) => {
-	const {productId} = data;
-	pool.getConnection((err, conn) => {
-		if(err) {
-			conn.release();
-			throw err;
-		}
-		const query = `SELECT PF.id as id from product as P
-		JOIN productFamily_user as PF ON P.family = PF.family_id
-		WHERE P.user_id = ?
-		AND P.id = ${productId}`
-
-		const exec = conn.query(query, [user.id], (err, result) => {
-			conn.release();
-			if(err) {
-				throw err;
-			}
-			console.log('실행 sql : ', exec.sql);
-			return callback(err, result);
-		})
-	})
-}
-
 module.exports.getList = async (user, callback) => {
   try{
     const query = `SELECT * from product
@@ -55,25 +32,6 @@ module.exports.getList = async (user, callback) => {
   catch(error) {
     console.log('getList error',error);
   }
-}
-
-module.exports.getList1 = (user, callback) => {
-  pool.getConnection(function(err, conn) {
-    if(err) {
-      conn.release();
-      throw err;
-    }
-    const query = `SELECT * from product
-									WHERE user_id = ?
-									AND \`set\`=1`;
-
-    const exec = conn.query(query, [user.id], (err, result) => {
-      conn.release();
-      console.log('실행 sql : ', exec.sql);
-
-      return callback(err, result);
-    });
-  })
 }
 
 module.exports.getOpenList = async (user, callback) => {
@@ -93,27 +51,6 @@ module.exports.getOpenList = async (user, callback) => {
   }
 }
 
-module.exports.getOpenList1 = (user, callback) => {
-  pool.getConnection(function(err, conn) {
-    if(err) {
-      conn.release();
-      throw err;
-    }
-    const query = `SELECT * from product
-			WHERE \`set\`=1
-			AND state = 1
-			${user !== "all" ? "AND user_id = ?" : ""}
-			`;
-
-    const exec = conn.query(query, [user], (err, result) => {
-      conn.release();
-      console.log('실행 sql : ', exec.sql);
-
-      return callback(err, result);
-    });
-  })
-}
-
 module.exports.getOpenDetail = async (productId, callback) => {
   try{
     const query = `SELECT * from product
@@ -126,24 +63,6 @@ module.exports.getOpenDetail = async (productId, callback) => {
   catch(error) {
     console.log('getOpenDetail error',error);
   }
-}
-
-module.exports.getOpenDetail1 = (productId, callback) => {
-  pool.getConnection(function(err, conn) {
-    if(err) {
-      conn.release();
-      throw err;
-    }
-    const query = `SELECT * from product
-			WHERE id=${productId}`;
-
-    const exec = conn.query(query, (err, result) => {
-      conn.release();
-      console.log('실행 sql : ', exec.sql);
-
-      return callback(err, result);
-    });
-  })
 }
 
 module.exports.getAllFamily = async (data, callback) => {
@@ -159,22 +78,7 @@ module.exports.getAllFamily = async (data, callback) => {
   }
 }
 
-module.exports.getAllFamily1 = (data, callback) => {
-  pool.getConnection(function(err, conn) {
-    if (err) {
-      conn.release();
-      throw err;
-    }
-    const query = `SELECT F.name, F.id FROM productFamily as F WHERE F.category = ${data}`;
-    const exec = conn.query(query, (err, result) => {
-      conn.release();
-      console.log('실행 sql : ', exec.sql);
-      return callback(err, result);
-    });
-  });
-}
-
-module.exports.getFamilyCategory = async (user, callback) => {
+module.exports.getFamilyCategory = async (user, callback) => { //영헌) user 안쓰임
   try{
     const query = `SELECT * FROM familyCategory`;
     const [rows, field] = await pool.query(query);
@@ -187,29 +91,13 @@ module.exports.getFamilyCategory = async (user, callback) => {
   }
 }
 
-module.exports.getFamilyCategory1 = (user, callback) => {
-  pool.getConnection(function(err, conn) {
-    if (err) {
-      conn.release();
-      throw err;
-    }
-    const query = `SELECT * FROM familyCategory`;
-    const exec = conn.query(query, (err, result) => {
-      conn.release();
-      console.log('실행 sql : ', exec.sql);
-      return callback(err, result);
-    });
-  });
-}
-
 //회원이 취급하는 대분류 리스트 주기
 module.exports.getUserFamilyCategory = async (user, callback) => {
   try{
-    const query = `SELECT FC.* FROM familyCategory AS FC
-      JOIN productFamily AS PF ON FC.id = PF.category
-      JOIN productFamily_user AS PFU ON PFU.family_id = PF.id
-      WHERE PFU.user_id = ?
-      GROUP BY FC.id`;
+    const query = `SELECT DISTINCT FC.name as name, FC.id as id FROM product AS P
+    JOIN productFamily as F ON P.family = F.id
+    JOIN familyCategory AS FC ON FC.id = F.category
+    WHERE user_id = ?`;
     const [rows, field] = await pool.query(query, [user.id]);
     console.log('getUserFamilyCategory');    
     //console.log('실행 sql : ', exec.sql);
@@ -220,34 +108,13 @@ module.exports.getUserFamilyCategory = async (user, callback) => {
   }
 }
 
-//회원이 취급하는 대분류 리스트 주기
-module.exports.getUserFamilyCategory1 = (user, callback) => {
-  pool.getConnection(function(err, conn) {
-    if (err) {
-      conn.release();
-      throw err;
-    }
-    const query = `SELECT DISTINCT FC.name as name, FC.id as id FROM product AS P
-    JOIN productFamily as F ON P.family = F.id
-    JOIN familyCategory AS FC ON FC.id = F.category
-    WHERE user_id = ?`;
-    const exec = conn.query(query, [user.id], (err, result) => {
-      conn.release();
-      console.log('실행 sql : ', exec.sql);
-      return callback(err, result);
-    });
-  });
-}
-
 //회원이 취급하는 품목군 리스트 주기
 module.exports.getFamilyList = async (user, data, callback) => {
   try{
     const {categoryId} = data;
-    const query = `SELECT F.name, F.id, FU.id as familyUserId
-		FROM productFamily as F JOIN productFamily_user as FU ON F.id = FU.family_id
-		JOIN familyCategory as FC ON FC.id = F.category
-		JOIN users as U ON FU.user_id = U.id
-		WHERE U.id = ?
+    const query = `SELECT DISTINCT F.name as name, F.id as id FROM product AS P
+    JOIN productFamily as F ON P.family = F.id
+    WHERE user_id = ?
 		${categoryId !== '0' ? `AND F.category = ${categoryId}`: ``};
 		`;
     const [rows, field] = await pool.query(query, [user.id]);
@@ -258,28 +125,6 @@ module.exports.getFamilyList = async (user, data, callback) => {
   catch(error) {
     console.log('getFamilyList error',error);
   }
-}
-
-//회원이 취급하는 품목군 리스트 주기
-module.exports.getFamilyList1 = (user, data, callback) => {
-  const {categoryId} = data;
-  pool.getConnection(function(err, conn) {
-    if (err) {
-      conn.release();
-      throw err;
-    }
-    // TODO: categoryId가 숫자에서 문자로 바뀌던 문제
-    const query = `SELECT DISTINCT F.name as name, F.id as id FROM product AS P
-    JOIN productFamily as F ON P.family = F.id
-    WHERE user_id = ?
-		${categoryId !== '0' ? `AND F.category = ${categoryId}`: ``};
-		`;
-    const exec = conn.query(query, [user.id], (err, result) => {
-      conn.release();
-      console.log('실행 sql : ', exec.sql);
-      return callback(err, result);
-    });
-  });
 }
 
 //회원이 취급하는 품목군 리스트 주기
@@ -298,26 +143,6 @@ module.exports.getStateCount = async (user, callback) => {
     console.log('getStateCount error',error);
   }
 }
-//회원이 취급하는 품목군 리스트 주기
-module.exports.getStateCount1 = (user, callback) => {
-	pool.getConnection(function(err, conn) {
-		if (err) {
-			conn.release();
-			throw err;
-		}
-
-		const query = `SELECT COUNT(*) as count, state FROM product
-    WHERE user_id = ?
-    AND \`set\` = 1
-		GROUP BY state`;
-
-		const exec = conn.query(query, [user.id], (err, result) => {
-			conn.release();
-			console.log("실행 sql : ", exec.sql);
-			return callback(err, result);
-		})
-	})
-}
 
 //창고에서 취급하는 품목군 주기
 module.exports.familyInPlant = async (user, plantId, callback) => {
@@ -334,25 +159,6 @@ module.exports.familyInPlant = async (user, plantId, callback) => {
   catch(error) {
     console.log('familyInPlant error',error);
   }
-}
-
-//창고에서 취급하는 품목군 주기
-module.exports.familyInPlant1 = (user, plantId, callback) => {
-  pool.getConnection(function(err, conn) {
-    if (err) {
-      conn.release();
-      throw err;
-    }
-		const query = `SELECT FIP.*, PFU.family_id as family, PF.name FROM familyInPlant as FIP
-		JOIN productFamily_user as PFU ON FIP.family_id = PFU.id
-		JOIN productFamily as PF ON PF.id = PFU.family_id
-		WHERE plant_id = ?`;
-    const exec = conn.query(query, [plantId], (err, result) => {
-      conn.release();
-			console.log('실행 sql : ', exec.sql);
-      return callback(err, result);
-    });
-  });
 }
 
 module.exports.modifyFamily = async (user, data, callback) => {
@@ -404,7 +210,7 @@ module.exports.modifyFamily1 = (user, data, callback) => {
 }
 
 //창고에서 취급하는 품목 변경
-module.exports.modifyFamilyInPlant = async (user, data, callback) => {
+module.exports.modifyFamilyInPlant = async (user, data, callback) => { //영헌) 안쓰이는듯
   try{
     let insert_query = ``;
 		data.addFamilyList.map((e, i) => {

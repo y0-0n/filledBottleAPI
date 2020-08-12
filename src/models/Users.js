@@ -25,24 +25,6 @@ module.exports.addUser = async (data, callback) => {
   }
 };
 
-module.exports.addUser1 = (data, callback) => {
-  pool.getConnection(function(err, conn) {
-    if (err) {
-      console.log(err);
-      conn.release();
-      throw err;
-		}
-		let {email, crNumber, password, name, address, addressDetail, postcode, phone, salt, accountName, accountNumber} = data;
-
-    const query = `INSERT INTO users SET email = ?, crNumber = ?, password = ?, name = ?, address = ?, address_detail = ?, postcode = ?, phone = ?, salt =  ?, accountName = ?, accountNumber = ?`;
-    const exec = conn.query(query, [email, crNumber, password, name, address, addressDetail, postcode, phone, salt, accountName, accountNumber], (err, result) => {
-      conn.release();
-      console.log('실행 sql : ', exec.sql);
-
-      return callback(err, result);
-    });
-  });
-};
 
 /**
  * 이메일 중복 체크
@@ -176,24 +158,6 @@ module.exports.getDetailAdmin = async (id, data, callback) => {
     console.log('getDetailAdmin error!',error);
     return callback(error, []);
   }
-}
-
-module.exports.getDetailAdmin1 = (id, data, callback) => {
-	pool.getConnection(function(err, conn) {
-    if(err) {
-      conn.release();
-      throw err;
-    }
-
-		const query = `SELECT id, email, crNumber, name, address, phone, created_date FROM users WHERE id= ?`;
-
-    const exec = conn.query(query, [data.id], (err, rows) => {
-      conn.release();
-      console.log('실행 sql : ', exec.sql);
-
-      return callback(err, rows);
-    });
-  });
 }
 
 module.exports.getProductFamilyAdmin = async (id, data, callback) => {
