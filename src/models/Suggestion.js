@@ -24,7 +24,7 @@ module.exports.getList = (user, page, callback) => {
   });
 };
 
-module.exports.getListAdmin = (user, page, callback) => {
+module.exports.getListAdmin = (page, callback) => {
   pool.getConnection(function(err, conn) {
     if (err) {
       console.log(err);
@@ -36,7 +36,7 @@ module.exports.getListAdmin = (user, page, callback) => {
     FROM suggestion as S JOIN users as U ON S.user_id = U.id
     ORDER BY created_date DESC
     ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')}`;
-    const exec = conn.query(query, user, (err, result) => {
+    const exec = conn.query(query,  (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
 
@@ -65,7 +65,7 @@ module.exports.getTotal = (user, callback) => {
   });
 };
 
-module.exports.getTotalAdmin = (user, callback) => {
+module.exports.getTotalAdmin = (callback) => {
   pool.getConnection(function(err, conn) {
     if (err) {
       console.log(err);
@@ -75,7 +75,7 @@ module.exports.getTotalAdmin = (user, callback) => {
 
     const query = `SELECT count(*) as total
     FROM suggestion as S JOIN users as U ON S.user_id = U.id`;
-    const exec = conn.query(query, user, (err, result) => {
+    const exec = conn.query(query, (err, result) => {
       conn.release();
       console.log('실행 sql : ', exec.sql);
       return callback(err, result);
@@ -102,7 +102,7 @@ module.exports.getDetail = (user_id, id, callback) => {
   });
 };
 
-module.exports.getDetailAdmin = (user_id, data, callback) => {
+module.exports.getDetailAdmin = (data, callback) => {
 
   pool.getConnection(function(err, conn) {
     if (err) {
