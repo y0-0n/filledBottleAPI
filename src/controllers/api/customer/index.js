@@ -19,4 +19,11 @@ router.post('/getOrder',
   customer.getOrder
 );
 
+//BASEURL/api/customer/total
+router.post('/total/',
+  passport.authenticate('JWT', { session: false }),
+  checkAuthed,
+  customer.getTotal
+);
+
 module.exports = router;

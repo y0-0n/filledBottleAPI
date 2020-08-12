@@ -23,3 +23,23 @@ module.exports.getOrder = async (user, data, callback) => {
     console.log('getOrder error',error);
   }
 }
+
+
+module.exports.getTotal = async (user, data, callback) => {
+  try {
+    const query = 
+    `SELECT count(*) as total
+    FROM customer as A JOIN users as B ON A.user_id = B.id
+    WHERE \`set\`=1
+    AND B.id = '${req.user.id}'
+    ${name !== '' ? `AND A.name like '%${name}%'` : ``}`;
+
+    const [rows, field] = await pool.query(query);
+    console.log('getTotal');
+    //console.log('실행 sql : ', exec.sql);
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('getTotal error',error);
+  }
+}

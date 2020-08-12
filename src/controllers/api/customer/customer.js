@@ -6,3 +6,10 @@ exports.getOrder = (req, res) => {
 		res.status(200).send(msg);
 	})
 }
+
+exports.getTotal = (req, res) => {
+	Customer.getTotal(req.user, req.body, (err, msg) => {
+		if(err) throw err;
+		res.status(200).send(msg);
+	})
+}
