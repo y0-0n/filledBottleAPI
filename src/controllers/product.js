@@ -19,12 +19,13 @@ function checkAuthed(req, res, next) {
 }
 
 router.post('/total/', checkAuthed, function(req, res) {
-	let {name, family, category, state} = req.body;
+  let {name, family, category, state} = req.body;
+  const {company_id} = req.user;
   let sql = `SELECT count(*) as total
-		FROM product as A JOIN users as B ON A.user_id = B.id
+		FROM product as A
 		LEFT JOIN productFamily as F ON F.id = A.family
 		WHERE \`set\`=1
-		AND B.id = '${req.user.id}'
+		AND A.company_id = '${company_id}'
 		${family !== 0 ? `AND A.family = '${family}'` : ``}
 		${name !== '' ? `AND A.name LIKE '%${name}%'` : ``}
 		${category !== 0 ? `AND F.category = '${category}'` : ``}
@@ -54,13 +55,14 @@ router.post('/total/unset/', checkAuthed, function(req, res) {
 });
 
 router.post('/list', checkAuthed, function(req, res){
-	let {page, name, family, category, state} = req.body;
+  let {page, name, family, category, state} = req.body;
+  const {company_id} = req.user;
   connection.query(`SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName, state, IFNULL(sum(S.quantity), 0) as stock
-		FROM product as A JOIN users as B ON A.user_id = B.id
+		FROM product as A
     LEFT JOIN productFamily as F ON F.id = A.family
     LEFT JOIN stock as S ON A.id = S.product_id
 		WHERE \`set\`=1
-		AND B.id = '${req.user.id}'
+		AND A.company_id = ${company_id}
 		${family !== 0 ? `AND A.family = '${family}'` : ``}
 		${name !== '' ? `AND A.name LIKE '%${name}%'` : ``}
 		${category !== 0 ? `AND F.category = '${category}'` : ``}
@@ -69,9 +71,9 @@ router.post('/list', checkAuthed, function(req, res){
     ORDER BY A.date DESC
     ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')}
     ;`, function(err, rows) {
-		if(err) throw err;
-    // console.log('POST /product/list : ', rows);
-    res.send(rows);
+      if(err) throw err;
+      // console.log('POST /product/list : ', rows);
+      res.send(rows);
   });
 });
 
@@ -100,17 +102,14 @@ router.post('/list/unset/', checkAuthed, function(req, res){
 
 router.get('/:id', checkAuthed, function(req, res) {
   let id = req.params.id; // id로 검색
-  console.warn(`SELECT P.*, F.\`name\` as familyName, FC.\`name\` as categoryName, FC.\`id\` as categoryId
-  FROM product as P LEFT JOIN productFamily as F ON P.family = F.id
-  LEFT JOIN familyCategory as FC ON FC.id = F.category
-  WHERE P.id = ${id}`)
+  //TODO : 다른 계정은 볼 수 없게 막기
   connection.query(`SELECT P.*, F.\`name\` as familyName, FC.\`name\` as categoryName, FC.\`id\` as categoryId
     FROM product as P LEFT JOIN productFamily as F ON P.family = F.id
     LEFT JOIN familyCategory as FC ON FC.id = F.category
     WHERE P.id = ${id}`, function(err, rows) {
     if(err) throw err;
 
-    console.log('GET /product/'+id+' : ', rows);
+    // console.log('GET /product/'+id+' : ', rows);
     res.send(rows);
   });
 });

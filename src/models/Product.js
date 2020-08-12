@@ -97,8 +97,8 @@ module.exports.getUserFamilyCategory = async (user, callback) => {
     const query = `SELECT DISTINCT FC.name as name, FC.id as id FROM product AS P
     JOIN productFamily as F ON P.family = F.id
     JOIN familyCategory AS FC ON FC.id = F.category
-    WHERE user_id = ?`;
-    const [rows, field] = await pool.query(query, [user.id]);
+    WHERE company_id = ?`;
+    const [rows, field] = await pool.query(query, [user.company_id]);
     console.log('getUserFamilyCategory');    
     //console.log('실행 sql : ', exec.sql);
     return callback(null, rows);
@@ -114,10 +114,10 @@ module.exports.getFamilyList = async (user, data, callback) => {
     const {categoryId} = data;
     const query = `SELECT DISTINCT F.name as name, F.id as id FROM product AS P
     JOIN productFamily as F ON P.family = F.id
-    WHERE user_id = ?
+    WHERE company_id = ?
 		${categoryId !== '0' ? `AND F.category = ${categoryId}`: ``};
 		`;
-    const [rows, field] = await pool.query(query, [user.id]);
+    const [rows, field] = await pool.query(query, [user.company_id]);
     console.log('getFamilyList');    
     //console.log('실행 sql : ', exec.sql);
     return callback(null, rows);
@@ -131,10 +131,10 @@ module.exports.getFamilyList = async (user, data, callback) => {
 module.exports.getStateCount = async (user, callback) => {
   try{
     const query = `SELECT COUNT(*) as count, state FROM product
-      WHERE user_id = ?
+      WHERE company_id = ?
       AND \`set\` = 1
       GROUP BY state`;
-    const [rows, field] = await pool.query(query, [user.id]);
+    const [rows, field] = await pool.query(query, [user.company_id]);
     console.log('getStateCount');    
     //console.log('실행 sql : ', exec.sql);
     return callback(null, rows);
