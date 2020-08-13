@@ -39,7 +39,7 @@ module.exports.getOpenList = async (user, callback) => {
     const query = `SELECT * from product
     WHERE \`set\`=1
     AND state = 1
-    ${user !== "all" ? "AND user_id = ?" : ""}
+    ${user !== "all" ? "AND company_id = ?" : ""}
     `;
     const [rows, field] = await pool.query(query, [user]);
     console.log('getOpenList');    
