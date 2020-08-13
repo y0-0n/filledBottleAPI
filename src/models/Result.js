@@ -9,7 +9,7 @@ module.exports.getProductResult = async (user, date, callback) => {
       JOIN \`order\` as O ON O.id = OP.order_id
       JOIN \`product\` as P ON P.id = OP.product_id
       WHERE (O.state = 'shipping' OR O.state = 'complete')
-      AND O.user_id = ${user.id}
+      AND O.company_id = ${user.company_id}
       AND YEAR(O.date) = ${date.year}
       AND MONTH(O.date) = ${date.month}
       GROUP BY OP.product_id`;

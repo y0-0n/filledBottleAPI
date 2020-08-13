@@ -23,11 +23,11 @@ module.exports.searchPlant = async (user, data, callback) => {
     const {productFamily} = data;
     const query = `SELECT P.* from plant as P
 		JOIN familyInPlant as FP ON P.id = FP.plant_id
-		WHERE user_id = ?
+		WHERE company_id = ?
 		AND FP.family_id = ${productFamily}
 		GROUP BY P.id
 		`;
-    const [rows, field] = await pool.query(query, [user.id]);
+    const [rows, field] = await pool.query(query, [user.company_id]);
     console.log('searchPlant');    
     //console.log('실행 sql : ', exec.sql);
     return callback(null, rows);
@@ -40,9 +40,9 @@ module.exports.searchPlant = async (user, data, callback) => {
 module.exports.add = async (user, data, callback) => {
   try{
     const query = `INSERT INTO plant
-		(\`user_id\`, \`name\`) VALUES (?, '${data.plantName}');
+		(\`company_id\`, \`name\`) VALUES (?, '${data.plantName}');
 		`;
-    const [rows, field] = await pool.query(query, [user.id]);
+    const [rows, field] = await pool.query(query, [user.company_id]);
     console.log('add');    
     //console.log('실행 sql : ', exec.sql);
     // Product.getList(user, async (err, msg) => {
@@ -75,9 +75,9 @@ module.exports.deactivate = async (user, data, callback) => {
     const {id} = data;
     const query = `UPDATE plant
       SET \`set\` = 0
-      WHERE user_id = ?
+      WHERE company_id = ?
       AND id = ?`;
-    const [rows, field] = await pool.query(query, [user.id,id]);
+    const [rows, field] = await pool.query(query, [user.company_id,id]);
     console.log('deactivate');    
     //console.log('실행 sql : ', exec.sql);
     return callback(null, rows);

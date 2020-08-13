@@ -7,9 +7,9 @@ module.exports.getFamilyId = async (user, data, callback) => {
     const {productId} = data;
     const query = `SELECT PF.id as id from product as P
       JOIN productFamily_user as PF ON P.family = PF.family_id
-      WHERE P.user_id = ?
+      WHERE P.company_id = ?
       AND P.id = ${productId}`
-    const [rows, field] = await pool.query(query, [user.id]);
+    const [rows, field] = await pool.query(query, [user.company_id]);
     console.log('getFamilyId');    
     //console.log('실행 sql : ', exec.sql);
     return callback(null, rows);
@@ -19,12 +19,12 @@ module.exports.getFamilyId = async (user, data, callback) => {
   }
 }
 
-module.exports.getList = async (user, callback) => {
+module.exports.getList = async (user, callback) => { //영헌) 안쓰임.
   try{
     const query = `SELECT * from product
-      WHERE user_id = ?
+      WHERE company_id = ?
       AND \`set\`=1`;
-    const [rows, field] = await pool.query(query, [user.id]);
+    const [rows, field] = await pool.query(query, [user.company_id]);
     console.log('getList');    
     //console.log('실행 sql : ', exec.sql);
     return callback(null, rows);
@@ -39,7 +39,7 @@ module.exports.getOpenList = async (user, callback) => {
     const query = `SELECT * from product
     WHERE \`set\`=1
     AND state = 1
-    ${user !== "all" ? "AND user_id = ?" : ""}
+    ${user !== "all" ? "AND company_id = ?" : ""}
     `;
     const [rows, field] = await pool.query(query, [user]);
     console.log('getOpenList');    
@@ -161,15 +161,15 @@ module.exports.familyInPlant = async (user, plantId, callback) => {
   }
 }
 
-module.exports.modifyFamily = async (user, data, callback) => {
+module.exports.modifyFamily = async (user, data, callback) => { //영헌) productFamily_user 여전히 user_id
   try{
     let insert_query = ``;
 		data.addFamilyList.map((e, i) => {
-			insert_query += `INSERT INTO productFamily_user (\`family_id\`, \`user_id\`) VALUES ('${e.id}', '${user.id}');`;
+			insert_query += `INSERT INTO productFamily_user (\`family_id\`, \`user_id\`) VALUES ('${e.id}', '${user.company_id}');`;
 		})
 		let delete_query = ``;
 		data.deleteFamilyList.map((e, i) => {
-			delete_query += `DELETE FROM productFamily_user WHERE family_id = '${e.id}' AND user_id = '${user.id}';`;
+			delete_query += `DELETE FROM productFamily_user WHERE family_id = '${e.id}' AND user_id = '${user.company_id}';`;
     })
     const query = insert_query + delete_query;
     const [rows, field] = await pool.query(query);
@@ -182,44 +182,17 @@ module.exports.modifyFamily = async (user, data, callback) => {
   }
 }
 
-module.exports.modifyFamily1 = (user, data, callback) => {
-  pool.getConnection(function(err, conn) {
-    if (err) {
-      conn.release();
-      throw err;
-    }
-		let insert_query = ``;
-		data.addFamilyList.map((e, i) => {
-			insert_query += `INSERT INTO productFamily_user (\`family_id\`, \`user_id\`) VALUES ('${e.id}', '${user.id}');`;
-		})
-		let delete_query = ``;
-		data.deleteFamilyList.map((e, i) => {
-			delete_query += `DELETE FROM productFamily_user WHERE family_id = '${e.id}' AND user_id = '${user.id}';`;
-		})
-		const query = insert_query + delete_query;
-		if(query !== ``) {
-			const exec = conn.query(query, (err, result) => {
-				conn.release();
-				console.log('실행 sql : ', exec.sql);
-				return callback(err, result);
-			});
-		} else {
-			return callback(err, []);
-		}
-	});
-}
-
 //창고에서 취급하는 품목 변경
 module.exports.modifyFamilyInPlant = async (user, data, callback) => { //영헌) 안쓰이는듯
   try{
     let insert_query = ``;
 		data.addFamilyList.map((e, i) => {
-			insert_query += `INSERT INTO productFamily_user (\`family_id\`, \`user_id\`) VALUES ('${e.id}', '${user.id}');`;
+			insert_query += `INSERT INTO familyInPlant (\`family_id\`, \`plant_id\`) VALUES ('${e.familyUserId}', '${data.plant}');`;
 		})
 		let delete_query = ``;
 		data.deleteFamilyList.map((e, i) => {
-			delete_query += `DELETE FROM productFamily_user WHERE family_id = '${e.id}' AND user_id = '${user.id}';`;
-    })
+			delete_query += `DELETE FROM familyInPlant WHERE family_id = '${e.familyUserId}' AND plant_id = '${data.plant}'`;
+		})
     const query = insert_query + delete_query;
     const [rows, field] = await pool.query(query);
     console.log('modifyFamilyInPlant');    
