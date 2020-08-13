@@ -13,6 +13,12 @@ function checkAuthed(req, res, next) {
   }
 }
 
+router.post('/create',
+  passport.authenticate('JWT', { session: false }),
+	auth.checkAdmin,
+	users.createAdmin
+);
+
 router.post('/list',
   passport.authenticate('JWT', { session: false }),
 	auth.checkAdmin,

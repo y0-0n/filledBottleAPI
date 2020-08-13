@@ -10,12 +10,12 @@ const pool = require('../../config/dbpool').pool;
  */
 module.exports.addUser = async (data, callback) => {
   try{
-    let {email, crNumber, password, name, address, addressDetail, postcode, phone, salt, accountName, accountNumber} = data;
+    let {email, password, name, phone, salt, company_id, role} = data;
 
     const query = 
-    `INSERT INTO users SET email = ?, crNumber = ?, password = ?, name = ?, address = ?, address_detail = ?, postcode = ?, phone = ?, salt =  ?, accountName = ?, accountNumber = ?`;
+    `INSERT INTO users_company SET email = ?, password = ?, name = ?, phone = ?, salt = ?, company_id = ?, role = ?`;
     const [rows, field] = await pool.query(
-      query, [email, crNumber, password, name, address, addressDetail, postcode, phone, salt, accountName, accountNumber]);    
+      query, [email, password, name, phone, salt, company_id, role]);    
     console.log('addUser')
     //console.log('실행 sql : ', exec.sql);
     return callback(null, rows);
