@@ -21,10 +21,3 @@ exports.getListByFamily = (req, res) => {
     res.status(200).send(rows);
   })
 }
-
-exports.getInfoOpen = (req, res) => {
-  Users.getInfoOpen(req.params.id, (err, rows) => {
-    if(err) throw err;
-    res.status(200).send(rows);
-  })
-}

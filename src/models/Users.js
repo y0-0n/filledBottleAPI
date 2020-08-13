@@ -84,22 +84,6 @@ module.exports.getInfo = async (user, callback) => {
   }
 }
 
-
-module.exports.getInfoOpen = async (id, callback) => {
-  try{
-    const query = 'SELECT email, name, address, address_detail as addressDetail, postcode, phone, crNumber, expiration FROM users WHERE id = ?';
-  
-    const [rows, field] = await pool.query(query,id);
-    console.log('getInfoOpen')
-    //console.log('실행 sql emailcheck: ', exec.sql);
-    return callback(null, rows);
-  }
-  catch(error) {
-    console.log('getInfoOpen error!',error);
-    return callback(error, []);
-  }
-}
-
 module.exports.updateInfo = async (id, data, callback) => {
   try{
     const query = `UPDATE users SET name = 
@@ -134,10 +118,10 @@ module.exports.getListAdmin = async (data, callback) => {
   }
 }
 
-module.exports.getTotalAdmin = async (id, callback) => {
+module.exports.getTotalAdmin = async (callback) => {
   try{
     const query = `SELECT count(*) as total FROM users_company`;
-    const [rows, field] = await pool.query(query, id);
+    const [rows, field] = await pool.query(query);
     console.log('getTotalAdmin')
     //console.log('실행 sql emailcheck: ', exec.sql);
     return callback(null, rows);
@@ -150,13 +134,13 @@ module.exports.getTotalAdmin = async (id, callback) => {
 
 module.exports.getListByFamily = async(id, callback) => {
   try{
-    const query = `SELECT U.id, U.name,
+    const query = `SELECT C.id, C.name,
     (SELECT GROUP_CONCAT(DISTINCT PF.name) FROM product AS P
     JOIN productFamily as PF ON P.family = PF.id
-    WHERE user_id = U.id
+    WHERE P.company_id = C.id
     ) as family
-    FROM en.users as U
-    WHERE U.mall_visible = 1;`;
+    FROM company as C
+    WHERE C.mall_visible = 1;`;
     const [rows, field] = await pool.query(query, id);
     console.log('getListByFamily')
     //console.log('실행 sql emailcheck: ', exec.sql);

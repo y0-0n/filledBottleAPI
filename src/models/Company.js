@@ -45,7 +45,6 @@ module.exports.getInfo = async (companyId, callback) => {
 module.exports.getInfoOpen = async (id, callback) => {
   try{
     const query = 'SELECT name, address, address_detail as addressDetail, postcode, phone, crNumber, expiration FROM company WHERE id = ?';
-  
     const [rows, field] = await pool.query(query,id);
     console.log('getInfoOpen')
     //console.log('실행 sql emailcheck: ', exec.sql);

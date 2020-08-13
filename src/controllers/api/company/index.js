@@ -9,5 +9,10 @@ router.get('/info',
   company.getInfo
 );
 
+router.get('/info/open/:id',
+  company.getInfoOpen
+);
+
+
 
 module.exports = router;
