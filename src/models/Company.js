@@ -8,20 +8,20 @@ const pool = require('../../config/dbpool').pool;
  * @param data
  * @param callback
  */
-module.exports.addCompany = async (data, callback) => {
+module.exports.createCompanyAdmin = async (data, callback) => {
   try{
-    let {email, crNumber, password, name, address, addressDetail, postcode, phone, salt, accountName, accountNumber} = data;
-
+    let {crNumber, name, address, addressDetail, postcode, phone, accountName, accountNumber} = data;
+    console.warn(data)
     const query = 
-    `INSERT INTO company SET email = ?, crNumber = ?, password = ?, name = ?, address = ?, address_detail = ?, postcode = ?, phone = ?, salt =  ?, accountName = ?, accountNumber = ?`;
+    `INSERT INTO company SET crNumber = ?, name = ?, address = ?, address_detail = ?, postcode = ?, phone = ?, accountName = ?, accountNumber = ?`;
     const [rows, field] = await pool.query(
-      query, [email, crNumber, password, name, address, addressDetail, postcode, phone, salt, accountName, accountNumber]);    
-    console.log('addUser')
+      query, [crNumber, name, address, addressDetail, postcode, phone, accountName, accountNumber]);    
+    console.log('addCompany')
     //console.log('실행 sql : ', exec.sql);
     return callback(null, rows);
   }
   catch(error) {
-    console.log('addUser error',error)
+    console.log('addCompany error',error)
   }
 };
 
