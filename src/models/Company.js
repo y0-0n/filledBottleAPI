@@ -8,7 +8,7 @@ const pool = require('../../config/dbpool').pool;
  * @param data
  * @param callback
  */
-module.exports.createCompanyAdmin = async (data, callback) => {
+module.exports.createAdmin = async (data, callback) => {
   try{
     let {crNumber, name, address, addressDetail, postcode, phone, accountName, accountNumber} = data;
     console.warn(data)

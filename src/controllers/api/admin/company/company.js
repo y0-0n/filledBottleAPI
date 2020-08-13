@@ -15,8 +15,8 @@ exports.getTotalAdmin = (req, res) => {
 	})
 }
 
-exports.createCompanyAdmin = (req, res) => {
-	Company.createCompanyAdmin(req.body, (err, msg) => {
+exports.createAdmin = (req, res) => {
+	Company.createAdmin(req.body, (err, msg) => {
 		if(err) throw err;
 		res.status(200).send(msg);
 	})

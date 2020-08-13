@@ -18,7 +18,7 @@ router.get('/total',
 router.post('/create',
   passport.authenticate('JWT', { session: false }),
   auth.checkAdmin,
-  company.createCompanyAdmin
+  company.createAdmin
 );
 
 
