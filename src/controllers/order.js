@@ -38,8 +38,8 @@ router.post('/total/', checkAuthed, function(req, res) {
   let {first_date, last_date, process_, keyword} = req.body; // 상태로 검색
   let name = keyword, state = process_;
   let sql = `SELECT count(*) as total
-             from \`order\` as A JOIN \`customer\` AS B JOIN \`users\` AS C ON A.customer_id = B.id AND A.user_id = C.id
-             WHERE C.id='${req.user.id}'
+             from \`order\` as A JOIN \`customer\` AS B JOIN \`company\` AS C ON A.customer_id = B.id AND A.company_id = C.id
+             WHERE C.id='${req.user.company_id}'
              AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
              ${(state !== 'all' ? `AND A.state = '${state}'` : '')}
              ${(name !== '' ? `AND B.name = '${name}'`: '')}`
@@ -83,8 +83,8 @@ router.post('/list', checkAuthed, function(req, res){
   }
   let name = keyword, state = process_;
   let sql = `SELECT A.id, A.state, A.date, A.price, A.received, B.name, A.createAt, B.set
-             from \`order\` AS A JOIN \`customer\` AS B JOIN \`users\` as C ON A.customer_id = B.id AND A.user_id = C.id
-             WHERE C.id='${req.user.id}'
+             from \`order\` AS A JOIN \`customer\` AS B JOIN \`company\` as C ON A.customer_id = B.id AND A.company_id = C.id
+             WHERE C.id='${req.user.company_id}'
              ${(state !== 'all' ? `AND A.state = '${state}'` : '')}
              ${(name !== '' ? `AND B.name = '${name}'`: '')}
              AND DATE(\`date\`) BETWEEN '${first_date}' AND '${last_date}'
@@ -203,9 +203,11 @@ router.post('/', (req, res) => {
 router.get('/detail/:id', checkAuthed, function(req, res){
   let {id} = req.params; // id로 검색
 
-  connection.query(`SELECT o.id as id, date, name, o.address as address, o.address_detail as addressDetail, o.postcode as postcode, o.telephone as telephone, o.cellphone as cellphone, comment, state, o.user_id, c.crNumber as crNumber from \`order\` as o JOIN \`customer\` as c ON o.customer_id = c.id WHERE o.id=${id}`, function(err, rows) {
+  connection.query(`SELECT o.id as id, date, name, o.address as address, o.address_detail as addressDetail, o.postcode as postcode, o.telephone as telephone, o.cellphone as cellphone, comment, state, o.company_id, c.crNumber as crNumber
+  from \`order\` as o JOIN \`customer\` as c ON o.customer_id = c.id
+  WHERE o.id=${id}`, function(err, rows) {
     if(err) throw err;
-    if(rows.length === 0 || rows[0]['user_id'] !== req.user.id) {
+    if(rows.length === 0 || rows[0]['company_id'] !== req.user.company_id) {
       res.status(400).send({message: '400 Error'});
       return ;
     }
