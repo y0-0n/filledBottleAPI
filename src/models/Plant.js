@@ -40,9 +40,9 @@ module.exports.searchPlant = async (user, data, callback) => {
 module.exports.add = async (user, data, callback) => {
   try{
     const query = `INSERT INTO plant
-		(\`user_id\`, \`name\`) VALUES (?, '${data.plantName}');
+		(\`company_id\`, \`name\`) VALUES (?, ?);
 		`;
-    const [rows, field] = await pool.query(query, [user.id]);
+    const [rows, field] = await pool.query(query, [user.id, data.plantName]);
     console.log('add');    
     //console.log('실행 sql : ', exec.sql);
     // Product.getList(user, async (err, msg) => {

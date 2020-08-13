@@ -30,6 +30,8 @@ exports.createAdmin = (req, res) => {
 		return res.status(422).json({ errors: errors.array() });
   }
   data = req.body;
+  // console.warn(data)
+  data.company_id = data.farmId
 	const salt = auth.generateSalt();
 	data.salt = salt;
 	data.password = auth.hashPassword(data.password, salt);
@@ -41,7 +43,7 @@ exports.createAdmin = (req, res) => {
 			Users.addUser(data, (err, result) => {
 				if(err) throw err;
 
-				Plant.add({id: result.insertId}, {plantName: "기본"}, (err, msg) => {
+				Plant.add({id: data.company_id}, {plantName: "기본"}, (err, msg) => {
 					if(err) throw err;
 					res.status(200).send({message: "Success"});
 					console.log(result, msg);

@@ -13,9 +13,9 @@ module.exports.addUser = async (data, callback) => {
     let {email, password, name, phone, salt, company_id, role} = data;
 
     const query = 
-    `INSERT INTO users_company SET email = ?, password = ?, name = ?, phone = ?, salt = ?, company_id = ?, role = ?`;
+    `INSERT INTO users_company SET email = ?, password = ?, name = ?, phone = ?, salt = ?, company_id = ?, role = 1`;
     const [rows, field] = await pool.query(
-      query, [email, password, name, phone, salt, company_id, role]);    
+      query, [email, password, name, phone, salt, company_id]);    
     console.log('addUser')
     //console.log('실행 sql : ', exec.sql);
     return callback(null, rows);
