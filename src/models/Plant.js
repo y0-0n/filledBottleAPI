@@ -6,9 +6,9 @@ const Product = require('./Product');
 module.exports.getList = async (user, callback) => {
   try{
     const query = `SELECT * from plant
-      WHERE user_id = ?
+      WHERE company_id = ?
       AND \`set\`=1`;
-    const [rows, field] = await pool.query(query, [user.id]);
+    const [rows, field] = await pool.query(query, [user.company_id]);
     console.log('getList');    
     //console.log('실행 sql : ', exec.sql);
     return callback(null, rows);
