@@ -15,11 +15,16 @@ router.get('/total',
   company.getTotalAdmin
 );
 
+router.get('/detail/:id',
+  passport.authenticate('JWT', { session: false }),
+	auth.checkAdmin,
+  company.getDetailAdmin
+);
+
 router.post('/create',
   passport.authenticate('JWT', { session: false }),
   auth.checkAdmin,
   company.createAdmin
 );
-
 
 module.exports = router;

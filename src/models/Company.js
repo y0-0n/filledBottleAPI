@@ -41,10 +41,9 @@ module.exports.getInfo = async (companyId, callback) => {
   }
 }
 
-
 module.exports.getInfoOpen = async (id, callback) => {
   try{
-    const query = 'SELECT name, address, address_detail as addressDetail, postcode, phone, crNumber, expiration FROM company WHERE id = ?';
+    const query = 'SELECT name, address, address_detail as addressDetail, postcode, phone, crNumber FROM company WHERE id = ?';
     const [rows, field] = await pool.query(query,id);
     console.log('getInfoOpen')
     //console.log('실행 sql emailcheck: ', exec.sql);
@@ -124,10 +123,10 @@ module.exports.getListByFamily = async(id, callback) => {
   }
 }
 
-module.exports.getDetailAdmin = async (id, data, callback) => {
+module.exports.getDetailAdmin = async (id, callback) => {
   try{
-    const query = `SELECT id, email, crNumber, name, address, phone, created_date FROM company WHERE id= ?`;
-    const [rows, field] = await pool.query(query, [data.id]);
+    const query = `SELECT name, address, address_detail as addressDetail, postcode, phone, crNumber, mall_visible, expiration FROM company WHERE id = ?`;
+    const [rows, field] = await pool.query(query, [id]);
     console.log('getDetailAdmin')
     //console.log('실행 sql emailcheck: ', exec.sql);
     return callback(null, rows);
