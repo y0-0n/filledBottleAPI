@@ -168,11 +168,11 @@ module.exports.getListByFamily = async(id, callback) => {
   }
 }
 
-module.exports.getDetailAdmin = async (id, data, callback) => {
+module.exports.getDetailAdmin = async (id, callback) => {
   try{
-    const query = `SELECT id, email, crNumber, name, address, phone, created_date FROM users WHERE id= ?`;
-    const [rows, field] = await pool.query(query, [data.id]);
-    console.log('getDetailAdmin')
+    const query = `SELECT id, email, name, phone, company_id FROM users_company WHERE id= ?`;
+    const [rows, field] = await pool.query(query, [id]);
+    console.log('getDetailAdmin');
     //console.log('실행 sql emailcheck: ', exec.sql);
     return callback(null, rows);
   }

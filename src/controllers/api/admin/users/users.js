@@ -21,7 +21,7 @@ exports.getTotalAdmin = (req, res) => {
 }
 
 exports.getDetailAdmin = (req, res) => {
-  Users.getDetailAdmin(req.user.id, req.params, (err, rows) => {
+  Users.getDetailAdmin(req.params.id, (err, rows) => {
     if(err) throw err;
     res.status(200).send(rows);
   })
