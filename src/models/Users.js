@@ -154,7 +154,7 @@ module.exports.getListByFamily = async(id, callback) => {
 
 module.exports.getDetailAdmin = async (id, callback) => {
   try{
-    const query = `SELECT id, email, name, phone, company_id FROM users_company WHERE id= ?`;
+    const query = `SELECT id, email, name, phone, company_id, role FROM users_company WHERE id= ?`;
     const [rows, field] = await pool.query(query, [id]);
     console.log('getDetailAdmin');
     //console.log('실행 sql emailcheck: ', exec.sql);
