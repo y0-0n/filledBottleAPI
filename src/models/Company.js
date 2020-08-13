@@ -10,12 +10,12 @@ const pool = require('../../config/dbpool').pool;
  */
 module.exports.createAdmin = async (data, callback) => {
   try{
-    let {crNumber, name, address, addressDetail, postcode, phone} = data;
+    let {crNumber, name, address, addressDetail, postcode, phone, ceoName} = data;
     console.warn(data)
     const query = 
-    `INSERT INTO company SET crNumber = ?, name = ?, address = ?, address_detail = ?, postcode = ?, phone = ?, accountName = '?', accountNumber = '?'`;
+    `INSERT INTO company SET crNumber = ?, name = ?, address = ?, address_detail = ?, postcode = ?, phone = ?, accountName = '', accountNumber = '', ceo_name = ?`;
     const [rows, field] = await pool.query(
-      query, [crNumber, name, address, addressDetail, postcode, phone]);    
+      query, [crNumber, name, address, addressDetail, postcode, phone, ceoName]);    
     console.log('addCompany')
     //console.log('실행 sql : ', exec.sql);
     return callback(null, rows);
@@ -72,8 +72,9 @@ module.exports.updateInfo = async (id, data, callback) => {
 }
 module.exports.getListAdmin = async ({page, perPage}, callback) => {
   try{
-    const query = `SELECT id, name, phone, address, crNumber
+    const query = `SELECT id, name, phone, address, crNumber, ceo_name as ceoName
     FROM company
+    ORDER BY id DESC
     ${(page !== 'all' ? `LIMIT ${perPage*(page-1)}, ${perPage}` : '')}`;
   
     const [rows, field] = await pool.query(query);
@@ -125,7 +126,7 @@ module.exports.getListByFamily = async(id, callback) => {
 
 module.exports.getDetailAdmin = async (id, callback) => {
   try{
-    const query = `SELECT name, address, address_detail as addressDetail, postcode, phone, crNumber, mall_visible as mallVisible, expiration FROM company WHERE id = ?`;
+    const query = `SELECT name, address, address_detail as addressDetail, postcode, phone, crNumber, mall_visible as mallVisible, expiration, ceo_name as ceoName FROM company WHERE id = ?`;
     const [rows, field] = await pool.query(query, [id]);
     console.log('getDetailAdmin')
     //console.log('실행 sql emailcheck: ', exec.sql);
