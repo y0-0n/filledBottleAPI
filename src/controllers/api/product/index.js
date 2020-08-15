@@ -78,4 +78,68 @@ router.get('/detail/open/:id',
 	product.getOpenDetail
 )
 
+//회원의 품목(활성) 전체 갯수
+router.post('/total',
+	passport.authenticate('JWT', { session: false }),
+	checkAuthed,
+	product.getTotal
+)
+
+//회원의 품목(비활성) 전체 갯수
+router.post('/total/unset',
+	passport.authenticate('JWT', { session: false }),
+	checkAuthed,
+	product.getTotalUnset
+)
+
+//로그인 이후 본인 상품(활성) 확인
+router.post('/list',
+	passport.authenticate('JWT', { session: false }),
+	checkAuthed,
+	product.getAuthedList
+)
+
+//로그인 이후 본인 상품(비활성) 확인
+router.post('/list/unset',
+	passport.authenticate('JWT', { session: false }),
+	checkAuthed,
+	product.getAuthedListUnset
+)
+
+//품목 정보 주기
+router.get('/:id',
+	passport.authenticate('JWT', { session: false }),
+	checkAuthed,
+	product.getProduct
+)
+
+//품목 등록
+router.post('/',
+	passport.authenticate('JWT', { session: false }),
+	checkAuthed,
+	product.addProduct
+)
+
+//품목 활성화
+router.put('/activate',
+	passport.authenticate('JWT', { session: false }),
+	checkAuthed,
+	product.activate
+)
+
+//품목 비활성화
+router.put('/deactivate',
+	passport.authenticate('JWT', { session: false }),
+	checkAuthed,
+	product.deactivate
+)
+
+//품목 수정
+router.put('/modify/:id',
+	passport.authenticate('JWT', { session: false }),
+	checkAuthed,
+	product.modifyProduct
+)
+
+
 module.exports = router;

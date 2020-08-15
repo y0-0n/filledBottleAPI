@@ -1,7 +1,6 @@
 'use strict';
 
 const pool = require('../../config/dbpool').pool;
-const Product = require('./Product');
 
 module.exports.getOrder = async (user, data, callback) => {
   try{

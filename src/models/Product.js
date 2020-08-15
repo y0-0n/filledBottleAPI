@@ -235,3 +235,191 @@ module.exports.modifyFamilyInPlant1 = (user, data, callback) => {
 3|API    | { addFamilyList: [],
 3|API    |   deleteFamilyList: [ { name: '방울양배추(스프로스)', id: 226, familyUserId: 32 } ] }
 */
+
+module.exports.getTotal = async (user, data, callback) => {
+  let {name, family, category, state} = data;
+  try{
+    const query = `SELECT count(*) as total
+		FROM product as A
+		LEFT JOIN productFamily as F ON F.id = A.family
+		WHERE \`set\`=1
+		AND A.company_id = '${user.company_id}'
+		${family !== 0 ? `AND A.family = '${family}'` : ``}
+		${name !== '' ? `AND A.name LIKE '%${name}%'` : ``}
+		${category !== 0 ? `AND F.category = '${category}'` : ``}
+		${state !== 0 ? `AND A.state = '${state}'` : ``}`;
+    const [rows, field] = await pool.query(query);
+    console.log('getTotal');    
+    //console.log('실행 sql : ', exec.sql);
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('getTotal error',error);
+  }
+}
+
+module.exports.getTotalUnset = async (user, data, callback) => {
+  let {name, family} = data;
+  try{
+    const query = `SELECT count(*) as total
+    FROM product as A JOIN company as B ON A.company_id = B.id
+    WHERE \`set\`=0
+    ${family !== 0 ? `AND A.family = '${family}'` : ``}
+    AND B.id='${user.company_id}'
+    ${(name !== 'a' ? `AND A.name = '${name}'`: '')}`;
+    const [rows, field] = await pool.query(query);
+    console.log('getTotalUnset');    
+    //console.log('실행 sql : ', exec.sql);
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('getTotalUnset error',error);
+  }
+}
+
+module.exports.getAuthedList = async (user, data, callback) => {
+  let {page, name, family, category, state} = data;
+  try{
+    const query = `SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName, state, IFNULL(sum(S.quantity), 0) as stock
+      FROM product as A
+      LEFT JOIN productFamily as F ON F.id = A.family
+      LEFT JOIN stock as S ON A.id = S.product_id
+      WHERE \`set\`=1
+      AND A.company_id = ${user.company_id}
+      ${family !== 0 ? `AND A.family = '${family}'` : ``}
+      ${name !== '' ? `AND A.name LIKE '%${name}%'` : ``}
+      ${category !== 0 ? `AND F.category = '${category}'` : ``}
+      ${state !== 0 ? `AND A.state = '${state}'` : ``}
+      GROUP BY A.id
+      ORDER BY A.date DESC
+      ${(page !== 'all' ? `LIMIT ${15*(page-1)}, 15` : '')}`;
+    const [rows, field] = await pool.query(query);
+    console.log('getAuthedList');    
+    //console.log('실행 sql : ', exec.sql);
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('getAuthedList error',error);
+  }
+}
+
+module.exports.getAuthedListUnset = async (user, data, callback) => {
+  let {page, name, family, category, state} = data;
+
+  try{
+    const query = `SELECT A.id as id, A.\`name\` as name, A.grade, A.price_shipping, weight, file_name, F.\`name\` as familyName
+      FROM product as A JOIN company as B ON A.company_id = B.id
+      LEFT JOIN productFamily_user as FU ON A.family = FU.family_id
+      LEFT JOIN productFamily as F ON F.id = FU.family_id								
+      WHERE \`set\`=0
+      ${family !== 0 ? `AND A.family = '${family}'` : ``}
+      AND B.id = '${user.company_id}'
+      ${name !== '' ? `AND A.name = '${name}'` : ``}
+      ${category !== 0 ? `AND F.category = '${category}'` : ``}
+      ${state !== 0 ? `AND A.state = '${state}'` : ``}
+      ${(page !== 'all' ? `LIMIT ${5*(page-1)}, 5` : '')}`;
+    const [rows, field] = await pool.query(query);
+    console.log('getAuthedListUnset');    
+    //console.log('실행 sql : ', exec.sql);
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('getAuthedListUnset error',error);
+  }
+}
+
+module.exports.getProduct = async (params, callback) => {
+  try{
+    //TODO : 다른 계정은 볼 수 없게 막기
+    const query = `SELECT P.*, F.\`name\` as familyName, FC.\`name\` as categoryName, FC.\`id\` as categoryId
+    FROM product as P LEFT JOIN productFamily as F ON P.family = F.id
+    LEFT JOIN familyCategory as FC ON FC.id = F.category
+    WHERE P.id = ${params.id}`;
+    const [rows, field] = await pool.query(query);
+    console.log('getProduct');    
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('getProduct error',error);
+  }
+}
+
+module.exports.addProduct = async (data, user, files, callback) => { //영헌) req.files는 없음
+  let {name, price, weight, weightUnit, productFamily, discount_price, state, vat, shippingDate, shippingEndDate, gap, additional} = data;
+  let fileName = 'noimage.jfif';
+	if(files && files.file)
+		 fileName = 'product/'+files.file[0].filename; // 대표 이미지
+	let detailFileName = ''; // 상세 이미지
+	// console.warn(req.files)
+	if(files && files.file_detail) {
+		req.files.file_detail.map((e, i) => {
+			detailFileName += 'productDetail/'+e.filename+'|'; // 대표 이미지
+		});
+		detailFileName = detailFileName.slice(0, -1);
+  }
+  weightUnit = 'kg';
+  try{
+    const query = 
+      `INSERT INTO 
+      \`product\` (\`name\`, \`price_shipping\`, \`discount_price\`, \`weight\`, \`weight_unit\`, \`file_name\`, \`detail_file\`, \`company_id\`, \`family\`, \`state\`, \`tax\`, \`shippingDate\`, \`shippingEndDate\`, \`additional\`, \`gap\`)
+      VALUES 
+      ('${name}', '${price}', '${discount_price}', '${weight}', '${weightUnit}', '${fileName}', '${detailFileName}', ${user.company_id}, ${productFamily}, ${state}, ${vat}, '${shippingDate}', '${shippingEndDate}', '${additional}', '${gap}')`;
+    const [rows, field] = await pool.query(query);
+    console.log('addProduct');    
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('addProduct error',error);
+  }
+}
+
+module.exports.activate = async (data, callback) => {
+  try{
+    const query = `UPDATE product SET \`set\`=1 WHERE \`id\`='${data.id}'`;
+    const [rows, field] = await pool.query(query);
+    console.log('activate');    
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('activate error',error);
+  }
+}
+
+module.exports.deactivate = async (data, callback) => {
+  try{
+    const query = `UPDATE product SET \`set\`=0 WHERE \`id\`='${data.id}'`;
+    const [rows, field] = await pool.query(query);
+    console.log('deactivate');    
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('deactivate error',error);
+  }
+}
+
+module.exports.modifyProduct = async (params, data, files, callback) => {//영헌) req.files는 없음
+  const { name, price, productFamily, discount_price, state, shippingDate, shippingEndDate, additional } = data;
+  let fileName = 'noimage.jfif';
+  // console.warn(req.body)
+	if(files && files.file)
+    fileName = 'product/'+req.files.file[0].filename; // 대표 이미지
+	let detailFileName = ''; // 상세 이미지
+	if(files && files.file_detail) {
+		req.files.file_detail.map((e, i) => {
+			detailFileName += 'productDetail/'+e.filename+'|'; // 대표 이미지
+		})
+		detailFileName = detailFileName.slice(0, -1);
+	}
+	// console.warn(req.files);
+  try{
+    const query = 
+      `UPDATE product SET \`name\`='${name}', \`price_shipping\`='${price}', \`discount_price\`='${discount_price}', \`family\` ='${productFamily}', \`state\` = '${state}', \`file_name\`='${fileName}', \`detail_file\`='${detailFileName}', \`shippingDate\` ='${shippingDate}', \`shippingEndDate\` ='${shippingEndDate}', \`additional\`='${additional}' 
+      WHERE \`id\`=${params.id}`;
+    const [rows, field] = await pool.query(query);
+    console.log('modifyProduct');    
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('modifyProduct error',error);
+  }
+}

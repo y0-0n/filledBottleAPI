@@ -105,3 +105,74 @@ exports.getOpenDetail = (req, res) => {
     res.status(200).send(msg);
   })
 }
+
+exports.getOpenList = (req, res) => {
+	Product.getOpenList(req.params.id, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+exports.getTotal = (req, res) => {
+	Product.getTotal(req.user, req.body, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+exports.getTotalUnset = (req, res) => {
+	Product.getTotalUnset(req.user, req.body, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+//회원 본인 품목 확인
+exports.getAuthedList = (req, res) => {
+	Product.getAuthedList(req.user, req.body, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+//회원 본인 품목 확인
+exports.getAuthedListUnset = (req, res) => {
+	Product.getAuthedListUnset(req.user, req.body, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+exports.getProduct = (req, res) => {
+	Product.getProduct(req.params, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+exports.addProduct = (req, res) => {//영헌) req.files는 없음
+	Product.addProduct(req.body, req.user, req.files, (err, msg) => { 
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+exports.activate = (req, res) => {
+	Product.activate(req.body, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+exports.deactivate = (req, res) => {
+	Product.deactivate(req.body, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+exports.modifyProduct = (req, res) => {//영헌) req.files는 없음
+	Product.modifyProduct(req.params, req.body, req.files, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
