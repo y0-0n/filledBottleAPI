@@ -15,6 +15,7 @@ const kakao = require('./kakao');
 const cafe24 = require('./cafe24');
 const result = require('./result');
 const company = require('./company');
+const order = require('./order')
 
 router.use('/auth', auth);
 router.use('/customer', customer);
@@ -32,5 +33,6 @@ router.use('/cafe24', cafe24);
 router.use('/kakao', kakao);
 router.use('/result', result);
 router.use('/company', company);
+router.use('/order', order);
 
 module.exports = router;
