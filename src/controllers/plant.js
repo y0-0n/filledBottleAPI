@@ -26,7 +26,7 @@ router.get('/plant/:id', function(req, res){
   });
 });
 
-router.post('/plant', (req, res) => {
+router.post('/plant', (req, res) => { //영헌) model에 같은 역할 하는 function 있음
   connection.query("INSERT INTO `plant` (`name`, `division`, `additional_company`, `set`) VALUES ('"+req.body.name+"','1','2','3');", function(err, rows) {
     if(err) throw err;
 

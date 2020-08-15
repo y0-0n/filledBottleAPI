@@ -27,3 +27,24 @@ exports.deactivate = (req, res) => {
     res.status(200).send(msg);
   })
 }
+
+exports.getAllPlant = (req, res) => {
+  Plant.getAllPlant((err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+exports.getIdPlant = (req, res) => {
+  Plant.getIdPlant(req.params, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+exports.deletePlant = (req, res) => {
+  Plant.deletePlant(req.body, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}

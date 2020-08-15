@@ -3,6 +3,19 @@
 const pool = require('../../config/dbpool').pool;
 const Product = require('./Product');
 
+module.exports.getAllPlant = async (callback) => {
+  try{
+    const query = 'SELECT * from plant';
+    const [rows, field] = await pool.query(query);
+    console.log('getAllPlant');    
+    //console.log('실행 sql : ', exec.sql);
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('getAllPlant error',error);
+  }
+}
+
 module.exports.getList = async (user, callback) => {
   try{
     const query = `SELECT * from plant
@@ -84,5 +97,31 @@ module.exports.deactivate = async (user, data, callback) => {
   }
   catch(error) {
     console.log('deactivate error',error);
+  }
+}
+
+module.exports.getIdPlant = async (params, callback) => {
+  try{
+    const query = `SELECT * from plant where id = ${params.id}`;
+    const [rows, field] = await pool.query(query);
+    console.log('getIdPlant');    
+    //console.log('실행 sql : ', exec.sql);
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('getIdPlant error',error);
+  }
+}
+
+module.exports.deletePlant = async (data, callback) => {
+	try{
+    const query = `DELETE FROM plant WHERE id = '${data.id}'`;
+    const [rows, field] = await pool.query(query);
+    console.log('deletePlant');    
+    //console.log('실행 sql : ', exec.sql);
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('deletePlant error',error);
   }
 }
