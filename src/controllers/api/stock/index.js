@@ -15,7 +15,8 @@ function checkAuthed(req, res, next) {
 router.get('/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
-  stock.getStockQuantity
+  //stock.getStockQuantity
+  stock.getStock //영헌) controller/stock.js의 코드. 위는 기존 코드. 
 );
 
 router.get('/order/:id',
@@ -108,7 +109,8 @@ router.get('/:stockId',
 router.put('/',
   passport.authenticate('JWT', { session: false }),
   checkAuthed,
-  stock.modifyStock
+  //stock.modifyStock
+  stock.modifyStockNew //영헌) controller/stock.js의 코드. 위는 기존 코드. 
 )
 
 module.exports = router;

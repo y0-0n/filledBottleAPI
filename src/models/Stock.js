@@ -127,7 +127,7 @@ module.exports.getLastStock = async (data, user, callback) => { //영헌) 현재
     return callback(null, {current});
   }
   catch(error) {
-    console.log('getLastStock error dd',error);
+    console.log('getLastStock error',error);
     return callback(error, null);
   }
 }
@@ -656,7 +656,8 @@ module.exports.getStockList = async (user, data, callback) => {//영헌) user �
     const query = `SELECT S.*, P.name as productName, PL.name as plantName, P.file_name as file_name FROM \`stock\` as S
 			JOIN \`product\` as P ON P.id = S.product_id
 			JOIN \`plant\` as PL ON PL.id = S.plant_id
-			WHERE S.name LIKE '%${name}%'
+      WHERE S.name LIKE '%${name}%' AND
+      P.company_id = '${user.company_id}'
 			${plant !== 'all' ? `AND S.plant_id = ${plant}` : ``}
 			${family !== 0 ? `AND P.family = '${family}'` : ``}
 			${(pageNumbers !== 'all' ? `LIMIT ${15*(pageNumbers-1)}, 15` : '')};`;
@@ -938,3 +939,33 @@ module.exports.getStockDetail = async (user, data, callback) => {
   }
 }
 
+module.exports.getStock = async (user, callback) => { //영헌) 현재 프론트에서 안쓰임.
+  try{
+    const query = `SELECT quantity, s.id as id, weight, p.name, grade
+      FROM stock as s JOIN product as p JOIN company as c ON s.product_id = p.id AND c.id = p.company_id
+      WHERE p.\`set\`=1
+      AND c.id = '${user.company_id}'`;
+    const [rows, field] = await pool.query(query);
+    console.log('getStock');    
+    //console.log('실행 sql : ', exec.sql);
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('getStock error',error);
+    return callback(error, null);
+  }
+}
+
+module.exports.modifyStockNew = async (data, callback) => { //영헌) 현재 프론트에서 안쓰임.
+  let {quantity, id} = data;
+  try{
+    const query = `UPDATE \`stock\` SET \`quantity\`='${quantity}' WHERE \`id\`=${id}`;
+    const [rows, field] = await pool.query(query);
+    console.log('modifyStockNew');    
+    return callback(null, rows);
+  }
+  catch(error) {
+    console.log('modifyStockNew error',error);
+    return callback(error, null);
+  }
+}

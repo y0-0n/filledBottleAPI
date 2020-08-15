@@ -118,3 +118,17 @@ exports.createStock = (req, res) => {
     res.status(200).send(msg);
   })
 }
+
+exports.getStock = (req, res) => {
+  Stock.getStock(req.user, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
+
+exports.modifyStockNew = (req, res) => {
+  Stock.modifyStockNew(req.body, (err, msg) => {
+    if(err) throw err;
+    res.status(200).send(msg);
+  })
+}
